@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NARX料金シミュレーター | 中島式メンズ脱毛</title>
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #aa8c2e;
+            --black: #000000;
+            --dark-gray: #1a1a1a;
+            --light-gray: #333;
+            --white: #ffffff;
+        }
+
+        /* ベースデザイン */
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            font-family: "YuMincho", "Hiragino Mincho ProN", serif;
+            margin: 0;
+            padding-bottom: 160px; /* 合計バー用 */
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .header img { width: 150px; } /* ロゴ用 */
+
+        /* 判定ボタン */
+        .type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 15px;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .type-btn.active {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        /* イラストエリア */
+        .visual-container {
+            position: sticky;
+            top: 10px;
+            z-index: 10;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid var(--light-gray);
+            height: 220px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .visual-container img {
+            max-height: 100%;
+            position: absolute;
+            transition: opacity 0.3s ease;
+        }
+
+        /* カテゴリータブ */
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 5px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            white-space: nowrap;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: var(--gold);
+            border-bottom: 2px solid var(--gold);
+            font-weight: bold;
+        }
+
+        /* メニューリスト */
+        .menu-list { display: none; }
+        .menu-list.active { display: block; }
+
+        .item {
+            background: var(--dark-gray);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+
+        .item.selected { border-color: var(--gold); }
+        .item.disabled { opacity: 0.3; }
+
+        .item input {
+            transform: scale(1.5);
+            margin-right: 15px;
+            accent-color: var(--gold);
+        }
+
+        .item-info { flex: 1; }
+        .item-name { display: block; font-size: 1rem; margin-bottom: 4px; }
+        .item-sub { display: block; font-size: 0.75rem; color: #aaa; }
+        .item-price { color: var(--gold); font-weight: bold; }
+
+        /* 下部固定見積もりバー */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            border-top: 2px solid var(--gold);
+            padding: 15px 20px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin-bottom: 15px;
+        }
+
+        .summary-item .label { font-size: 0.7rem; color: #888; display: block; }
+        .summary-item .val { font-size: 1.2rem; color: var(--gold); font-weight: bold; }
+
+        .btn-group { display: flex; gap: 10px; }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 4px;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .btn-copy { background: #333; color: white; border: none; }
+        .btn-reserve { background: var(--gold); color: black; }
+
+        /* スクロールバー装飾 */
+        .tabs::-webkit-scrollbar { height: 3px; }
+        .tabs::-webkit-scrollbar-thumb { background: var(--gold); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2 style="color: var(--gold); margin: 0; letter-spacing: 2px;">NARX</h2>
+        <small>NAKASHIMA STYLE REMOVAL SALON</small>
+    </div>
+
+    <!-- ステップ1: 来店判定 -->
+    <div class="type-selector">
+        <button class="type-btn active" id="btn-new" onclick="setType('new')">新規客</button>
+        <button class="type-btn" id="btn-rep" onclick="setType('repeat')">既存客</button>
+    </div>
+
+    <!-- ステップ2: ビジュアル（イラスト連動） -->
+    <div class="visual-container" id="visual-box">
+        <!-- ベース画像（正面） -->
+        <img src="body_base.png" id="base-img">
+        <!-- 選択された部位の画像をここに重ねる（JSで制御） -->
+        <div id="highlight-layers"></div>
+    </div>
+
+    <!-- ステップ3: カテゴリー選択 -->
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('set')">セットメニュー</div>
+        <div class="tab" onclick="showTab('face')">顔パーツ</div>
+        <div class="tab" onclick="showTab('body')">胴・腕・脚</div>
+        <div class="tab" onclick="showTab('vio')">VIO</div>
+        <div class="tab" onclick="showTab('other')">その他</div>
+    </div>
+
+    <!-- メニューリスト（JSで自動生成） -->
+    <div id="menu-area"></div>
+</div>
+
+<div class="bottom-bar">
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="label">合計料金 (税込)</span>
+            <span class="val" id="total-price">¥0</span>
+        </div>
+        <div class="summary-item" style="text-align: right;">
+            <span class="label">予約時間枠（LINE用）</span>
+            <span class="val" id="total-time-slot">0.0 時間枠</span>
+        </div>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-copy" onclick="copyResult()">①内容をコピー</button>
+        <a href="https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1752815909" class="btn btn-reserve" target="_blank">②LINEで予約</a>
+    </div>
+</div>
+
+<script>
+/**
+ * メニューデータ構築 (既存のscript.jsより完全移行)
+ */
+const menuData = {
+    // セットメニュー (既存データにカテゴリ追加)
+    set_eyebrow: { time: 40, price: 11000, label: '眉毛セット', cat: 'set', face: true, sub: '眉上・下・中・デザイン込' },
+    set_fullface: { time: 65, price: 13200, label: '全顔セット', cat: 'set', face: true, sub: '鼻下・口下・頬・Fライン・首' },
+    set_fullface_eyebrow: { time: 105, price: 22000, label: '全顔+眉毛セット', cat: 'set', face: true },
+    set_fullbody_all: { time: 270, price: 52800, label: '全身オール（顔VIO込）', cat: 'set', face: true },
+    set_fullbody_noface: { time: 200, price: 41800, label: '顔なし全身', cat: 'set', face: false },
+    set_upperbody: { time: 170, price: 30800, label: '上半身セット', cat: 'set', face: true },
+    set_lowerbody: { time: 150, price: 30800, label: '下半身セット', cat: 'set', face: false },
+    set_vio: { time: 50, price: 16500, label: 'VIOセット', cat: 'set', face: false },
+    set_fullface_vio: { time: 100, price: 27500, label: '全顔+VIOセット', cat: 'set', face: true },
+    
+    // 顔パーツ
+    part_nose_under: { time: 16, price: 4400, label: '鼻下', cat: 'face', face: true },
+    part_mouth_under: { time: 16, price: 4400, label: '口下', cat: 'face', face: true },
+    part_cheek: { time: 16, price: 4400, label: '頬', cat: 'face', face: true },
+    part_face_line: { time: 16, price: 4400, label: 'フェイスライン', cat: 'face', face: true },
+    part_neck: { time: 16, price: 4400, label: '首', cat: 'face', face: true },
+    part_forehead: { time: 13, price: 4400, label: 'おでこ', cat: 'face', face: true },
+    
+    // 胴・腕・脚パーツ
+    part_nape: { time: 16, price: 4400, label: 'うなじ', cat: 'body', face: false },
+    part_armpit: { time: 13, price: 4400, label: '脇', cat: 'body', face: false },
+    part_chest_nipple: { time: 16, price: 6600, label: '胸', cat: 'body', face: false },
+    part_abdomen_navel: { time: 16, price: 6600, label: '腹部', cat: 'body', face: false },
+    part_elbow_upper: { time: 16, price: 6600, label: '肘上', cat: 'body', face: false },
+    part_knee_upper: { time: 35, price: 8800, label: '膝上', cat: 'body', face: false },
+    
+    // VIOパーツ
+    part_v_line: { time: 16, price: 7700, label: 'Vライン', cat: 'vio', face: false },
+    part_i_line: { time: 20, price: 7700, label: 'Iライン', cat: 'vio', face: false },
+    part_o_line: { time: 16, price: 5500, label: 'Oライン', cat: 'vio', face: false },
+    
+    // その他
+    other_lala_peel: { time: 90, price: 12100, label: 'ララピール', cat: 'other', face: true },
+};
+
+// セット内容の定義（無効化ロジック用）
+const setIncludes = {
+    set_fullface: ['part_nose_under', 'part_mouth_under', 'part_cheek', 'part_face_line', 'part_neck'],
+    set_vio: ['part_v_line', 'part_i_line', 'part_o_line'],
+    set_fullbody_all: ['set_fullface', 'set_vio', 'part_armpit', 'part_chest_nipple'] // 省略、適宜追加
+};
+
+let userType = 'new';
+let activeTab = 'set';
+const selectedIds = new Set();
+
+/**
+ * 初期化
+ */
+function init() {
+    renderMenu();
+    updateCalc();
+}
+
+/** 来店種別切り替え */
+function setType(type) {
+    userType = type;
+    document.getElementById('btn-new').classList.toggle('active', type === 'new');
+    document.getElementById('btn-rep').classList.toggle('active', type === 'repeat');
+    updateCalc();
+}
+
+/** タブ切り替え */
+function showTab(cat) {
+    activeTab = cat;
+    document.querySelectorAll('.tab').forEach(t => {
+        t.classList.toggle('active', t.getAttribute('onclick').includes(cat));
+    });
+    renderMenu();
+}
+
+/** メニューの描画 */
+function renderMenu() {
+    const area = document.getElementById('menu-area');
+    area.innerHTML = '';
+    
+    // 他のセットでカバーされているIDを特定
+    let coveredIds = [];
+    selectedIds.forEach(id => {
+        if(setIncludes[id]) coveredIds = [...coveredIds, ...setIncludes[id]];
+    });
+
+    Object.keys(menuData).filter(key => menuData[key].cat === activeTab).forEach(key => {
+        const item = menuData[key];
+        const isSelected = selectedIds.has(key);
+        const isDisabled = coveredIds.includes(key);
+
+        const div = document.createElement('div');
+        div.className = `item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`;
+        div.onclick = () => !isDisabled && toggleItem(key);
+
+        div.innerHTML = `
+            <input type="checkbox" ${isSelected ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+            <div class="item-info">
+                <span class="item-name">${item.label}</span>
+                ${item.sub ? `<span class="item-sub">${item.sub}</span>` : ''}
+            </div>
+            <div class="item-price">¥${item.price.toLocaleString()}</div>
+        `;
+        area.appendChild(div);
+    });
+}
+
+function toggleItem(id) {
+    if (selectedIds.has(id)) selectedIds.delete(id);
+    else selectedIds.add(id);
+    renderMenu();
+    updateCalc();
+}
+
+/**
+ * メイン計算ロジック（ナークス式）
+ */
+function updateCalc() {
+    let baseTime = 0;
+    let totalPrice = 0;
+    let hasFace = false;
+
+    selectedIds.forEach(id => {
+        const item = menuData[id];
+        totalPrice += item.price;
+        baseTime += item.time;
+        if (item.face) hasFace = true;
+    });
+
+    // --- 時間加算ルール ---
+    let extraTime = 0;
+    if (selectedIds.size > 0) {
+        if (userType === 'new') {
+            extraTime = 90; // 新規カウンセリング
+        } else if (hasFace) {
+            extraTime = 20; // 既存・冷却+アフター
+        }
+    }
+
+    const totalTimeMinutes = baseTime + extraTime;
+
+    // 予約枠の計算 (既存ロジック: 30分単位切り上げ)
+    const slotRounded = Math.ceil(totalTimeMinutes / 30) * 30;
+    const hours = Math.floor(slotRounded / 60);
+    const minutes = slotRounded % 60;
+    const slotText = `${hours}.${minutes === 30 ? '5' : '0'}`;
+
+    // 表示更新
+    document.getElementById('total-price').innerText = `¥${totalPrice.toLocaleString()}`;
+    document.getElementById('total-time-slot').innerText = `${slotText} 時間枠`;
+    
+    // イラスト連動（簡易版：実際の画像がある場合はここに表示ロジックを入れる）
+    updateVisual(hasFace);
+}
+
+function updateVisual(hasFace) {
+    // 選択された部位に合わせて画像を重ねる処理をここに記述
+}
+
+/** 内容コピー */
+function copyResult() {
+    let text = `【NARX脱毛シミュレーション】\n区分：${userType === 'new' ? '新規' : '既存'}\n`;
+    text += `選択メニュー：\n`;
+    selectedIds.forEach(id => { text += `・${menuData[id].label}\n`; });
+    text += `予約枠：${document.getElementById('total-time-slot').innerText}\n`;
+    text += `備考欄に貼り付けてください。`;
+    
+    navigator.clipboard.writeText(text);
+    alert("内容をコピーしました！予約ページの備考欄に貼り付けてください。");
+}
+
+init();
+</script>
+</body>
+</html>
