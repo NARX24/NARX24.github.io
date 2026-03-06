@@ -215,4 +215,201 @@ const menuData = {
 
 const setIncludes = {
     set_fullbody_all: ['set_upperbody', 'set_lowerbody'],
-    set_fullface_eyebrow: ['set_ful
+    set_fullface_eyebrow: ['set_fullface', 'set_eyebrow'],
+    set_upperbody: ['set_fullface', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_nape', 'part_back_upper', 'part_back_lower', 'set_arms'],
+    set_lowerbody: ['set_vio', 'part_buttocks', 'set_legs'],
+    set_fullface_vio: ['set_fullface', 'set_vio'],
+    set_vio_buttocks: ['set_vio', 'part_buttocks'],
+    set_chest_abdomen: ['part_chest_nipple', 'part_abdomen_navel'],
+    set_arms_legs: ['set_arms', 'set_legs'],
+    set_vio: ['part_v_line', 'part_i_line', 'part_o_line'],
+    set_fullface: ['part_nose_under', 'part_mouth_under', 'part_cheek', 'part_face_line', 'part_neck']
+};
+
+let selected = new Set();
+let suggestionId = null;
+
+// --- 動作のコア：ここを強力に修正 ---
+
+function selectUserType(type) {
+    try {
+        const modal = document.getElementById('gate-modal');
+        if (modal) modal.style.display = 'none';
+        updateUserType(type);
+        initApp(); // 全処理を開始
+    } catch (e) {
+        console.error(e);
+        document.getElementById('gate-modal').style.display = 'none';
+    }
+}
+
+function initApp() {
+    const bPanel = document.getElementById('body-panel');
+    const fPanel = document.getElementById('face-panel');
+    if (!bPanel || !fPanel) return;
+
+    Object.keys(menuData).forEach(id => {
+        const item = menuData[id];
+        if (item.imgs) {
+            if (item.imgs.body) createImg(bPanel, item.imgs.body);
+            if (item.imgs.face) createImg(fPanel, item.imgs.face);
+        }
+    });
+    render();
+}
+
+function createImg(parent, name) {
+    const layerId = `img-${name}`;
+    if (document.getElementById(layerId)) return;
+    const img = document.createElement('img');
+    img.src = `${name}.png`;
+    img.id = layerId;
+    img.className = 'layer-part';
+    img.onerror = () => img.style.display = 'none';
+    parent.appendChild(img);
+}
+
+function updateUserType(type) {
+    userType = type;
+    const btnNew = document.getElementById('type-new');
+    const btnRep = document.getElementById('type-rep');
+    if (btnNew) btnNew.classList.toggle('active', type === 'new');
+    if (btnRep) btnRep.classList.toggle('active', type === 'repeat');
+    
+    const badge = document.getElementById('mode-display');
+    if (badge) {
+        badge.innerText = type === 'new' ? "新規予約モード" : "会員予約モード";
+        badge.style.background = type === 'new' ? "var(--gold)" : "#666";
+    }
+    updateTotal();
+}
+
+function changeTab(tab) {
+    currentTab = tab;
+    render();
+}
+
+function toggleItem(id) {
+    if (selected.has(id)) selected.delete(id);
+    else selected.add(id);
+    checkSuggestion();
+    render();
+}
+
+function render() {
+    const area = document.getElementById('menu-area');
+    if (!area) return;
+    area.innerHTML = '';
+
+    // タブ
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const activeTabEl = document.getElementById(`tab-${currentTab}`);
+    if (activeTabEl) activeTabEl.classList.add('active');
+
+    // イラスト再点灯ロジック
+    document.querySelectorAll('.layer-part').forEach(img => img.classList.remove('active'));
+    
+    // 無効化リスト生成
+    let disabledIds = [];
+    const getDeepSubs = (id) => {
+        if (setIncludes[id]) {
+            setIncludes[id].forEach(sub => {
+                disabledIds.push(sub);
+                getDeepSubs(sub);
+            });
+        }
+    };
+    selected.forEach(id => {
+        getDeepSubs(id);
+        const item = menuData[id];
+        if (item && item.imgs) {
+            if (item.imgs.body) { let i = document.getElementById(`img-${item.imgs.body}`); if(i) i.classList.add('active'); }
+            if (item.imgs.face) { let i = document.getElementById(`img-${item.imgs.face}`); if(i) i.classList.add('active'); }
+        }
+    });
+
+    // リスト生成
+    let lastSub = "";
+    Object.keys(menuData).filter(id => menuData[id].cat === currentTab).forEach(id => {
+        const item = menuData[id];
+        if (currentTab === 'part' && item.subCat !== lastSub) {
+            lastSub = item.subCat;
+            const h = document.createElement('div');
+            h.className = 'subcat-header';
+            h.innerText = lastSub;
+            area.appendChild(h);
+        }
+        const div = document.createElement('div');
+        const isSel = selected.has(id);
+        const isDis = disabledIds.includes(id);
+        div.className = `item ${isSel ? 'selected' : ''} ${isDis ? 'disabled' : ''}`;
+        div.onclick = () => !isDis && toggleItem(id);
+        div.innerHTML = `
+            <input type="checkbox" ${isSel ? 'checked' : ''} ${isDis ? 'disabled' : ''}>
+            <div class="item-info">
+                <span class="item-name">${item.label}</span>
+                ${item.sub ? `<span class="item-sub">${item.sub}</span>` : ''}
+            </div>
+            <div class="item-price">¥${item.price.toLocaleString()}</div>
+        `;
+        area.appendChild(div);
+    });
+    updateTotal();
+}
+
+function updateTotal() {
+    let p = 0, t = 0, f = false;
+    selected.forEach(id => {
+        const item = menuData[id];
+        p += item.price; t += item.time; if(item.hasFace) f = true;
+    });
+    if (selected.size > 0) {
+        if (userType === 'new') t += 90;
+        else if (f) t += 20;
+    }
+    const rounded = Math.ceil(t / 30) * 30;
+    const slot = `${Math.floor(rounded / 60)}.${(rounded % 60) === 30 ? '5' : '0'}`;
+    const pDisp = document.getElementById('total-price');
+    const tDisp = document.getElementById('total-time-slot');
+    if(pDisp) pDisp.innerText = `¥${p.toLocaleString()}`;
+    if(tDisp) tDisp.innerText = `${slot} 時間枠`;
+}
+
+function checkSuggestion() {
+    suggestionId = null;
+    const box = document.getElementById('suggestion-box');
+    box.style.display = 'none';
+    
+    // セット+セットの検知優先順
+    const priority = ['set_fullbody_all', 'set_fullface_eyebrow', 'set_upperbody', 'set_lowerbody', 'set_fullface_vio', 'set_chest_abdomen'];
+    for (const sid of priority) {
+        if (setIncludes[sid].every(part => selected.has(part)) && !selected.has(sid)) {
+            suggestionId = sid;
+            document.getElementById('suggestion-text').innerText = `「${menuData[sid].label}」へ切り替えると、よりお得にご利用いただけます。`;
+            box.style.display = 'block';
+            break;
+        }
+    }
+}
+
+function applyOptimalSet() {
+    if (!suggestionId) return;
+    setIncludes[suggestionId].forEach(part => selected.delete(part));
+    selected.add(suggestionId);
+    hideSuggestion();
+    render();
+}
+
+function hideSuggestion() { document.getElementById('suggestion-box').style.display = 'none'; }
+
+function copyResult() {
+    if (selected.size === 0) return alert("メニューを選択してください");
+    const slot = document.getElementById('total-time-slot').innerText;
+    let txt = `【NARX脱毛予約】\n区分：${userType === 'new' ? '新規' : '会員'}\nメニュー：\n`;
+    selected.forEach(id => txt += `・${menuData[id].label}\n`);
+    txt += `予約枠目安：${slot}`;
+    navigator.clipboard.writeText(txt).then(() => alert("コピーしました。"));
+}
+</script>
+</body>
+</html>
