@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.11.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.12.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
-    /* スクロール領域を広く確保して隠れないように修正 */
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
 
     /* ゲートモーダル */
@@ -48,8 +47,11 @@
     .item-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-top: 2px; }
     .item-sub { display: block; font-size: 0.7rem; color: #888; margin-top: 5px; line-height: 1.4; }
 
-    /* 提案ポップアップ */
-    #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: var(--gold); color: var(--black); padding: 18px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+    /* 提案ポップアップ（見やすくリッチに改善） */
+    #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: linear-gradient(135deg, #f7d05e 0%, #d4af37 100%); color: #111; padding: 20px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid #fff; }
+    .sug-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 6px; }
+    .sug-price-badge { background: #111; color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 1rem; }
+    .sug-discount { display: inline-block; background: #c00; color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; margin-top: 6px; font-weight: bold; }
 
     /* ボトムバー */
     .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(5, 5, 5, 0.98); border-top: 2px solid var(--gold); padding: 15px 20px; box-sizing: border-box; z-index: 100; }
@@ -95,11 +97,11 @@
 </div>
 
 <div id="suggestion-box">
-    <div style="font-weight: bold; font-size: 0.95rem; margin-bottom: 6px;">👑 特別プランのご提案</div>
-    <div id="suggestion-text" style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 15px;"></div>
+    <div class="sug-title">👑 AIコンシェルジュからのご提案</div>
+    <div id="suggestion-text" style="font-size: 0.85rem; line-height: 1.6; margin-bottom: 15px;"></div>
     <div style="display: flex; gap: 10px;">
-        <button onclick="applyOptimalSet()" style="background: var(--black); color: var(--gold); border: 1px solid var(--gold); padding: 10px 20px; border-radius: 4px; font-weight: bold; flex: 2;">切り替える</button>
-        <button onclick="hideSuggestion()" style="background: transparent; color: #444; border: none; font-size: 0.75rem; flex: 1;">今はしない</button>
+        <button onclick="applyOptimalSet()" style="background: var(--black); color: var(--gold); border: 1px solid var(--black); padding: 12px 20px; border-radius: 6px; font-weight: bold; flex: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">変更する</button>
+        <button onclick="hideSuggestion()" style="background: transparent; color: #333; border: none; font-size: 0.8rem; flex: 1; font-weight: bold;">今はしない</button>
     </div>
 </div>
 
@@ -121,7 +123,6 @@ var selected =[];
 var suggestionId = null;
 var itemLeaves = {}; 
 
-// 完全なメニューデータ（欠損なし）
 var menuData = {
     // === セットメニュー ===
     set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '全顔 ＋ 上半身 ＋ 下半身 ＋ VIO ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
@@ -139,14 +140,13 @@ var menuData = {
     set_legs: { price: 17600, time: 65, label: '両足セット', cat: 'set', sub: '膝上・下・足の甲指', imgs: { body: 'set_legs' }, hasFace: false },
     set_ear_whole: { price: 8800, time: 25, label: '耳全体セット', cat: 'set', sub: '耳珠 ＋ 耳たぶ', imgs: { face: 'set_ear_whole' }, hasFace: true, isSpecial: true },
 
-    // === パーツメニュー（顔） ===
+    // === パーツメニュー ===
     part_nose_under: { price: 4400, time: 16, label: '鼻下', cat: 'part', subCat: '顔', imgs: { face: 'part_nose_under' }, hasFace: true },
     part_mouth_under: { price: 4400, time: 16, label: '口下', cat: 'part', subCat: '顔', imgs: { face: 'part_mouth_under' }, hasFace: true },
     part_cheek: { price: 4400, time: 16, label: '頬', cat: 'part', subCat: '顔', imgs: { face: 'part_cheek' }, hasFace: true },
     part_face_line: { price: 4400, time: 16, label: 'フェイスライン', cat: 'part', subCat: '顔', imgs: { face: 'part_face_line' }, hasFace: true },
     part_neck: { price: 4400, time: 16, label: '首', cat: 'part', subCat: '顔', imgs: { face: 'part_neck' }, hasFace: true },
 
-    // === パーツメニュー（上半身） ===
     part_nape: { price: 4400, time: 16, label: 'うなじ', cat: 'part', subCat: '上半身', imgs: { body: 'part_nape' }, hasFace: false },
     part_armpit: { price: 4400, time: 13, label: '脇', cat: 'part', subCat: '上半身', imgs: { body: 'part_armpit' }, hasFace: false },
     part_chest_nipple: { price: 6600, time: 16, label: '胸（乳輪込）', cat: 'part', subCat: '上半身', imgs: { body: 'part_chest_nipple' }, hasFace: false },
@@ -157,31 +157,26 @@ var menuData = {
     part_elbow_lower: { price: 6600, time: 18, label: '肘下', cat: 'part', subCat: '上半身', imgs: { body: 'part_elbow_lower' }, hasFace: false },
     part_hand_finger: { price: 4400, time: 15, label: '手の甲・指', cat: 'part', subCat: '上半身', imgs: { body: 'part_hand_finger' }, hasFace: false },
 
-    // === パーツメニュー（下半身） ===
     part_buttocks: { price: 6600, time: 16, label: '臀部（おしり）', cat: 'part', subCat: '下半身', imgs: { body: 'part_buttocks' }, hasFace: false },
     part_knee_upper: { price: 8800, time: 30, label: '膝上', cat: 'part', subCat: '下半身', imgs: { body: 'part_knee_upper' }, hasFace: false },
     part_knee_lower: { price: 8800, time: 35, label: '膝下', cat: 'part', subCat: '下半身', imgs: { body: 'part_knee_lower' }, hasFace: false },
     part_foot_toe: { price: 4400, time: 15, label: '足の甲・指', cat: 'part', subCat: '下半身', imgs: { body: 'part_foot_toe' }, hasFace: false },
 
-    // === パーツメニュー（VIO） ===
     part_v_line: { price: 6600, time: 15, label: 'Vライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_v_line' }, hasFace: false },
     part_i_line: { price: 6600, time: 15, label: 'Iライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_i_line' }, hasFace: false },
     part_o_line: { price: 6600, time: 15, label: 'Oライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_o_line' }, hasFace: false },
 
-    // === パーツメニュー（特殊部位） ===
     part_eyebrow_upper: { price: 4400, time: 13, label: '眉上', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_eyebrow_upper' }, hasFace: true },
     part_eyebrow_middle: { price: 4400, time: 10, label: '眉間（眉中）', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_eyebrow_middle' }, hasFace: true },
     part_eyebrow_lower: { price: 6600, time: 13, label: '眉下', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_eyebrow_lower' }, hasFace: true, isSpecial: true },
     part_nose_hair: { price: 4400, time: 20, label: '鼻毛', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_nose_hair' }, hasFace: true, isSpecial: true },
     part_under_eyes: { price: 4400, time: 10, label: '目の下', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_under_eyes' }, hasFace: true, isSpecial: true },
 
-    // === その他 ===
     other_lala_peel: { price: 12100, time: 90, label: 'ララピール', cat: 'other', imgs: { face: 'other_lala_peel' }, hasFace: true },
     other_face_correction: { price: 22000, time: 90, label: '小顔矯正術', cat: 'other', imgs: { face: 'other_face_correction' }, hasFace: true },
     other_derma_injection: { price: 22000, time: 60, label: 'ダーマインジェクション', cat: 'other', imgs: { face: 'other_derma_injection' }, hasFace: true }
 };
 
-// 【修正】全身オールから眉毛と特殊部位を除外
 var setIncludes = {
     set_fullbody_all:['set_fullbody_noface', 'set_upperbody', 'set_lowerbody', 'set_fullface', 'set_vio', 'set_fullface_vio', 'set_chest_abdomen', 'set_arms_legs', 'set_arms', 'set_legs', 'part_chest_nipple'],
     set_fullbody_noface:['set_lowerbody', 'set_vio', 'set_arms', 'set_legs', 'part_nape', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_back_upper', 'part_back_lower', 'part_buttocks'],
@@ -214,7 +209,7 @@ function forceStart(type) {
 
 function initApp() {
     function getLeafNodes(id) {
-        var leaves = [];
+        var leaves =[];
         function traverse(nodeId) {
             if (setIncludes[nodeId]) { setIncludes[nodeId].forEach(function(subId) { traverse(subId); }); } 
             else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); }
@@ -326,7 +321,18 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = slot + " 時間枠";
 }
 
-// 【究極のAIコンシェルジュ：アップセル＆ダウンセル統合】
+// 【指定セットの「単品合計額」を計算する関数】
+function getOriginalPrice(setId) {
+    var leaves = itemLeaves[setId];
+    var total = 0;
+    if(leaves) {
+        leaves.forEach(function(leaf) {
+            if (menuData[leaf]) total += menuData[leaf].price;
+        });
+    }
+    return total;
+}
+
 function checkSuggestion() {
     suggestionId = null;
     document.getElementById('suggestion-box').style.display = 'none';
@@ -334,7 +340,7 @@ function checkSuggestion() {
     var currentPrice = 0;
     selected.forEach(function(id) { currentPrice += menuData[id].price; });
 
-    var selectedLeaves = [];
+    var selectedLeaves =[];
     selected.forEach(function(id) {
         if(itemLeaves[id]) {
             itemLeaves[id].forEach(function(leaf) {
@@ -369,27 +375,38 @@ function checkSuggestion() {
     var bestSuggestion = null;
     var suggestionMsg = "";
 
-    // 優先順位1: 安くなる提案（一番安いものを提案）
+    // 1: 安くなる提案
     if (cheaperCandidates.length > 0) {
         cheaperCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
         bestSuggestion = cheaperCandidates[0];
-        suggestionMsg = "「" + menuData[bestSuggestion].label + "」へ切り替えると、<strong style='color:#fff;'>¥" + menuData[bestSuggestion].price.toLocaleString() + "</strong> になりお得です。";
+        suggestionMsg = "「<strong>" + menuData[bestSuggestion].label + "</strong>」へ切り替えると、<span class='sug-price-badge'>¥" + menuData[bestSuggestion].price.toLocaleString() + "</span> になりお得です。";
     } 
-    // 優先順位2: 同額で部位が増える提案
+    // 2: 同額の提案
     else if (samePriceCandidates.length > 0) {
         samePriceCandidates.sort(function(a, b) { return itemLeaves[b].length - itemLeaves[a].length; });
         bestSuggestion = samePriceCandidates[0];
-        suggestionMsg = "同じ金額で「<strong style='color:#fff;'>" + menuData[bestSuggestion].label + "</strong>」ができますがいかがですか？";
+        suggestionMsg = "同じ金額で「<strong>" + menuData[bestSuggestion].label + "</strong>」に切り替え可能ですがいかがですか？";
     } 
-    // 優先順位3: アップセル提案（あと少し足せば上位セットになる場合）
+    // 3: 賢いアップセル提案（追加1万円以内、または元の1.5倍以内の金額増に絞る）
     else if (upsellCandidates.length > 0) {
         upsellCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
         var upSug = upsellCandidates[0];
         var diff = menuData[upSug].price - currentPrice;
-        // 条件：追加料金が15,000円以内で、現在の金額が4,400円以上の場合に提案
-        if (diff <= 15000 && currentPrice >= 4400) {
+        
+        // 提案条件：追加金額が 10,000円以内、または現在の合計額の1.5倍以内
+        if (diff <= Math.max(10000, currentPrice * 1.5)) {
             bestSuggestion = upSug;
-            suggestionMsg = "あと <strong style='color:var(--gold);'>¥" + diff.toLocaleString() + "</strong> 追加するだけで、さらに部位が充実した「<strong style='color:#fff;'>" + menuData[bestSuggestion].label + "</strong>」にアップグレードできます！";
+            
+            // お得額の計算
+            var originalPrice = getOriginalPrice(upSug);
+            var savedAmount = originalPrice - menuData[upSug].price;
+
+            suggestionMsg = "あと <span class='sug-price-badge'>+¥" + diff.toLocaleString() + "</span> で、さらに部位が充実した「<strong>" + menuData[bestSuggestion].label + "</strong>」にアップグレードできます！";
+            
+            // 割引額が2,000円以上ある場合は、キラーフレーズを追加
+            if (savedAmount >= 2000) {
+                suggestionMsg += "<br><span class='sug-discount'>※パーツを別々に追加するより ¥" + savedAmount.toLocaleString() + " もお得です！</span>";
+            }
         }
     }
 
