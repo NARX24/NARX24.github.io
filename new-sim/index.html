@@ -54,7 +54,7 @@
 
         /* プレビューパネル */
         .dual-visual-container {
-            display: flex; gap: 4px; height: 250px; position: sticky; top: 10px; z-index: 50;
+            display: flex; gap: 4px; height: 260px; position: sticky; top: 10px; z-index: 50;
             background: var(--light-gray); border: 2px solid var(--gold);
             margin-bottom: 20px; border-radius: 8px; overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
@@ -85,7 +85,7 @@
         .item { background: var(--dark-gray); margin-bottom: 8px; padding: 15px; border-radius: 5px; display: flex; align-items: center; cursor: pointer; border: 1px solid transparent; }
         .item.selected { border-color: var(--gold); background: #111; }
         .item.disabled { opacity: 0.15; cursor: default; }
-        .item input { transform: scale(1.3); margin-right: 15px; accent-color: var(--gold); }
+        .item input { transform: scale(1.3); margin-right: 15px; accent-color: var(--gold); pointer-events: none; }
         .item-info { flex: 1; }
         .item-name { display: block; font-size: 0.9rem; }
         .item-price { color: var(--gold); font-weight: bold; font-size: 0.8rem; }
@@ -167,28 +167,26 @@
 
 <script>
 /**
- * データベース（詳細部位を完全復活）
+ * データベース（詳細説明を完全修正）
  */
 const menuData = {
-    // 【セットメニュー】
-    set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '上半身セット ＋ 下半身セット ＋ 顔全体 ＋ VIOセット ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
+    set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '顔全体 ＋ 上半身セット ＋ 下半身セット（VIO・おしり含） ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
     set_fullbody_noface: { price: 41800, time: 200, label: '顔なし全身', cat: 'set', sub: '脇・うなじ・背中・胸・腹・腕全体・VIO・脚全体', imgs: { body: 'set_fullbody_noface' }, hasFace: false },
-    set_upperbody: { price: 30800, time: 170, label: '上半身セット', cat: 'set', sub: '全顔・脇・胸・腹・うなじ・背中・腕全体・手の甲指', imgs: { body: 'set_upperbody_body', face: 'set_upperbody_face' }, hasFace: true },
-    set_lowerbody: { price: 30800, time: 150, label: '下半身セット', cat: 'set', sub: 'VIOセット・臀部（おしり）・脚全体・足の甲指', imgs: { body: 'set_lowerbody' }, hasFace: false },
+    set_upperbody: { price: 30800, time: 170, label: '上半身セット', cat: 'set', sub: '全顔・脇・胸・腹・うなじ・背中・腕全体', imgs: { body: 'set_upperbody_body', face: 'set_upperbody_face' }, hasFace: true },
+    set_lowerbody: { price: 30800, time: 150, label: '下半身セット', cat: 'set', sub: 'VIOセット・臀部（おしり）・脚全体', imgs: { body: 'set_lowerbody' }, hasFace: false },
     set_fullface_vio: { price: 27500, time: 100, label: '全顔+VIOセット', cat: 'set', sub: '全顔セット ＋ VIOセット', imgs: { body: 'set_fullface_vio_body', face: 'set_fullface_vio_face' }, hasFace: true },
-    set_fullface_eyebrow: { price: 22000, time: 105, label: '全顔+眉毛脱毛セット', cat: 'set', sub: '全顔セット ＋ 眉毛脱毛セット', imgs: { face: 'set_fullface_eyebrow' }, hasFace: true },
+    set_fullface_eyebrow: { price: 22000, time: 105, label: '全顔+眉毛セット', cat: 'set', sub: '全顔セット ＋ 眉毛脱毛セット', imgs: { face: 'set_fullface_eyebrow' }, hasFace: true },
     set_eyebrow: { price: 11000, time: 40, label: '眉毛セット', cat: 'set', sub: '眉上・眉下・眉中・デザイン料', imgs: { face: 'set_eyebrow' }, hasFace: true },
     set_fullface: { price: 13200, time: 65, label: '全顔セット', cat: 'set', sub: '鼻下・口下・頬・フェイスライン・首', imgs: { face: 'set_fullface' }, hasFace: true },
     set_vio: { price: 16500, time: 50, label: 'VIOセット', cat: 'set', sub: 'Vライン・Iライン・Oライン', imgs: { body: 'set_vio' }, hasFace: false },
     set_vio_buttocks: { price: 20900, time: 60, label: 'VIO+臀部セット', cat: 'set', sub: 'VIOセット ＋ 臀部（おしり）', imgs: { body: 'set_vio_buttocks' }, hasFace: false },
-    set_navel_vio: { price: 18700, time: 55, label: 'ヘソ下+VIOセット', cat: 'set', sub: 'ヘソ下（パーツ） ＋ VIOセット', imgs: { body: 'set_navel_vio' }, hasFace: false },
+    set_navel_vio: { price: 18700, time: 55, label: 'ヘソ下+VIOセット', cat: 'set', sub: 'ヘソ下パーツ ＋ VIOセット', imgs: { body: 'set_navel_vio' }, hasFace: false },
     set_chest_abdomen: { price: 9900, time: 35, label: '胸＋腹部セット', cat: 'set', sub: '胸（乳輪込） ＋ 腹部（ヘソ下込）', imgs: { body: 'set_chest_abdomen' }, hasFace: false },
-    set_arms_legs: { price: 28600, time: 125, label: '両腕+両足セット', cat: 'set', sub: '両腕（肘上・下・甲指） ＋ 両足（膝上・下・甲指）', imgs: { body: 'set_arms_legs' }, hasFace: false },
+    set_arms_legs: { price: 28600, time: 125, label: '両腕+両足セット', cat: 'set', sub: '両腕全体 ＋ 両足全体', imgs: { body: 'set_arms_legs' }, hasFace: false },
     set_arms: { price: 17600, time: 65, label: '両腕セット', cat: 'set', sub: '肘上・肘下・手の甲＋指', imgs: { body: 'set_arms' }, hasFace: false },
     set_legs: { price: 17600, time: 65, label: '両足セット', cat: 'set', sub: '膝上・膝下・足の甲＋指', imgs: { body: 'set_legs' }, hasFace: false },
     set_ear_whole: { price: 8800, time: 25, label: '耳全体セット', cat: 'set', sub: '耳珠 ＋ 耳たぶ', imgs: { face: 'set_ear_whole' }, hasFace: true },
 
-    // 【パーツメニュー】
     part_nose_under: { price: 4400, time: 16, label: '鼻下', cat: 'part', subCat: '顔', imgs: { face: 'part_nose_under' }, hasFace: true },
     part_mouth_under: { price: 4400, time: 16, label: '口下', cat: 'part', subCat: '顔', imgs: { face: 'part_mouth_under' }, hasFace: true },
     part_cheek: { price: 4400, time: 16, label: '頬', cat: 'part', subCat: '顔', imgs: { face: 'part_cheek' }, hasFace: true },
@@ -198,36 +196,23 @@ const menuData = {
     part_armpit: { price: 4400, time: 13, label: '脇', cat: 'part', subCat: '上半身', imgs: { body: 'part_armpit' }, hasFace: false },
     part_chest_nipple: { price: 6600, time: 16, label: '胸（乳輪周り込）', cat: 'part', subCat: '上半身', imgs: { body: 'part_chest_nipple' }, hasFace: false },
     part_abdomen_navel: { price: 6600, time: 16, label: '腹部（ヘソ下込）', cat: 'part', subCat: '上半身', imgs: { body: 'part_abdomen_navel' }, hasFace: false },
-    part_elbow_lower: { price: 6600, time: 18, label: '肘下', cat: 'part', subCat: '上半身', imgs: { body: 'part_elbow_lower' }, hasFace: false },
+    part_back_upper: { price: 6600, time: 16, label: '背中上', cat: 'part', subCat: '上半身', imgs: { body: 'part_back_upper' }, hasFace: false },
+    part_back_lower: { price: 6600, time: 16, label: '背中下', cat: 'part', subCat: '上半身', imgs: { body: 'part_back_lower' }, hasFace: false },
     part_buttocks: { price: 6600, time: 16, label: '臀部（おしり）', cat: 'part', subCat: '下半身', imgs: { body: 'part_buttocks' }, hasFace: false },
+    part_elbow_lower: { price: 6600, time: 18, label: '肘下', cat: 'part', subCat: '上半身', imgs: { body: 'part_elbow_lower' }, hasFace: false },
     part_knee_lower: { price: 8800, time: 35, label: '膝下', cat: 'part', subCat: '下半身', imgs: { body: 'part_knee_lower' }, hasFace: false },
     part_v_line: { price: 7700, time: 16, label: 'Vライン', cat: 'part', subCat: '下半身', imgs: { body: 'part_v_line' }, hasFace: false },
     part_i_line: { price: 7700, time: 20, label: 'Iライン', cat: 'part', subCat: '下半身', imgs: { body: 'part_i_line' }, hasFace: false },
     part_o_line: { price: 5500, time: 16, label: 'Oライン', cat: 'part', subCat: '下半身', imgs: { body: 'part_o_line' }, hasFace: false },
+    part_forehead: { price: 4400, time: 13, label: 'おでこ', cat: 'part', subCat: '顔', imgs: { face: 'part_forehead' }, hasFace: true },
     part_eyebrow_lower: { price: 6600, time: 13, label: '眉下', cat: 'part', subCat: '顔', imgs: { face: 'part_eyebrow_lower' }, hasFace: true },
     part_nose_hair: { price: 4400, time: 20, label: '鼻毛', cat: 'part', subCat: '顔', imgs: { face: 'part_nose_hair' }, hasFace: true },
     part_under_eyes: { price: 4400, time: 10, label: '目の下', cat: 'part', subCat: '顔', imgs: { face: 'part_under_eyes' }, hasFace: true },
 
-    // 【その他】
     other_lala_peel: { price: 12100, time: 90, label: 'ララピール', cat: 'other', imgs: { face: 'other_lala_peel' }, hasFace: true },
     other_face_correction: { price: 22000, time: 90, label: '小顔矯正術', cat: 'other', imgs: { face: 'other_face_correction' }, hasFace: true }
 };
 
-/**
- * お得セット提案マッピング（パーツ・セットの組み合わせ）
- */
 const setIncludes = {
-    set_fullbody_all: ['set_upperbody', 'set_lowerbody'], // セット+セットの検知
-    set_fullface_eyebrow: ['set_fullface', 'set_eyebrow'], // セット+セット
-    set_upperbody: ['set_fullface', 'set_arms', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_nape'],
-    set_lowerbody: ['set_vio', 'set_legs', 'part_buttocks'],
-    set_fullface_vio: ['set_fullface', 'set_vio'],
-    set_vio_buttocks: ['set_vio', 'part_buttocks'],
-    set_chest_abdomen: ['part_chest_nipple', 'part_abdomen_navel'], // パーツ+パーツ
-    set_arms_legs: ['set_arms', 'set_legs'],
-    set_vio: ['part_v_line', 'part_i_line', 'part_o_line'],
-    set_fullface: ['part_nose_under', 'part_mouth_under', 'part_cheek', 'part_face_line', 'part_neck']
-};
-
-let userType = 'new';
-let currentTab = 's
+    set_fullbody_all: ['set_upperbody', 'set_lowerbody'],
+    set_fullface_eyebrow: ['set_ful
