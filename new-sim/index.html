@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.10.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.11.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
-    body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 180px; overflow-x: hidden; }
+    /* スクロール領域を広く確保して隠れないように修正 */
+    body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
 
     /* ゲートモーダル */
     #gate-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 99999; display: flex; justify-content: center; align-items: center; }
@@ -114,13 +115,13 @@
 </div>
 
 <script>
-// 完全互換設計（ES5）を維持
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
 var suggestionId = null;
 var itemLeaves = {}; 
 
+// 完全なメニューデータ（欠損なし）
 var menuData = {
     // === セットメニュー ===
     set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '全顔 ＋ 上半身 ＋ 下半身 ＋ VIO ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
@@ -180,8 +181,9 @@ var menuData = {
     other_derma_injection: { price: 22000, time: 60, label: 'ダーマインジェクション', cat: 'other', imgs: { face: 'other_derma_injection' }, hasFace: true }
 };
 
+// 【修正】全身オールから眉毛と特殊部位を除外
 var setIncludes = {
-    set_fullbody_all:['set_fullbody_noface', 'set_upperbody', 'set_lowerbody', 'set_fullface', 'set_vio', 'set_fullface_vio', 'set_fullface_eyebrow', 'set_chest_abdomen', 'set_arms_legs', 'set_arms', 'set_legs', 'part_nipple'],
+    set_fullbody_all:['set_fullbody_noface', 'set_upperbody', 'set_lowerbody', 'set_fullface', 'set_vio', 'set_fullface_vio', 'set_chest_abdomen', 'set_arms_legs', 'set_arms', 'set_legs', 'part_chest_nipple'],
     set_fullbody_noface:['set_lowerbody', 'set_vio', 'set_arms', 'set_legs', 'part_nape', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_back_upper', 'part_back_lower', 'part_buttocks'],
     set_upperbody:['set_fullface', 'set_arms', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_nape', 'part_back_upper', 'part_back_lower'],
     set_lowerbody:['set_vio', 'set_legs', 'part_buttocks'],
@@ -212,7 +214,7 @@ function forceStart(type) {
 
 function initApp() {
     function getLeafNodes(id) {
-        var leaves =[];
+        var leaves = [];
         function traverse(nodeId) {
             if (setIncludes[nodeId]) { setIncludes[nodeId].forEach(function(subId) { traverse(subId); }); } 
             else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); }
@@ -324,7 +326,7 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = slot + " 時間枠";
 }
 
-// 【超進化版：AIコンシェルジュロジック】
+// 【究極のAIコンシェルジュ：アップセル＆ダウンセル統合】
 function checkSuggestion() {
     suggestionId = null;
     document.getElementById('suggestion-box').style.display = 'none';
@@ -332,7 +334,7 @@ function checkSuggestion() {
     var currentPrice = 0;
     selected.forEach(function(id) { currentPrice += menuData[id].price; });
 
-    var selectedLeaves =[];
+    var selectedLeaves = [];
     selected.forEach(function(id) {
         if(itemLeaves[id]) {
             itemLeaves[id].forEach(function(leaf) {
@@ -344,7 +346,6 @@ function checkSuggestion() {
     if (selectedLeaves.length === 0) return;
 
     var candidates =[];
-    // 選択部位をすべてカバーできるセットを探す
     Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
         if (selected.indexOf(sid) !== -1) return;
         var candidateLeaves = itemLeaves[sid];
@@ -361,26 +362,35 @@ function checkSuggestion() {
 
     if (candidates.length === 0) return;
 
-    // パターン1：今より「安くなる」セットを探す
     var cheaperCandidates = candidates.filter(function(sid) { return menuData[sid].price < currentPrice; });
-    // パターン2：今と「同じ金額で、部位が増える」セットを探す
-    var samePriceCandidates = candidates.filter(function(sid) { 
-        return menuData[sid].price === currentPrice && itemLeaves[sid].length > selectedLeaves.length; 
-    });
+    var samePriceCandidates = candidates.filter(function(sid) { return menuData[sid].price === currentPrice && itemLeaves[sid].length > selectedLeaves.length; });
+    var upsellCandidates = candidates.filter(function(sid) { return menuData[sid].price > currentPrice && itemLeaves[sid].length > selectedLeaves.length; });
 
     var bestSuggestion = null;
     var suggestionMsg = "";
 
+    // 優先順位1: 安くなる提案（一番安いものを提案）
     if (cheaperCandidates.length > 0) {
-        // 安くなる場合は一番安いものを提案
         cheaperCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
         bestSuggestion = cheaperCandidates[0];
         suggestionMsg = "「" + menuData[bestSuggestion].label + "」へ切り替えると、<strong style='color:#fff;'>¥" + menuData[bestSuggestion].price.toLocaleString() + "</strong> になりお得です。";
-    } else if (samePriceCandidates.length > 0) {
-        // 同額の場合は一番部位が多いものを提案
+    } 
+    // 優先順位2: 同額で部位が増える提案
+    else if (samePriceCandidates.length > 0) {
         samePriceCandidates.sort(function(a, b) { return itemLeaves[b].length - itemLeaves[a].length; });
         bestSuggestion = samePriceCandidates[0];
         suggestionMsg = "同じ金額で「<strong style='color:#fff;'>" + menuData[bestSuggestion].label + "</strong>」ができますがいかがですか？";
+    } 
+    // 優先順位3: アップセル提案（あと少し足せば上位セットになる場合）
+    else if (upsellCandidates.length > 0) {
+        upsellCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
+        var upSug = upsellCandidates[0];
+        var diff = menuData[upSug].price - currentPrice;
+        // 条件：追加料金が15,000円以内で、現在の金額が4,400円以上の場合に提案
+        if (diff <= 15000 && currentPrice >= 4400) {
+            bestSuggestion = upSug;
+            suggestionMsg = "あと <strong style='color:var(--gold);'>¥" + diff.toLocaleString() + "</strong> 追加するだけで、さらに部位が充実した「<strong style='color:#fff;'>" + menuData[bestSuggestion].label + "</strong>」にアップグレードできます！";
+        }
     }
 
     if (bestSuggestion) {
@@ -402,7 +412,7 @@ function hideSuggestion() { document.getElementById('suggestion-box').style.disp
 function copyResult() {
     if (selected.length === 0) return alert("選択してください");
     var slot = document.getElementById('total-time-slot').innerText;
-    var priceStr = document.getElementById('total-price').innerText; // 合計金額を取得
+    var priceStr = document.getElementById('total-price').innerText;
     var txt = "【NARX脱毛予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
     selected.forEach(function(id) { txt += "・" + menuData[id].label + "\n"; });
     txt += "──────────\n";
