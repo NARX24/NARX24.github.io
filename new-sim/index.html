@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.9.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.10.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 180px; overflow-x: hidden; }
@@ -95,7 +95,7 @@
 
 <div id="suggestion-box">
     <div style="font-weight: bold; font-size: 0.95rem; margin-bottom: 6px;">👑 特別プランのご提案</div>
-    <div id="suggestion-text" style="font-size: 0.8rem; margin-bottom: 15px;"></div>
+    <div id="suggestion-text" style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 15px;"></div>
     <div style="display: flex; gap: 10px;">
         <button onclick="applyOptimalSet()" style="background: var(--black); color: var(--gold); border: 1px solid var(--gold); padding: 10px 20px; border-radius: 4px; font-weight: bold; flex: 2;">切り替える</button>
         <button onclick="hideSuggestion()" style="background: transparent; color: #444; border: none; font-size: 0.75rem; flex: 1;">今はしない</button>
@@ -109,13 +109,12 @@
     </div>
     <div class="btn-group">
         <button class="btn btn-copy" onclick="copyResult()">内容をコピー</button>
-        <!-- 移管先URL差し替え完了 -->
         <a href="https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585" class="btn btn-reserve" target="_blank">予約ページへ</a>
     </div>
 </div>
 
 <script>
-// 古いブラウザ（LINE内ブラウザ等）でも100%動くようにES5で記述
+// 完全互換設計（ES5）を維持
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -123,6 +122,7 @@ var suggestionId = null;
 var itemLeaves = {}; 
 
 var menuData = {
+    // === セットメニュー ===
     set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '全顔 ＋ 上半身 ＋ 下半身 ＋ VIO ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
     set_fullbody_noface: { price: 41800, time: 200, label: '顔なし全身', cat: 'set', sub: '脇・うなじ・背中・胸・腹・腕全体・VIO・脚全体', imgs: { body: 'set_fullbody_noface' }, hasFace: false },
     set_upperbody: { price: 30800, time: 170, label: '上半身セット', cat: 'set', sub: '全顔・脇・胸・腹・うなじ・背中・腕全体', imgs: { body: 'set_upperbody_body', face: 'set_upperbody_face' }, hasFace: true },
@@ -138,24 +138,46 @@ var menuData = {
     set_legs: { price: 17600, time: 65, label: '両足セット', cat: 'set', sub: '膝上・下・足の甲指', imgs: { body: 'set_legs' }, hasFace: false },
     set_ear_whole: { price: 8800, time: 25, label: '耳全体セット', cat: 'set', sub: '耳珠 ＋ 耳たぶ', imgs: { face: 'set_ear_whole' }, hasFace: true, isSpecial: true },
 
+    // === パーツメニュー（顔） ===
     part_nose_under: { price: 4400, time: 16, label: '鼻下', cat: 'part', subCat: '顔', imgs: { face: 'part_nose_under' }, hasFace: true },
     part_mouth_under: { price: 4400, time: 16, label: '口下', cat: 'part', subCat: '顔', imgs: { face: 'part_mouth_under' }, hasFace: true },
     part_cheek: { price: 4400, time: 16, label: '頬', cat: 'part', subCat: '顔', imgs: { face: 'part_cheek' }, hasFace: true },
     part_face_line: { price: 4400, time: 16, label: 'フェイスライン', cat: 'part', subCat: '顔', imgs: { face: 'part_face_line' }, hasFace: true },
     part_neck: { price: 4400, time: 16, label: '首', cat: 'part', subCat: '顔', imgs: { face: 'part_neck' }, hasFace: true },
+
+    // === パーツメニュー（上半身） ===
     part_nape: { price: 4400, time: 16, label: 'うなじ', cat: 'part', subCat: '上半身', imgs: { body: 'part_nape' }, hasFace: false },
     part_armpit: { price: 4400, time: 13, label: '脇', cat: 'part', subCat: '上半身', imgs: { body: 'part_armpit' }, hasFace: false },
     part_chest_nipple: { price: 6600, time: 16, label: '胸（乳輪込）', cat: 'part', subCat: '上半身', imgs: { body: 'part_chest_nipple' }, hasFace: false },
     part_abdomen_navel: { price: 6600, time: 16, label: '腹部（ヘソ下込）', cat: 'part', subCat: '上半身', imgs: { body: 'part_abdomen_navel' }, hasFace: false },
+    part_back_upper: { price: 6600, time: 20, label: '背中上', cat: 'part', subCat: '上半身', imgs: { body: 'part_back_upper' }, hasFace: false },
+    part_back_lower: { price: 6600, time: 20, label: '背中下', cat: 'part', subCat: '上半身', imgs: { body: 'part_back_lower' }, hasFace: false },
+    part_elbow_upper: { price: 6600, time: 20, label: '肘上', cat: 'part', subCat: '上半身', imgs: { body: 'part_elbow_upper' }, hasFace: false },
     part_elbow_lower: { price: 6600, time: 18, label: '肘下', cat: 'part', subCat: '上半身', imgs: { body: 'part_elbow_lower' }, hasFace: false },
+    part_hand_finger: { price: 4400, time: 15, label: '手の甲・指', cat: 'part', subCat: '上半身', imgs: { body: 'part_hand_finger' }, hasFace: false },
+
+    // === パーツメニュー（下半身） ===
     part_buttocks: { price: 6600, time: 16, label: '臀部（おしり）', cat: 'part', subCat: '下半身', imgs: { body: 'part_buttocks' }, hasFace: false },
+    part_knee_upper: { price: 8800, time: 30, label: '膝上', cat: 'part', subCat: '下半身', imgs: { body: 'part_knee_upper' }, hasFace: false },
     part_knee_lower: { price: 8800, time: 35, label: '膝下', cat: 'part', subCat: '下半身', imgs: { body: 'part_knee_lower' }, hasFace: false },
+    part_foot_toe: { price: 4400, time: 15, label: '足の甲・指', cat: 'part', subCat: '下半身', imgs: { body: 'part_foot_toe' }, hasFace: false },
+
+    // === パーツメニュー（VIO） ===
+    part_v_line: { price: 6600, time: 15, label: 'Vライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_v_line' }, hasFace: false },
+    part_i_line: { price: 6600, time: 15, label: 'Iライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_i_line' }, hasFace: false },
+    part_o_line: { price: 6600, time: 15, label: 'Oライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_o_line' }, hasFace: false },
+
+    // === パーツメニュー（特殊部位） ===
+    part_eyebrow_upper: { price: 4400, time: 13, label: '眉上', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_eyebrow_upper' }, hasFace: true },
+    part_eyebrow_middle: { price: 4400, time: 10, label: '眉間（眉中）', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_eyebrow_middle' }, hasFace: true },
     part_eyebrow_lower: { price: 6600, time: 13, label: '眉下', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_eyebrow_lower' }, hasFace: true, isSpecial: true },
     part_nose_hair: { price: 4400, time: 20, label: '鼻毛', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_nose_hair' }, hasFace: true, isSpecial: true },
     part_under_eyes: { price: 4400, time: 10, label: '目の下', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_under_eyes' }, hasFace: true, isSpecial: true },
 
+    // === その他 ===
     other_lala_peel: { price: 12100, time: 90, label: 'ララピール', cat: 'other', imgs: { face: 'other_lala_peel' }, hasFace: true },
-    other_face_correction: { price: 22000, time: 90, label: '小顔矯正術', cat: 'other', imgs: { face: 'other_face_correction' }, hasFace: true }
+    other_face_correction: { price: 22000, time: 90, label: '小顔矯正術', cat: 'other', imgs: { face: 'other_face_correction' }, hasFace: true },
+    other_derma_injection: { price: 22000, time: 60, label: 'ダーマインジェクション', cat: 'other', imgs: { face: 'other_derma_injection' }, hasFace: true }
 };
 
 var setIncludes = {
@@ -174,12 +196,9 @@ var setIncludes = {
     set_legs:['part_knee_upper', 'part_knee_lower', 'part_foot_toe']
 };
 
-// 【絶対止まらないフェイルセーフ】
 function forceStart(type) {
-    // ボタンを押したら何があっても即座にモーダルを消す
     var modal = document.getElementById('gate-modal');
     if (modal) modal.style.display = 'none';
-
     try {
         userType = type;
         var badge = document.getElementById('mode-display');
@@ -187,33 +206,21 @@ function forceStart(type) {
             badge.innerText = type === 'new' ? "【ご新規様】初回限定価格モード" : "【会員様】通常価格モード";
             badge.style.background = type === 'new' ? "var(--gold)" : "#666";
         }
-
-        setTimeout(function() {
-            initApp();
-            render();
-        }, 50);
-    } catch(e) {
-        console.error("起動エラー:", e);
-    }
+        setTimeout(function() { initApp(); render(); }, 50);
+    } catch(e) { console.error(e); }
 }
 
 function initApp() {
     function getLeafNodes(id) {
         var leaves =[];
         function traverse(nodeId) {
-            if (setIncludes[nodeId]) {
-                setIncludes[nodeId].forEach(function(subId) { traverse(subId); });
-            } else {
-                if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId);
-            }
+            if (setIncludes[nodeId]) { setIncludes[nodeId].forEach(function(subId) { traverse(subId); }); } 
+            else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); }
         }
         traverse(id);
         return leaves;
     }
-    
-    Object.keys(menuData).forEach(function(id) {
-        itemLeaves[id] = getLeafNodes(id);
-    });
+    Object.keys(menuData).forEach(function(id) { itemLeaves[id] = getLeafNodes(id); });
 
     var bPanel = document.getElementById('body-panel');
     var fPanel = document.getElementById('face-panel');
@@ -256,10 +263,8 @@ function render() {
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
     var activeTab = document.getElementById("tab-" + currentTab);
     if(activeTab) activeTab.classList.add('active');
-
     document.querySelectorAll('.layer-part').forEach(function(img) { img.classList.remove('active'); });
 
-    // 選ばれている部位の最小パーツをリスト化
     var selectedLeaves =[];
     selected.forEach(function(id) {
         if(itemLeaves[id]) {
@@ -269,12 +274,11 @@ function render() {
         }
     });
 
-    // イラスト再点灯
     selected.forEach(function(id) {
         var item = menuData[id];
         if (item.imgs) {
             if (item.imgs.body) { var i = document.getElementById("img-" + item.imgs.body); if(i) i.classList.add('active'); }
-            if (item.imgs.face) { var i = document.getElementById("img-" + item.imgs.face); if(i) i.classList.add('active'); }
+            if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
         }
     });
 
@@ -288,12 +292,8 @@ function render() {
 
         var isSel = selected.indexOf(id) !== -1;
         var isDis = false;
-
-        // 【安全なグレーアウト判定】1つでも被っていればグレーアウト
         if (!isSel && itemLeaves[id]) {
-            isDis = itemLeaves[id].some(function(leaf) {
-                return selectedLeaves.indexOf(leaf) !== -1;
-            });
+            isDis = itemLeaves[id].some(function(leaf) { return selectedLeaves.indexOf(leaf) !== -1; });
         }
 
         var div = document.createElement('div');
@@ -324,6 +324,7 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = slot + " 時間枠";
 }
 
+// 【超進化版：AIコンシェルジュロジック】
 function checkSuggestion() {
     suggestionId = null;
     document.getElementById('suggestion-box').style.display = 'none';
@@ -340,35 +341,58 @@ function checkSuggestion() {
         }
     });
 
-    var priority =['set_fullbody_all', 'set_fullbody_noface', 'set_upperbody', 'set_lowerbody', 'set_arms_legs', 'set_fullface_vio', 'set_fullface_eyebrow', 'set_chest_abdomen'];
+    if (selectedLeaves.length === 0) return;
 
-    for (var i = 0; i < priority.length; i++) {
-        var sid = priority[i];
-        if (selected.indexOf(sid) !== -1) continue;
-
+    var candidates =[];
+    // 選択部位をすべてカバーできるセットを探す
+    Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
+        if (selected.indexOf(sid) !== -1) return;
         var candidateLeaves = itemLeaves[sid];
-        if (!candidateLeaves) continue;
+        if (!candidateLeaves) return;
 
         var isSubset = true;
         for (var j = 0; j < selectedLeaves.length; j++) {
             if (candidateLeaves.indexOf(selectedLeaves[j]) === -1) {
-                isSubset = false;
-                break;
+                isSubset = false; break;
             }
         }
+        if (isSubset) candidates.push(sid);
+    });
 
-        if (isSubset && selectedLeaves.length > 0 && currentPrice >= menuData[sid].price) {
-            suggestionId = sid;
-            document.getElementById('suggestion-text').innerText = "「" + menuData[sid].label + "」へ切り替えると、よりお得になります。";
-            document.getElementById('suggestion-box').style.display = 'block';
-            return;
-        }
+    if (candidates.length === 0) return;
+
+    // パターン1：今より「安くなる」セットを探す
+    var cheaperCandidates = candidates.filter(function(sid) { return menuData[sid].price < currentPrice; });
+    // パターン2：今と「同じ金額で、部位が増える」セットを探す
+    var samePriceCandidates = candidates.filter(function(sid) { 
+        return menuData[sid].price === currentPrice && itemLeaves[sid].length > selectedLeaves.length; 
+    });
+
+    var bestSuggestion = null;
+    var suggestionMsg = "";
+
+    if (cheaperCandidates.length > 0) {
+        // 安くなる場合は一番安いものを提案
+        cheaperCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
+        bestSuggestion = cheaperCandidates[0];
+        suggestionMsg = "「" + menuData[bestSuggestion].label + "」へ切り替えると、<strong style='color:#fff;'>¥" + menuData[bestSuggestion].price.toLocaleString() + "</strong> になりお得です。";
+    } else if (samePriceCandidates.length > 0) {
+        // 同額の場合は一番部位が多いものを提案
+        samePriceCandidates.sort(function(a, b) { return itemLeaves[b].length - itemLeaves[a].length; });
+        bestSuggestion = samePriceCandidates[0];
+        suggestionMsg = "同じ金額で「<strong style='color:#fff;'>" + menuData[bestSuggestion].label + "</strong>」ができますがいかがですか？";
+    }
+
+    if (bestSuggestion) {
+        suggestionId = bestSuggestion;
+        document.getElementById('suggestion-text').innerHTML = suggestionMsg;
+        document.getElementById('suggestion-box').style.display = 'block';
     }
 }
 
 function applyOptimalSet() {
     if (!suggestionId) return;
-    selected =[suggestionId];
+    selected = [suggestionId];
     hideSuggestion();
     render();
 }
@@ -378,8 +402,11 @@ function hideSuggestion() { document.getElementById('suggestion-box').style.disp
 function copyResult() {
     if (selected.length === 0) return alert("選択してください");
     var slot = document.getElementById('total-time-slot').innerText;
+    var priceStr = document.getElementById('total-price').innerText; // 合計金額を取得
     var txt = "【NARX脱毛予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
     selected.forEach(function(id) { txt += "・" + menuData[id].label + "\n"; });
+    txt += "──────────\n";
+    txt += "合計金額：" + priceStr + "\n";
     txt += "予約枠目安：" + slot;
     navigator.clipboard.writeText(txt).then(function() { alert("コピーしました。"); });
 }
