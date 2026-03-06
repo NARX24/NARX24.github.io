@@ -1,65 +1,66 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NARX 料金＆時間シミュレーター Ver.7.0</title>
-    <style>
-        :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
-        body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 180px; overflow-x: hidden; }
-        
-        /* ゲートモーダル（最優先） */
-        #gate-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 99999; display: flex; justify-content: center; align-items: center; }
-        .modal-content { border: 1px solid var(--gold); padding: 40px 20px; width: 85%; max-width: 400px; background: var(--black); text-align: center; border-radius: 8px; }
-        
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; padding: 10px 0; border-bottom: 1px solid var(--gold); margin-bottom: 20px; }
-        .header h1 { color: var(--gold); margin: 0; font-size: 1.4rem; letter-spacing: 3px; }
-        #mode-display { font-size: 0.75rem; color: var(--black); background: var(--gold); padding: 4px 15px; border-radius: 20px; margin-top: 8px; display: inline-block; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NARX 料金＆時間シミュレーター Ver.8.0</title>
+<style>
+    :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
+    body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 180px; overflow-x: hidden; }
 
-        /* プレビューパネル */
-        .dual-visual-container { display: flex; gap: 4px; height: 240px; position: sticky; top: 10px; z-index: 50; background: var(--light-gray); border: 2px solid var(--gold); margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
-        .view-panel { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background-color: var(--panel-bg); }
-        .view-panel:first-child { border-right: 1px solid #ddd; }
-        .view-panel span { position: absolute; top: 8px; font-size: 9px; color: #999; letter-spacing: 2px; font-weight: bold; z-index: 10; }
-        .view-panel img { position: absolute; height: 90%; transition: opacity 0.3s ease; pointer-events: none; }
-        .base-img { opacity: 0.3; z-index: 1; }
-        .layer-part { opacity: 0; z-index: 2; }
-        .layer-part.active { opacity: 1; filter: drop-shadow(0 0 3px var(--gold)); }
+    /* ゲートモーダル */
+    #gate-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 99999; display: flex; justify-content: center; align-items: center; }
+    .modal-content { border: 1px solid var(--gold); padding: 40px 20px; width: 85%; max-width: 400px; background: var(--black); text-align: center; border-radius: 8px; }
+    
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; padding: 10px 0; border-bottom: 1px solid var(--gold); margin-bottom: 20px; }
+    .header h1 { color: var(--gold); margin: 0; font-size: 1.4rem; letter-spacing: 3px; }
+    #mode-display { font-size: 0.75rem; color: var(--black); background: var(--gold); padding: 4px 15px; border-radius: 20px; margin-top: 8px; display: inline-block; }
 
-        /* タブ */
-        .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid var(--light-gray); }
-        .tab { flex: 1; padding: 12px 5px; text-align: center; color: #777; cursor: pointer; font-size: 0.85rem; }
-        .tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); font-weight: bold; }
+    /* プレビューパネル */
+    .dual-visual-container { display: flex; gap: 4px; height: 240px; position: sticky; top: 10px; z-index: 50; background: var(--light-gray); border: 2px solid var(--gold); margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
+    .view-panel { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background-color: var(--panel-bg); }
+    .view-panel:first-child { border-right: 1px solid #ddd; }
+    .view-panel span { position: absolute; top: 8px; font-size: 9px; color: #999; letter-spacing: 2px; font-weight: bold; z-index: 10; }
+    .view-panel img { position: absolute; height: 90%; transition: opacity 0.3s ease; pointer-events: none; }
+    .base-img { opacity: 0.3; z-index: 1; }
+    .layer-part { opacity: 0; z-index: 2; }
+    .layer-part.active { opacity: 1; filter: drop-shadow(0 0 3px var(--gold)); }
 
-        /* 小見出し */
-        .subcat-header { display: flex; align-items: center; justify-content: center; margin: 30px 0 15px; color: var(--gold); font-size: 0.85rem; letter-spacing: 0.4em; font-weight: bold; }
-        .subcat-header::before, .subcat-header::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold)); margin: 0 20px; opacity: 0.6; }
-        .subcat-header::after { background: linear-gradient(to left, transparent, var(--gold)); }
+    /* タブ */
+    .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid var(--light-gray); }
+    .tab { flex: 1; padding: 12px 5px; text-align: center; color: #777; cursor: pointer; font-size: 0.85rem; }
+    .tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); font-weight: bold; }
 
-        /* アイテム */
-        .item { background: var(--dark-gray); margin-bottom: 8px; padding: 16px; border-radius: 6px; display: flex; align-items: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
-        .item.selected { border-color: var(--gold); background: #080808; }
-        .item.disabled { opacity: 0.15; cursor: default; filter: grayscale(1); }
-        .item input { transform: scale(1.4); margin-right: 18px; accent-color: var(--gold); }
-        .item-info { flex: 1; }
-        .item-name { display: block; font-size: 0.95rem; }
-        .item-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-top: 2px; }
-        .item-sub { display: block; font-size: 0.7rem; color: #888; margin-top: 5px; line-height: 1.4; }
+    /* 小見出し */
+    .subcat-header { display: flex; align-items: center; justify-content: center; margin: 30px 0 15px; color: var(--gold); font-size: 0.85rem; letter-spacing: 0.4em; font-weight: bold; }
+    .subcat-header::before, .subcat-header::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold)); margin: 0 20px; opacity: 0.6; }
+    .subcat-header::after { background: linear-gradient(to left, transparent, var(--gold)); }
 
-        /* 提案 */
-        #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: var(--gold); color: var(--black); padding: 18px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+    /* アイテム */
+    .item { background: var(--dark-gray); margin-bottom: 8px; padding: 16px; border-radius: 6px; display: flex; align-items: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+    .item.selected { border-color: var(--gold); background: #080808; }
+    .item.disabled { opacity: 0.15; cursor: default; filter: grayscale(1); }
+    .item input { transform: scale(1.4); margin-right: 18px; accent-color: var(--gold); }
+    .item-info { flex: 1; }
+    .item-name { display: block; font-size: 0.95rem; }
+    .item-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-top: 2px; }
+    .item-sub { display: block; font-size: 0.7rem; color: #888; margin-top: 5px; line-height: 1.4; }
 
-        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(5, 5, 5, 0.98); border-top: 2px solid var(--gold); padding: 15px 20px; box-sizing: border-box; z-index: 100; }
-        .summary-grid { display: grid; grid-template-columns: 1fr 1.1fr; margin-bottom: 12px; }
-        .summary-item .label { font-size: 0.7rem; color: #999; display: block; }
-        .summary-item .val { font-size: 1.35rem; color: var(--gold); font-weight: bold; }
-        
-        .btn-group { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 15px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer; text-decoration: none; }
-        .btn-copy { background: #222; color: #fff; }
-        .btn-reserve { background: var(--gold); color: #000; }
-    </style>
+    /* 提案ポップアップ */
+    #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: var(--gold); color: var(--black); padding: 18px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+
+    /* ボトムバー */
+    .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(5, 5, 5, 0.98); border-top: 2px solid var(--gold); padding: 15px 20px; box-sizing: border-box; z-index: 100; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1.1fr; margin-bottom: 12px; }
+    .summary-item .label { font-size: 0.7rem; color: #999; display: block; }
+    .summary-item .val { font-size: 1.35rem; color: var(--gold); font-weight: bold; }
+    
+    .btn-group { display: flex; gap: 10px; }
+    .btn { flex: 1; padding: 15px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer; text-decoration: none; }
+    .btn-copy { background: #222; color: #fff; }
+    .btn-reserve { background: var(--gold); color: #000; }
+</style>
 </head>
 <body>
 
@@ -88,6 +89,7 @@
         <div id="tab-part" class="tab" onclick="changeTab('part')">パーツメニュー</div>
         <div id="tab-other" class="tab" onclick="changeTab('other')">その他</div>
     </div>
+    
     <div id="menu-area"></div>
 </div>
 
@@ -112,15 +114,11 @@
 </div>
 
 <script>
-/**
- * 徹底した安全設計：ボタンを殺さないための Ver.7.0
- */
-
-// グローバル変数
 let userType = 'new';
 let currentTab = 'set';
 let selected = new Set();
 let suggestionId = null;
+const itemLeaves = {}; // 新機能：最小パーツ分解データ
 
 const menuData = {
     set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '全顔 ＋ 上半身 ＋ 下半身 ＋ VIO ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
@@ -159,165 +157,5 @@ const menuData = {
 };
 
 const setIncludes = {
-    set_fullbody_all: ['set_fullbody_noface', 'set_upperbody', 'set_lowerbody', 'set_fullface', 'set_vio', 'set_fullface_vio', 'set_fullface_eyebrow', 'set_chest_abdomen', 'set_arms_legs', 'set_arms', 'set_legs', 'part_nipple'],
-    set_fullbody_noface: ['set_lowerbody', 'set_vio', 'set_arms', 'set_legs', 'part_nape', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_back_upper', 'part_back_lower', 'part_buttocks'],
-    set_upperbody: ['set_fullface', 'set_arms', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_nape'],
-    set_lowerbody: ['set_vio', 'set_legs', 'part_buttocks'],
-    set_fullface_vio: ['set_fullface', 'set_vio'],
-    set_fullface_eyebrow: ['set_fullface', 'set_eyebrow'],
-    set_eyebrow: ['part_eyebrow_upper', 'part_eyebrow_lower', 'part_eyebrow_middle'],
-    set_fullface: ['part_nose_under', 'part_mouth_under', 'part_cheek', 'part_face_line', 'part_neck'],
-    set_vio: ['part_v_line', 'part_i_line', 'part_o_line'],
-    set_chest_abdomen: ['part_chest_nipple', 'part_abdomen_navel'],
-    set_arms_legs: ['set_arms', 'set_legs'],
-    set_arms: ['part_elbow_upper', 'part_elbow_lower', 'part_hand_finger'],
-    set_legs: ['part_knee_upper', 'part_knee_lower', 'part_foot_toe']
-};
-
-/**
- * ゲートを閉じて開始（最優先）
- */
-function forceStart(type) {
-    document.getElementById('gate-modal').style.display = 'none';
-    userType = type;
-    
-    // UI更新
-    const badge = document.getElementById('mode-display');
-    badge.innerText = type === 'new' ? "【ご新規様】初回限定価格モード" : "【会員様】通常価格モード";
-    badge.style.background = type === 'new' ? "var(--gold)" : "#666";
-    
-    // 少し遅らせて重たい処理を動かす
-    setTimeout(() => {
-        initLayers();
-        render();
-    }, 100);
-}
-
-function initLayers() {
-    const bPanel = document.getElementById('body-panel');
-    const fPanel = document.getElementById('face-panel');
-    if (!bPanel || !fPanel) return;
-
-    Object.keys(menuData).forEach(id => {
-        const item = menuData[id];
-        if (item.imgs) {
-            if (item.imgs.body) createImg(bPanel, item.imgs.body);
-            if (item.imgs.face) createImg(fPanel, item.imgs.face);
-        }
-    });
-}
-
-function createImg(parent, name) {
-    const layerId = `img-${name}`;
-    if (document.getElementById(layerId)) return;
-    const img = document.createElement('img');
-    img.src = `${name}.png`;
-    img.id = layerId;
-    img.className = 'layer-part';
-    img.onerror = () => img.style.display = 'none';
-    parent.appendChild(img);
-}
-
-function changeTab(tab) { currentTab = tab; render(); }
-
-function toggleItem(id) {
-    if (selected.has(id)) selected.delete(id); else selected.add(id);
-    checkSuggestion();
-    render();
-}
-
-function render() {
-    const area = document.getElementById('menu-area');
-    if (!area) return;
-    area.innerHTML = '';
-
-    // タブ
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(`tab-${currentTab}`).classList.add('active');
-
-    // イラスト再点灯
-    document.querySelectorAll('.layer-part').forEach(img => img.classList.remove('active'));
-    
-    let disabledIds = new Set();
-    const collectDeep = (id) => { if (setIncludes[id]) setIncludes[id].forEach(sub => { disabledIds.add(sub); collectDeep(sub); }); };
-    
-    selected.forEach(id => {
-        collectDeep(id);
-        const item = menuData[id];
-        if (item.imgs) {
-            if (item.imgs.body) { let i = document.getElementById(`img-${item.imgs.body}`); if(i) i.classList.add('active'); }
-            if (item.imgs.face) { let i = document.getElementById(`img-${item.imgs.face}`); if(i) i.classList.add('active'); }
-        }
-    });
-
-    let lastSub = "";
-    Object.keys(menuData).filter(id => menuData[id].cat === currentTab).forEach(id => {
-        const item = menuData[id];
-        if (currentTab === 'part' && item.subCat !== lastSub) {
-            lastSub = item.subCat;
-            const h = document.createElement('div'); h.className = 'subcat-header'; h.innerText = lastSub; area.appendChild(h);
-        }
-        const isSel = selected.has(id);
-        const isDis = disabledIds.has(id);
-        const div = document.createElement('div');
-        div.className = `item ${isSel ? 'selected' : ''} ${isDis ? 'disabled' : ''}`;
-        div.onclick = () => !isDis && toggleItem(id);
-        div.innerHTML = `<input type="checkbox" ${isSel ? 'checked' : ''} ${isDis ? 'disabled' : ''}>
-            <div class="item-info"><span class="item-name">${item.label}</span>
-            ${item.sub ? `<span class="item-sub">${item.sub}</span>` : ''}</div>
-            <div class="item-price">¥${item.price.toLocaleString()}</div>`;
-        area.appendChild(div);
-    });
-    updateTotal();
-}
-
-function updateTotal() {
-    let p = 0, t = 0, f = false;
-    selected.forEach(id => {
-        const item = menuData[id]; p += item.price; t += item.time; if(item.hasFace) f = true;
-    });
-    if (selected.size > 0) {
-        if (userType === 'new') t += 90; else if (f) t += 20;
-    }
-    const rounded = Math.ceil(t / 30) * 30;
-    const slot = `${Math.floor(rounded / 60)}.${(rounded % 60) === 30 ? '5' : '0'}`;
-    document.getElementById('total-price').innerText = `¥${p.toLocaleString()}`;
-    document.getElementById('total-time-slot').innerText = `${slot} 時間枠`;
-}
-
-function checkSuggestion() {
-    suggestionId = null;
-    document.getElementById('suggestion-box').style.display = 'none';
-    const priority = ['set_fullbody_all', 'set_fullface_eyebrow', 'set_upperbody', 'set_lowerbody', 'set_fullface_vio', 'set_chest_abdomen'];
-    
-    for (const sid of priority) {
-        if (setIncludes[sid] && setIncludes[sid].every(p => selected.has(p)) && !selected.has(sid)) {
-            suggestionId = sid;
-            document.getElementById('suggestion-text').innerText = `「${menuData[sid].label}」へ切り替えると、よりお得になります。`;
-            document.getElementById('suggestion-box').style.display = 'block';
-            return;
-        }
-    }
-}
-
-function applyOptimalSet() {
-    if (!suggestionId) return;
-    setIncludes[suggestionId].forEach(p => selected.delete(p));
-    selected.add(suggestionId);
-    hideSuggestion();
-    render();
-}
-
-function hideSuggestion() { document.getElementById('suggestion-box').style.display = 'none'; }
-
-function copyResult() {
-    if (selected.size === 0) return alert("選択してください");
-    const slot = document.getElementById('total-time-slot').innerText;
-    let txt = `【NARX脱毛予約】\n区分：${userType === 'new' ? '新規' : '会員'}\nメニュー：\n`;
-    selected.forEach(id => txt += `・${menuData[id].label}\n`);
-    txt += `予約枠目安：${slot}`;
-    navigator.clipboard.writeText(txt).then(() => alert("コピーしました。"));
-}
-</script>
-</body>
-</html>
+    set_fullbody_all:['set_fullbody_noface', 'set_upperbody', 'set_lowerbody', 'set_fullface', 'set_vio', 'set_fullface_vio', 'set_fullface_eyebrow', 'set_chest_abdomen', 'set_arms_legs', 'set_arms', 'set_legs', 'part_nipple'],
+    set_fullbody_noface:['set_lowerbody', 'set_vio', 'set_arms', 'set_legs', 'part_nape', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_back_upper', 'part_back_lower', 'part_but
