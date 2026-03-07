@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.12.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.13.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
@@ -47,7 +47,7 @@
     .item-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-top: 2px; }
     .item-sub { display: block; font-size: 0.7rem; color: #888; margin-top: 5px; line-height: 1.4; }
 
-    /* 提案ポップアップ（見やすくリッチに改善） */
+    /* 提案ポップアップ */
     #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: linear-gradient(135deg, #f7d05e 0%, #d4af37 100%); color: #111; padding: 20px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid #fff; }
     .sug-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 6px; }
     .sug-price-badge { background: #111; color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 1rem; }
@@ -123,8 +123,10 @@ var selected =[];
 var suggestionId = null;
 var itemLeaves = {}; 
 
+// 【新機能】断られた提案IDを記憶する配列（二度と出さないため）
+var dismissedSuggestions =[];
+
 var menuData = {
-    // === セットメニュー ===
     set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '全顔 ＋ 上半身 ＋ 下半身 ＋ VIO ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
     set_fullbody_noface: { price: 41800, time: 200, label: '顔なし全身', cat: 'set', sub: '脇・うなじ・背中・胸・腹・腕全体・VIO・脚全体', imgs: { body: 'set_fullbody_noface' }, hasFace: false },
     set_upperbody: { price: 30800, time: 170, label: '上半身セット', cat: 'set', sub: '全顔・脇・胸・腹・うなじ・背中・腕全体', imgs: { body: 'set_upperbody_body', face: 'set_upperbody_face' }, hasFace: true },
@@ -140,7 +142,6 @@ var menuData = {
     set_legs: { price: 17600, time: 65, label: '両足セット', cat: 'set', sub: '膝上・下・足の甲指', imgs: { body: 'set_legs' }, hasFace: false },
     set_ear_whole: { price: 8800, time: 25, label: '耳全体セット', cat: 'set', sub: '耳珠 ＋ 耳たぶ', imgs: { face: 'set_ear_whole' }, hasFace: true, isSpecial: true },
 
-    // === パーツメニュー ===
     part_nose_under: { price: 4400, time: 16, label: '鼻下', cat: 'part', subCat: '顔', imgs: { face: 'part_nose_under' }, hasFace: true },
     part_mouth_under: { price: 4400, time: 16, label: '口下', cat: 'part', subCat: '顔', imgs: { face: 'part_mouth_under' }, hasFace: true },
     part_cheek: { price: 4400, time: 16, label: '頬', cat: 'part', subCat: '顔', imgs: { face: 'part_cheek' }, hasFace: true },
@@ -321,7 +322,6 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = slot + " 時間枠";
 }
 
-// 【指定セットの「単品合計額」を計算する関数】
 function getOriginalPrice(setId) {
     var leaves = itemLeaves[setId];
     var total = 0;
@@ -349,11 +349,15 @@ function checkSuggestion() {
         }
     });
 
-    if (selectedLeaves.length === 0) return;
+    // 【新機能】パーツが1つしか選ばれていない場合は提案しない（ウザさ軽減）
+    if (selectedLeaves.length < 2) return;
 
     var candidates =[];
     Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
         if (selected.indexOf(sid) !== -1) return;
+        // 【新機能】「今はしない」と断られた提案は候補から除外する（ウザさ軽減）
+        if (dismissedSuggestions.indexOf(sid) !== -1) return;
+
         var candidateLeaves = itemLeaves[sid];
         if (!candidateLeaves) return;
 
@@ -375,35 +379,27 @@ function checkSuggestion() {
     var bestSuggestion = null;
     var suggestionMsg = "";
 
-    // 1: 安くなる提案
     if (cheaperCandidates.length > 0) {
         cheaperCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
         bestSuggestion = cheaperCandidates[0];
         suggestionMsg = "「<strong>" + menuData[bestSuggestion].label + "</strong>」へ切り替えると、<span class='sug-price-badge'>¥" + menuData[bestSuggestion].price.toLocaleString() + "</span> になりお得です。";
     } 
-    // 2: 同額の提案
     else if (samePriceCandidates.length > 0) {
         samePriceCandidates.sort(function(a, b) { return itemLeaves[b].length - itemLeaves[a].length; });
         bestSuggestion = samePriceCandidates[0];
         suggestionMsg = "同じ金額で「<strong>" + menuData[bestSuggestion].label + "</strong>」に切り替え可能ですがいかがですか？";
     } 
-    // 3: 賢いアップセル提案（追加1万円以内、または元の1.5倍以内の金額増に絞る）
     else if (upsellCandidates.length > 0) {
         upsellCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
         var upSug = upsellCandidates[0];
         var diff = menuData[upSug].price - currentPrice;
         
-        // 提案条件：追加金額が 10,000円以内、または現在の合計額の1.5倍以内
         if (diff <= Math.max(10000, currentPrice * 1.5)) {
             bestSuggestion = upSug;
-            
-            // お得額の計算
             var originalPrice = getOriginalPrice(upSug);
             var savedAmount = originalPrice - menuData[upSug].price;
 
             suggestionMsg = "あと <span class='sug-price-badge'>+¥" + diff.toLocaleString() + "</span> で、さらに部位が充実した「<strong>" + menuData[bestSuggestion].label + "</strong>」にアップグレードできます！";
-            
-            // 割引額が2,000円以上ある場合は、キラーフレーズを追加
             if (savedAmount >= 2000) {
                 suggestionMsg += "<br><span class='sug-discount'>※パーツを別々に追加するより ¥" + savedAmount.toLocaleString() + " もお得です！</span>";
             }
@@ -417,14 +413,23 @@ function checkSuggestion() {
     }
 }
 
+// 適用ボタンを押したときの処理
 function applyOptimalSet() {
     if (!suggestionId) return;
     selected = [suggestionId];
-    hideSuggestion();
+    suggestionId = null; // 適用後はリセット
+    document.getElementById('suggestion-box').style.display = 'none';
     render();
 }
 
-function hideSuggestion() { document.getElementById('suggestion-box').style.display = 'none'; }
+// 【新機能】「今はしない」を押したときの処理
+function hideSuggestion() { 
+    if (suggestionId) {
+        // 断られた提案を記憶リストにブチ込む
+        dismissedSuggestions.push(suggestionId);
+    }
+    document.getElementById('suggestion-box').style.display = 'none'; 
+}
 
 function copyResult() {
     if (selected.length === 0) return alert("選択してください");
