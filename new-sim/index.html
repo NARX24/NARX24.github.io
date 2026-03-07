@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.17.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.18.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
@@ -50,15 +50,30 @@
     /* 中央ポップアップ */
     #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: linear-gradient(135deg, #f7d05e 0%, #d4af37 100%); color: #111; padding: 20px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid #fff; }
     .sug-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 6px; }
-    .sug-price-badge { background: #111; color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 1rem; }
-    .sug-discount { display: inline-block; background: #c00; color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; margin-top: 6px; font-weight: bold; }
+    
+    /* 差額をわかりやすく表示するボックス */
+    .sug-price-box { background: rgba(255, 255, 255, 0.4); padding: 12px; border-radius: 8px; text-align: center; margin: 12px 0; font-size: 0.95rem; border: 1px dashed rgba(0,0,0,0.3); }
+    .sug-discount { display: inline-block; background: #c00; color: #fff; font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; margin-top: 8px; font-weight: bold; }
 
-    /* コンシェルジュ待機アイコン＆吹き出し */
-    #concierge-wrapper { display:none; position: fixed; bottom: 85px; right: 20px; z-index: 1000; align-items: flex-end; flex-direction: column; }
-    #concierge-bubble { display:none; background: #fff; color: #111; padding: 12px 16px; border-radius: 12px 12px 0 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.3s ease; position:relative; line-height: 1.5; white-space: nowrap; }
-    .bubble-tail { position: absolute; bottom: -8px; right: 15px; width: 0; height: 0; border-left: 10px solid transparent; border-top: 10px solid #fff; }
-    .concierge-icon { width: 55px; height: 55px; background: #111; border: 2px solid var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.8); transition: transform 0.2s; }
+    /* コンシェルジュ待機アイコン＆吹き出し（中央配置） */
+    #concierge-wrapper { display: flex; position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 1000; align-items: center; flex-direction: column; }
+    #concierge-bubble { display:none; background: #fff; color: #111; padding: 12px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.3s ease; position:relative; line-height: 1.5; white-space: nowrap; text-align: center; }
+    .bubble-tail { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid #fff; }
+    
+    .concierge-icon { width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.8); transition: transform 0.2s, background 0.3s, border 0.3s; }
     .concierge-icon:active { transform: scale(0.9); }
+    
+    /* ON状態（金背景×黒アイコン） */
+    .concierge-icon.on { background: var(--gold); border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(212,175,55,0.5); }
+    .concierge-icon.on svg .skin, .concierge-icon.on svg .suit { fill: #111; }
+    .concierge-icon.on svg .line { stroke: var(--gold); }
+    .concierge-icon.on svg .btn { fill: var(--gold); }
+
+    /* OFF状態（黒背景×金アイコン・太枠） */
+    .concierge-icon.off { background: #111; border: 3px solid var(--gold); }
+    .concierge-icon.off svg .skin, .concierge-icon.off svg .suit { fill: var(--gold); }
+    .concierge-icon.off svg .line { stroke: #111; }
+    .concierge-icon.off svg .btn { fill: #111; }
 
     /* 最後の最終確認モーダル */
     #final-confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100000; display: none; justify-content: center; align-items: center; }
@@ -107,33 +122,33 @@
     <div id="menu-area"></div>
 </div>
 
-<!-- コンシェルジュ（待機アイコン） -->
+<!-- コンシェルジュ（中央配置・トグル式） -->
 <div id="concierge-wrapper">
     <div id="concierge-bubble">
         <div class="bubble-tail"></div>
         <span id="concierge-msg"></span>
     </div>
-    <!-- ご指定のイメージに合わせたラグジュアリーなSVGアイコン -->
-    <div class="concierge-icon" onclick="checkSuggestion(true)">
+    <!-- 初期状態はON（onクラス） -->
+    <div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()">
         <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
-            <path d="M30 20 h40 v12 h-40 z" fill="#d4af37"/>
-            <path d="M22 32 h56 v4 h-56 z" fill="#d4af37"/>
-            <path d="M34 36 v10 c0 9 7 16 16 16 c9 0 16 -7 16 -16 v-10 z" fill="#d4af37"/>
-            <circle cx="30" cy="45" r="4" fill="#d4af37"/>
-            <circle cx="70" cy="45" r="4" fill="#d4af37"/>
-            <path d="M34 66 l-20 16 v18 h72 v-18 l-20 -16 z" fill="#d4af37"/>
-            <path d="M34 66 L50 82 L66 66" stroke="#111" stroke-width="4" fill="none"/>
-            <line x1="50" y1="82" x2="50" y2="100" stroke="#111" stroke-width="4"/>
-            <line x1="68" y1="80" x2="78" y2="80" stroke="#111" stroke-width="3"/>
-            <circle cx="44" cy="88" r="2" fill="#111"/>
-            <circle cx="44" cy="96" r="2" fill="#111"/>
+            <path class="suit" d="M30 20 h40 v12 h-40 z"/>
+            <path class="suit" d="M22 32 h56 v4 h-56 z"/>
+            <path class="skin" d="M34 36 v10 c0 9 7 16 16 16 c9 0 16 -7 16 -16 v-10 z"/>
+            <circle class="skin" cx="30" cy="45" r="4"/>
+            <circle class="skin" cx="70" cy="45" r="4"/>
+            <path class="suit" d="M34 66 l-20 16 v18 h72 v-18 l-20 -16 z"/>
+            <path class="line" d="M34 66 L50 82 L66 66" stroke-width="4" fill="none"/>
+            <line class="line" x1="50" y1="82" x2="50" y2="100" stroke-width="4"/>
+            <line class="line" x1="68" y1="80" x2="78" y2="80" stroke-width="3"/>
+            <circle class="btn" cx="44" cy="88" r="2"/>
+            <circle class="btn" cx="44" cy="96" r="2"/>
         </svg>
     </div>
 </div>
 
 <div id="suggestion-box">
     <div class="sug-title">👑 AIコンシェルジュからのご提案</div>
-    <div id="suggestion-text" style="font-size: 0.85rem; line-height: 1.6; margin-bottom: 15px;"></div>
+    <div id="suggestion-text" style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 15px;"></div>
     <div style="display: flex; gap: 10px;">
         <button onclick="applyOptimalSet()" style="background: var(--black); color: var(--gold); border: 1px solid var(--black); padding: 12px 20px; border-radius: 6px; font-weight: bold; flex: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">変更する</button>
         <button onclick="hideSuggestion()" style="background: transparent; color: #333; border: none; font-size: 0.8rem; flex: 1; font-weight: bold;">今はしない</button>
@@ -170,7 +185,8 @@ var itemLeaves = {};
 var dismissedSuggestions =[];
 var lastToggledItem = null;
 
-// 【新機能】ウザさ防止のためのキャンセル回数記録
+// 【コンシェルジュ状態管理】
+var isConciergeON = true; 
 var cancelCount = 0;
 var bubbleTimer = null;
 
@@ -392,6 +408,29 @@ function getOriginalPrice(setId) {
     return total;
 }
 
+// 【アイコンのON/OFF切り替え】
+function toggleConcierge(forceState) {
+    if (typeof forceState !== 'undefined') {
+        isConciergeON = forceState;
+    } else {
+        isConciergeON = !isConciergeON; // トグル
+        if (isConciergeON) {
+            cancelCount = 0; // ONにしたら回数リセット
+            showConciergeBubble("コンシェルジュをONにしました！<br>最適なプランをご提案します。");
+            checkSuggestion(true); // 直ちに判定
+        } else {
+            showConciergeBubble("コンシェルジュを待機させました。<br>（アイコンタップでONになります）");
+            document.getElementById('suggestion-box').style.display = 'none';
+        }
+    }
+    var icon = document.getElementById('concierge-icon');
+    if (isConciergeON) {
+        icon.className = 'concierge-icon on';
+    } else {
+        icon.className = 'concierge-icon off';
+    }
+}
+
 // 【コンシェルジュAI 分析ロジック】
 function analyzeSuggestions(isManual) {
     var selectedLeaves =[];
@@ -409,7 +448,6 @@ function analyzeSuggestions(isManual) {
 
     Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
         if (selected.indexOf(sid) !== -1) return;
-        // 手動呼び出し(isManual)の時は、一度断られたものも再評価する
         if (!isManual && dismissedSuggestions.indexOf(sid) !== -1) return;
 
         var candidateLeaves = itemLeaves[sid];
@@ -458,7 +496,7 @@ function analyzeSuggestions(isManual) {
             }
         });
 
-        // 【修正】セット内に含まれたパーツが2つ以上選ばれた時のみ作動
+        // セット内に含まれるパーツが「2つ以上」選ばれた場合のみ作動
         if (intersectingItems.length >= 2 && isCovered) {
             var oldPrice = 0;
             intersectingItems.forEach(function(itemId) { oldPrice += menuData[itemId].price; });
@@ -482,7 +520,7 @@ function analyzeSuggestions(isManual) {
                 simData.type = 'samePrice';
                 samePriceCandidates.push(simData);
             } else if (diffPrice > 0 && addedLeavesCount > 0) {
-                // 【修正】追加金額が10,000円以内
+                // 【修正】追加金額の上限を 10,000円以内 に変更
                 if (includesLastToggled && diffPrice <= 10000) {
                     simData.type = 'upsell';
                     upsellCandidates.push(simData);
@@ -516,32 +554,48 @@ function analyzeSuggestions(isManual) {
 // 【表示制御ロジック】
 function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').style.display = 'none';
+    
+    // コンシェルジュがOFFなら自動提案はしない
+    if (!isConciergeON && !isManual) return;
 
     var best = analyzeSuggestions(isManual);
 
     if (!best) {
-        if (isManual) showConciergeBubble("現在、最適なプランのご提案はございません。<br>引き続きメニューをお選びください。");
+        // アイコンを手動タップしたが何も提案がない場合
+        if (isManual && isConciergeON) showConciergeBubble("現在、最適なプランのご提案はございません。<br>引き続きメニューをお選びください。");
         suggestionId = null;
         return;
     }
 
-    // 自動呼び出しの時、すでに2回断られていたらポップアップを出さない
-    if (!isManual && cancelCount >= 2) return;
-
     suggestionId = best.sid;
     suggestionReplaceItems = best.intersectingItems;
 
+    // 現在の合計金額と新しい合計金額の計算
+    var currentTotalPrice = 0;
+    selected.forEach(function(id) { currentTotalPrice += menuData[id].price; });
+    var newTotalPrice = currentTotalPrice - best.oldPrice + menuData[best.sid].price;
+
     var suggestionMsg = "";
+    var setName = menuData[best.sid].label;
+
     if (best.type === 'cheaper') {
-        suggestionMsg = "「<strong>" + menuData[best.sid].label + "</strong>」へ切り替えると、<span class='sug-price-badge'>¥" + menuData[best.sid].price.toLocaleString() + "</span> になりお得です。";
+        var savingAmount = currentTotalPrice - newTotalPrice;
+        suggestionMsg = "「<strong>" + setName + "</strong>」へ切り替えると…<br>";
+        suggestionMsg += "<div class='sug-price-box'>合計：¥" + currentTotalPrice.toLocaleString() + " <span style='color:#c00; margin:0 5px;'>→</span> <strong>¥" + newTotalPrice.toLocaleString() + "</strong></div>";
+        suggestionMsg += "<span class='sug-discount'>✨ ¥" + savingAmount.toLocaleString() + " お得になります！</span>";
+    
     } else if (best.type === 'samePrice') {
-        suggestionMsg = "同じ金額で「<strong>" + menuData[best.sid].label + "</strong>」に切り替え可能ですがいかがですか？";
+        suggestionMsg = "同じ合計金額（<strong style='font-size:1.1rem;'>¥" + currentTotalPrice.toLocaleString() + "</strong>）のままで、さらに部位が多い「<strong>" + setName + "</strong>」に切り替え可能です！";
+    
     } else if (best.type === 'upsell') {
+        var addAmount = newTotalPrice - currentTotalPrice;
         var originalPrice = getOriginalPrice(best.sid);
-        var savedAmount = originalPrice - menuData[best.sid].price;
-        suggestionMsg = "あと <span class='sug-price-badge'>+¥" + best.diffPrice.toLocaleString() + "</span> で、さらに部位が充実した「<strong>" + menuData[best.sid].label + "</strong>」にアップグレードできます！";
-        if (savedAmount >= 2000) {
-            suggestionMsg += "<br><span class='sug-discount'>※パーツを別々に追加するより ¥" + savedAmount.toLocaleString() + " もお得です！</span>";
+        var theoreticalSaving = originalPrice - menuData[best.sid].price;
+        
+        suggestionMsg = "「<strong>" + setName + "</strong>」へアップグレードしませんか？<br>";
+        suggestionMsg += "<div class='sug-price-box'>あと <strong style='font-size:1.1rem; color:var(--black);'>+¥" + addAmount.toLocaleString() + "</strong> （合計: ¥" + newTotalPrice.toLocaleString() + "）</div>";
+        if (theoreticalSaving >= 2000) {
+            suggestionMsg += "<span class='sug-discount'>※別々に追加するより ¥" + theoreticalSaving.toLocaleString() + " もお得です！</span>";
         }
     }
 
@@ -571,9 +625,9 @@ function hideSuggestion() {
     if (suggestionId) {
         dismissedSuggestions.push(suggestionId);
         cancelCount++;
-        // 2回断られたら待機モードへ
-        if (cancelCount === 2) {
-            document.getElementById('concierge-wrapper').style.display = 'flex';
+        // 2回断られたら待機モード（OFF）へ移行
+        if (cancelCount >= 2 && isConciergeON) {
+            toggleConcierge(false);
             showConciergeBubble("いつでも待機していますので、<br>必要な時に呼んでくださいね♪");
         }
     }
@@ -591,23 +645,28 @@ function showConciergeBubble(msg) {
     bubbleTimer = setTimeout(function() {
         bubble.style.opacity = '0';
         setTimeout(function() { bubble.style.display = 'none'; }, 300);
-    }, 5000); // 5秒後に消える
+    }, 5000); 
 }
 
 // 【最終確認＆コピー処理】
 function copyResult() {
     if (selected.length === 0) return alert("選択してください");
 
-    // 待機モードに入っている場合、コピー直前で「安くなる・同額の提案」がないか最終確認
-    if (cancelCount >= 2) {
+    // 待機モード（OFF状態）でコピーを押した時、見逃している「お得な提案」があれば最終確認する
+    if (!isConciergeON) {
         var best = analyzeSuggestions(true); // 手動モード(dismissed無視)で解析
         if (best && (best.type === 'cheaper' || best.type === 'samePrice')) {
             suggestionId = best.sid;
             suggestionReplaceItems = best.intersectingItems;
             
+            var currentTotalPrice = 0;
+            selected.forEach(function(id) { currentTotalPrice += menuData[id].price; });
+            var newTotalPrice = currentTotalPrice - best.oldPrice + menuData[best.sid].price;
+
             var msg = "<strong>【最後にご確認です】</strong><br><br>";
             if (best.type === 'cheaper') {
-                msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + Math.abs(best.diffPrice).toLocaleString() + "</span> お安くなります！";
+                var savingAmount = currentTotalPrice - newTotalPrice;
+                msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + savingAmount.toLocaleString() + "</span> お安くなります！";
             } else {
                 msg += "同じ金額でさらに部位が多い「<strong>" + menuData[best.sid].label + "</strong>」に変更できます！";
             }
@@ -625,24 +684,8 @@ function copyResult() {
 function acceptFinalConfirm() {
     document.getElementById('final-confirm-modal').style.display = 'none';
     applyOptimalSet();
-    setTimeout(doActualCopy, 200); // UI反映を少し待ってからコピー実行
+    setTimeout(doActualCopy, 200); 
 }
 
 function rejectFinalConfirm() {
-    document.getElementById('final-confirm-modal').style.display = 'none';
-    doActualCopy();
-}
-
-function doActualCopy() {
-    var slot = document.getElementById('total-time-slot').innerText;
-    var priceStr = document.getElementById('total-price').innerText;
-    var txt = "【NARX脱毛予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
-    selected.forEach(function(id) { txt += "・" + menuData[id].label + "\n"; });
-    txt += "──────────\n";
-    txt += "合計金額：" + priceStr + "\n";
-    txt += "予約枠目安：" + slot;
-    navigator.clipboard.writeText(txt).then(function() { alert("コピーしました。"); });
-}
-</script>
-</body>
-</html>
+    docume
