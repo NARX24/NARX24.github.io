@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.14.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.15.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
@@ -121,9 +121,12 @@ var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
 var suggestionId = null;
-var suggestionReplaceItems =[]; // 【新機能】置換対象のアイテムを記憶
+var suggestionReplaceItems =[]; 
 var itemLeaves = {}; 
 var dismissedSuggestions =[];
+
+// 【新機能】コンテキストを認識するための記憶
+var lastToggledItem = null;
 
 var menuData = {
     set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '全顔 ＋ 上半身 ＋ 下半身 ＋ VIO ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
@@ -244,10 +247,16 @@ function createImg(parent, name) {
 
 function changeTab(tab) { currentTab = tab; render(); }
 
+// 【修正】直近で選んだアイテムを記憶
 function toggleItem(id) {
     var idx = selected.indexOf(id);
-    if (idx !== -1) selected.splice(idx, 1);
-    else selected.push(id);
+    if (idx !== -1) {
+        selected.splice(idx, 1);
+        lastToggledItem = null; // 削除時はクリア
+    } else {
+        selected.push(id);
+        lastToggledItem = id; // ここで「最後にタップした部位」を記憶
+    }
     checkSuggestion();
     render();
 }
@@ -332,7 +341,7 @@ function getOriginalPrice(setId) {
     return total;
 }
 
-// 【超進化】部分最適化コンシェルジュAI
+// 【コンテキスト認識AI】
 function checkSuggestion() {
     suggestionId = null;
     suggestionReplaceItems =[];
@@ -347,14 +356,12 @@ function checkSuggestion() {
         }
     });
 
-    // 選択部位が少ない時は提案しない（ウザさ軽減）
     if (selectedLeaves.length < 2) return;
 
     var cheaperCandidates = [];
-    var samePriceCandidates = [];
-    var upsellCandidates =[];
+    var samePriceCandidates =[];
+    var upsellCandidates = [];
 
-    // すべてのセットを評価し、「今選んでいる部位」と被る部分だけを差し替えるシミュレーションを行う
     Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
         if (selected.indexOf(sid) !== -1) return;
         if (dismissedSuggestions.indexOf(sid) !== -1) return;
@@ -362,9 +369,22 @@ function checkSuggestion() {
         var candidateLeaves = itemLeaves[sid];
         if (!candidateLeaves) return;
 
+        // 直近でタップしたアイテム（lastToggledItem）が、このセットに含まれるかをチェック
+        var includesLastToggled = false;
+        if (lastToggledItem && itemLeaves[lastToggledItem]) {
+            var lastLeaves = itemLeaves[lastToggledItem];
+            includesLastToggled = true;
+            for (var k = 0; k < lastLeaves.length; k++) {
+                if (candidateLeaves.indexOf(lastLeaves[k]) === -1) {
+                    includesLastToggled = false;
+                    break;
+                }
+            }
+        }
+
         var intersectingItems =[];
         var intersectingLeaves =[];
-        var isCovered = true; // 被っている部位が「すべて」セットに含まれるか
+        var isCovered = true; 
 
         selected.forEach(function(selId) {
             var selLeaves = itemLeaves[selId];
@@ -393,7 +413,6 @@ function checkSuggestion() {
             }
         });
 
-        // 重複するアイテムがあり、かつ、それがセット内に完全に包含される場合のみシミュレーション成立
         if (intersectingItems.length > 0 && isCovered) {
             var oldPrice = 0;
             intersectingItems.forEach(function(itemId) { oldPrice += menuData[itemId].price; });
@@ -406,7 +425,8 @@ function checkSuggestion() {
                 diffPrice: diffPrice,
                 addedLeavesCount: addedLeavesCount,
                 intersectingItems: intersectingItems,
-                oldPrice: oldPrice
+                oldPrice: oldPrice,
+                includesLastToggled: includesLastToggled // 文脈の記憶
             };
 
             if (diffPrice < 0) {
@@ -414,8 +434,9 @@ function checkSuggestion() {
             } else if (diffPrice === 0 && addedLeavesCount > 0) {
                 samePriceCandidates.push(simData);
             } else if (diffPrice > 0 && addedLeavesCount > 0) {
-                // アップセル条件：追加1万円以内、または置き換え対象額の1.5倍以内
-                if (diffPrice <= Math.max(10000, oldPrice * 1.5)) {
+                // 【超重要】アップセルは「今タップした部位を拡張するセット」のみに限定！
+                // 上限も 12,000円 に引き上げ（肘上→両腕の差額11,000円を通すため）
+                if (includesLastToggled && diffPrice <= Math.max(12000, oldPrice * 1.5)) {
                     upsellCandidates.push(simData);
                 }
             }
@@ -425,16 +446,22 @@ function checkSuggestion() {
     var bestSuggestion = null;
     var suggestionMsg = "";
 
-    // 優先順位： 1.安くなる ＞ 2.同額で増える ＞ 3.少し足して増える
     if (cheaperCandidates.length > 0) {
-        cheaperCandidates.sort(function(a, b) { return a.diffPrice - b.diffPrice; });
+        // 安くなる提案が複数ある場合は、直近の操作に関連するものを優先
+        cheaperCandidates.sort(function(a, b) { 
+            if (a.includesLastToggled !== b.includesLastToggled) return b.includesLastToggled ? 1 : -1;
+            return a.diffPrice - b.diffPrice; 
+        });
         var best = cheaperCandidates[0];
         bestSuggestion = best.sid;
         suggestionReplaceItems = best.intersectingItems;
         suggestionMsg = "「<strong>" + menuData[bestSuggestion].label + "</strong>」へ切り替えると、<span class='sug-price-badge'>¥" + menuData[bestSuggestion].price.toLocaleString() + "</span> になりお得です。";
     } 
     else if (samePriceCandidates.length > 0) {
-        samePriceCandidates.sort(function(a, b) { return b.addedLeavesCount - a.addedLeavesCount; });
+        samePriceCandidates.sort(function(a, b) { 
+            if (a.includesLastToggled !== b.includesLastToggled) return b.includesLastToggled ? 1 : -1;
+            return b.addedLeavesCount - a.addedLeavesCount; 
+        });
         var best = samePriceCandidates[0];
         bestSuggestion = best.sid;
         suggestionReplaceItems = best.intersectingItems;
@@ -462,11 +489,9 @@ function checkSuggestion() {
     }
 }
 
-// 適用ボタンを押したときの処理（無関係なパーツを消さないための修正）
 function applyOptimalSet() {
     if (!suggestionId) return;
     
-    // 置き換え対象のアイテムだけを選択解除
     if (suggestionReplaceItems && suggestionReplaceItems.length > 0) {
         suggestionReplaceItems.forEach(function(itemId) {
             var idx = selected.indexOf(itemId);
@@ -474,7 +499,7 @@ function applyOptimalSet() {
         });
     }
 
-    selected.push(suggestionId); // 新しいセットを追加
+    selected.push(suggestionId);
     
     suggestionId = null;
     suggestionReplaceItems =[];
