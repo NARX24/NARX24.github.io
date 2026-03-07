@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.13.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.14.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
@@ -121,9 +121,8 @@ var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
 var suggestionId = null;
+var suggestionReplaceItems =[]; // 【新機能】置換対象のアイテムを記憶
 var itemLeaves = {}; 
-
-// 【新機能】断られた提案IDを記憶する配列（二度と出さないため）
 var dismissedSuggestions =[];
 
 var menuData = {
@@ -333,12 +332,11 @@ function getOriginalPrice(setId) {
     return total;
 }
 
+// 【超進化】部分最適化コンシェルジュAI
 function checkSuggestion() {
     suggestionId = null;
+    suggestionReplaceItems =[];
     document.getElementById('suggestion-box').style.display = 'none';
-
-    var currentPrice = 0;
-    selected.forEach(function(id) { currentPrice += menuData[id].price; });
 
     var selectedLeaves =[];
     selected.forEach(function(id) {
@@ -349,60 +347,111 @@ function checkSuggestion() {
         }
     });
 
-    // 【新機能】パーツが1つしか選ばれていない場合は提案しない（ウザさ軽減）
+    // 選択部位が少ない時は提案しない（ウザさ軽減）
     if (selectedLeaves.length < 2) return;
 
-    var candidates =[];
+    var cheaperCandidates = [];
+    var samePriceCandidates = [];
+    var upsellCandidates =[];
+
+    // すべてのセットを評価し、「今選んでいる部位」と被る部分だけを差し替えるシミュレーションを行う
     Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
         if (selected.indexOf(sid) !== -1) return;
-        // 【新機能】「今はしない」と断られた提案は候補から除外する（ウザさ軽減）
         if (dismissedSuggestions.indexOf(sid) !== -1) return;
 
         var candidateLeaves = itemLeaves[sid];
         if (!candidateLeaves) return;
 
-        var isSubset = true;
-        for (var j = 0; j < selectedLeaves.length; j++) {
-            if (candidateLeaves.indexOf(selectedLeaves[j]) === -1) {
-                isSubset = false; break;
+        var intersectingItems =[];
+        var intersectingLeaves =[];
+        var isCovered = true; // 被っている部位が「すべて」セットに含まれるか
+
+        selected.forEach(function(selId) {
+            var selLeaves = itemLeaves[selId];
+            if (!selLeaves) return;
+
+            var hasIntersection = false;
+            var fullyContained = true;
+
+            selLeaves.forEach(function(leaf) {
+                if (candidateLeaves.indexOf(leaf) !== -1) {
+                    hasIntersection = true;
+                } else {
+                    fullyContained = false;
+                }
+            });
+
+            if (hasIntersection) {
+                intersectingItems.push(selId);
+                if (!fullyContained) {
+                    isCovered = false;
+                } else {
+                    selLeaves.forEach(function(leaf) {
+                        if (intersectingLeaves.indexOf(leaf) === -1) intersectingLeaves.push(leaf);
+                    });
+                }
+            }
+        });
+
+        // 重複するアイテムがあり、かつ、それがセット内に完全に包含される場合のみシミュレーション成立
+        if (intersectingItems.length > 0 && isCovered) {
+            var oldPrice = 0;
+            intersectingItems.forEach(function(itemId) { oldPrice += menuData[itemId].price; });
+            var newPrice = menuData[sid].price;
+            var diffPrice = newPrice - oldPrice;
+            var addedLeavesCount = candidateLeaves.length - intersectingLeaves.length;
+
+            var simData = {
+                sid: sid,
+                diffPrice: diffPrice,
+                addedLeavesCount: addedLeavesCount,
+                intersectingItems: intersectingItems,
+                oldPrice: oldPrice
+            };
+
+            if (diffPrice < 0) {
+                cheaperCandidates.push(simData);
+            } else if (diffPrice === 0 && addedLeavesCount > 0) {
+                samePriceCandidates.push(simData);
+            } else if (diffPrice > 0 && addedLeavesCount > 0) {
+                // アップセル条件：追加1万円以内、または置き換え対象額の1.5倍以内
+                if (diffPrice <= Math.max(10000, oldPrice * 1.5)) {
+                    upsellCandidates.push(simData);
+                }
             }
         }
-        if (isSubset) candidates.push(sid);
     });
-
-    if (candidates.length === 0) return;
-
-    var cheaperCandidates = candidates.filter(function(sid) { return menuData[sid].price < currentPrice; });
-    var samePriceCandidates = candidates.filter(function(sid) { return menuData[sid].price === currentPrice && itemLeaves[sid].length > selectedLeaves.length; });
-    var upsellCandidates = candidates.filter(function(sid) { return menuData[sid].price > currentPrice && itemLeaves[sid].length > selectedLeaves.length; });
 
     var bestSuggestion = null;
     var suggestionMsg = "";
 
+    // 優先順位： 1.安くなる ＞ 2.同額で増える ＞ 3.少し足して増える
     if (cheaperCandidates.length > 0) {
-        cheaperCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
-        bestSuggestion = cheaperCandidates[0];
+        cheaperCandidates.sort(function(a, b) { return a.diffPrice - b.diffPrice; });
+        var best = cheaperCandidates[0];
+        bestSuggestion = best.sid;
+        suggestionReplaceItems = best.intersectingItems;
         suggestionMsg = "「<strong>" + menuData[bestSuggestion].label + "</strong>」へ切り替えると、<span class='sug-price-badge'>¥" + menuData[bestSuggestion].price.toLocaleString() + "</span> になりお得です。";
     } 
     else if (samePriceCandidates.length > 0) {
-        samePriceCandidates.sort(function(a, b) { return itemLeaves[b].length - itemLeaves[a].length; });
-        bestSuggestion = samePriceCandidates[0];
+        samePriceCandidates.sort(function(a, b) { return b.addedLeavesCount - a.addedLeavesCount; });
+        var best = samePriceCandidates[0];
+        bestSuggestion = best.sid;
+        suggestionReplaceItems = best.intersectingItems;
         suggestionMsg = "同じ金額で「<strong>" + menuData[bestSuggestion].label + "</strong>」に切り替え可能ですがいかがですか？";
     } 
     else if (upsellCandidates.length > 0) {
-        upsellCandidates.sort(function(a, b) { return menuData[a].price - menuData[b].price; });
-        var upSug = upsellCandidates[0];
-        var diff = menuData[upSug].price - currentPrice;
-        
-        if (diff <= Math.max(10000, currentPrice * 1.5)) {
-            bestSuggestion = upSug;
-            var originalPrice = getOriginalPrice(upSug);
-            var savedAmount = originalPrice - menuData[upSug].price;
+        upsellCandidates.sort(function(a, b) { return a.diffPrice - b.diffPrice; });
+        var best = upsellCandidates[0];
+        bestSuggestion = best.sid;
+        suggestionReplaceItems = best.intersectingItems;
 
-            suggestionMsg = "あと <span class='sug-price-badge'>+¥" + diff.toLocaleString() + "</span> で、さらに部位が充実した「<strong>" + menuData[bestSuggestion].label + "</strong>」にアップグレードできます！";
-            if (savedAmount >= 2000) {
-                suggestionMsg += "<br><span class='sug-discount'>※パーツを別々に追加するより ¥" + savedAmount.toLocaleString() + " もお得です！</span>";
-            }
+        var originalPrice = getOriginalPrice(bestSuggestion);
+        var savedAmount = originalPrice - menuData[bestSuggestion].price;
+
+        suggestionMsg = "あと <span class='sug-price-badge'>+¥" + best.diffPrice.toLocaleString() + "</span> で、さらに部位が充実した「<strong>" + menuData[bestSuggestion].label + "</strong>」にアップグレードできます！";
+        if (savedAmount >= 2000) {
+            suggestionMsg += "<br><span class='sug-discount'>※パーツを別々に追加するより ¥" + savedAmount.toLocaleString() + " もお得です！</span>";
         }
     }
 
@@ -413,21 +462,28 @@ function checkSuggestion() {
     }
 }
 
-// 適用ボタンを押したときの処理
+// 適用ボタンを押したときの処理（無関係なパーツを消さないための修正）
 function applyOptimalSet() {
     if (!suggestionId) return;
-    selected = [suggestionId];
-    suggestionId = null; // 適用後はリセット
+    
+    // 置き換え対象のアイテムだけを選択解除
+    if (suggestionReplaceItems && suggestionReplaceItems.length > 0) {
+        suggestionReplaceItems.forEach(function(itemId) {
+            var idx = selected.indexOf(itemId);
+            if (idx !== -1) selected.splice(idx, 1);
+        });
+    }
+
+    selected.push(suggestionId); // 新しいセットを追加
+    
+    suggestionId = null;
+    suggestionReplaceItems =[];
     document.getElementById('suggestion-box').style.display = 'none';
     render();
 }
 
-// 【新機能】「今はしない」を押したときの処理
 function hideSuggestion() { 
-    if (suggestionId) {
-        // 断られた提案を記憶リストにブチ込む
-        dismissedSuggestions.push(suggestionId);
-    }
+    if (suggestionId) dismissedSuggestions.push(suggestionId);
     document.getElementById('suggestion-box').style.display = 'none'; 
 }
 
