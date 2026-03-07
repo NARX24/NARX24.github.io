@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.15.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.17.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
@@ -47,11 +47,22 @@
     .item-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-top: 2px; }
     .item-sub { display: block; font-size: 0.7rem; color: #888; margin-top: 5px; line-height: 1.4; }
 
-    /* 提案ポップアップ */
+    /* 中央ポップアップ */
     #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: linear-gradient(135deg, #f7d05e 0%, #d4af37 100%); color: #111; padding: 20px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid #fff; }
     .sug-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 6px; }
     .sug-price-badge { background: #111; color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 1rem; }
     .sug-discount { display: inline-block; background: #c00; color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; margin-top: 6px; font-weight: bold; }
+
+    /* コンシェルジュ待機アイコン＆吹き出し */
+    #concierge-wrapper { display:none; position: fixed; bottom: 85px; right: 20px; z-index: 1000; align-items: flex-end; flex-direction: column; }
+    #concierge-bubble { display:none; background: #fff; color: #111; padding: 12px 16px; border-radius: 12px 12px 0 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.3s ease; position:relative; line-height: 1.5; white-space: nowrap; }
+    .bubble-tail { position: absolute; bottom: -8px; right: 15px; width: 0; height: 0; border-left: 10px solid transparent; border-top: 10px solid #fff; }
+    .concierge-icon { width: 55px; height: 55px; background: #111; border: 2px solid var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.8); transition: transform 0.2s; }
+    .concierge-icon:active { transform: scale(0.9); }
+
+    /* 最後の最終確認モーダル */
+    #final-confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100000; display: none; justify-content: center; align-items: center; }
+    .final-modal-content { border: 1px solid var(--gold); padding: 30px 20px; width: 85%; max-width: 400px; background: var(--black); text-align: center; border-radius: 8px; }
 
     /* ボトムバー */
     .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(5, 5, 5, 0.98); border-top: 2px solid var(--gold); padding: 15px 20px; box-sizing: border-box; z-index: 100; }
@@ -96,12 +107,45 @@
     <div id="menu-area"></div>
 </div>
 
+<!-- コンシェルジュ（待機アイコン） -->
+<div id="concierge-wrapper">
+    <div id="concierge-bubble">
+        <div class="bubble-tail"></div>
+        <span id="concierge-msg"></span>
+    </div>
+    <!-- ご指定のイメージに合わせたラグジュアリーなSVGアイコン -->
+    <div class="concierge-icon" onclick="checkSuggestion(true)">
+        <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path d="M30 20 h40 v12 h-40 z" fill="#d4af37"/>
+            <path d="M22 32 h56 v4 h-56 z" fill="#d4af37"/>
+            <path d="M34 36 v10 c0 9 7 16 16 16 c9 0 16 -7 16 -16 v-10 z" fill="#d4af37"/>
+            <circle cx="30" cy="45" r="4" fill="#d4af37"/>
+            <circle cx="70" cy="45" r="4" fill="#d4af37"/>
+            <path d="M34 66 l-20 16 v18 h72 v-18 l-20 -16 z" fill="#d4af37"/>
+            <path d="M34 66 L50 82 L66 66" stroke="#111" stroke-width="4" fill="none"/>
+            <line x1="50" y1="82" x2="50" y2="100" stroke="#111" stroke-width="4"/>
+            <line x1="68" y1="80" x2="78" y2="80" stroke="#111" stroke-width="3"/>
+            <circle cx="44" cy="88" r="2" fill="#111"/>
+            <circle cx="44" cy="96" r="2" fill="#111"/>
+        </svg>
+    </div>
+</div>
+
 <div id="suggestion-box">
     <div class="sug-title">👑 AIコンシェルジュからのご提案</div>
     <div id="suggestion-text" style="font-size: 0.85rem; line-height: 1.6; margin-bottom: 15px;"></div>
     <div style="display: flex; gap: 10px;">
         <button onclick="applyOptimalSet()" style="background: var(--black); color: var(--gold); border: 1px solid var(--black); padding: 12px 20px; border-radius: 6px; font-weight: bold; flex: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">変更する</button>
         <button onclick="hideSuggestion()" style="background: transparent; color: #333; border: none; font-size: 0.8rem; flex: 1; font-weight: bold;">今はしない</button>
+    </div>
+</div>
+
+<div id="final-confirm-modal">
+    <div class="final-modal-content">
+        <h3 style="color: var(--gold); margin-top:0; font-size:1.1rem; letter-spacing:1px;">💡 最終ご提案</h3>
+        <p id="final-confirm-text" style="font-size: 0.85rem; line-height: 1.6; color: #ddd; margin-bottom: 20px;"></p>
+        <button onclick="acceptFinalConfirm()" style="width: 100%; background: var(--gold); color: #000; border: none; padding: 14px; border-radius: 6px; font-weight: bold; margin-bottom: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">お得なプランに変更してコピー</button>
+        <button onclick="rejectFinalConfirm()" style="width: 100%; background: transparent; color: #888; border: 1px solid #444; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">変更せずにコピーする</button>
     </div>
 </div>
 
@@ -124,9 +168,11 @@ var suggestionId = null;
 var suggestionReplaceItems =[]; 
 var itemLeaves = {}; 
 var dismissedSuggestions =[];
-
-// 【新機能】コンテキストを認識するための記憶
 var lastToggledItem = null;
+
+// 【新機能】ウザさ防止のためのキャンセル回数記録
+var cancelCount = 0;
+var bubbleTimer = null;
 
 var menuData = {
     set_fullbody_all: { price: 52800, time: 270, label: '全身オール（顔VIO込）', cat: 'set', sub: '全顔 ＋ 上半身 ＋ 下半身 ＋ VIO ＋ 耳たぶ等すべて', imgs: { body: 'set_fullbody_all_body', face: 'set_fullbody_all_face' }, hasFace: true },
@@ -138,9 +184,13 @@ var menuData = {
     set_eyebrow: { price: 11000, time: 40, label: '眉毛セット', cat: 'set', sub: '眉上・眉下・眉中・デザイン込', imgs: { face: 'set_eyebrow' }, hasFace: true, isSpecial: true },
     set_fullface: { price: 13200, time: 65, label: '全顔セット', cat: 'set', sub: '鼻下・口下・頬・フェイスライン・首', imgs: { face: 'set_fullface' }, hasFace: true },
     set_vio: { price: 16500, time: 50, label: 'VIOセット', cat: 'set', sub: 'Vライン・Iライン・Oライン', imgs: { body: 'set_vio' }, hasFace: false },
+    
+    set_vio_buttocks: { price: 20900, time: 65, label: 'VIO+臀部(おしり)セット', cat: 'set', sub: 'VIOセット ＋ 臀部（おしり）', imgs: { body: 'set_vio' }, hasFace: false },
+    set_abdomen_vio: { price: 18700, time: 65, label: 'ヘソ下+VIOセット', cat: 'set', sub: '腹部（ヘソ下込） ＋ VIOセット', imgs: { body: 'set_chest_abdomen' }, hasFace: false },
+
     set_chest_abdomen: { price: 9900, time: 35, label: '胸＋腹部セット', cat: 'set', sub: '胸（乳輪込） ＋ 腹部（ヘソ下込）', imgs: { body: 'set_chest_abdomen' }, hasFace: false },
     set_arms_legs: { price: 28600, time: 125, label: '両腕+両足セット', cat: 'set', sub: '両腕全体 ＋ 両脚全体', imgs: { body: 'set_arms_legs' }, hasFace: false },
-    set_arms: { price: 17600, time: 65, label: '両腕セット', cat: 'set', sub: '肘上・下・手の甲指', imgs: { body: 'set_arms' }, hasFace: false },
+    set_arms: { price: 15400, time: 65, label: '両腕セット', cat: 'set', sub: '肘上・下・手の甲指', imgs: { body: 'set_arms' }, hasFace: false },
     set_legs: { price: 17600, time: 65, label: '両足セット', cat: 'set', sub: '膝上・下・足の甲指', imgs: { body: 'set_legs' }, hasFace: false },
     set_ear_whole: { price: 8800, time: 25, label: '耳全体セット', cat: 'set', sub: '耳珠 ＋ 耳たぶ', imgs: { face: 'set_ear_whole' }, hasFace: true, isSpecial: true },
 
@@ -165,9 +215,9 @@ var menuData = {
     part_knee_lower: { price: 8800, time: 35, label: '膝下', cat: 'part', subCat: '下半身', imgs: { body: 'part_knee_lower' }, hasFace: false },
     part_foot_toe: { price: 4400, time: 15, label: '足の甲・指', cat: 'part', subCat: '下半身', imgs: { body: 'part_foot_toe' }, hasFace: false },
 
-    part_v_line: { price: 6600, time: 15, label: 'Vライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_v_line' }, hasFace: false },
-    part_i_line: { price: 6600, time: 15, label: 'Iライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_i_line' }, hasFace: false },
-    part_o_line: { price: 6600, time: 15, label: 'Oライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_o_line' }, hasFace: false },
+    part_v_line: { price: 7700, time: 15, label: 'Vライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_v_line' }, hasFace: false },
+    part_i_line: { price: 7700, time: 15, label: 'Iライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_i_line' }, hasFace: false },
+    part_o_line: { price: 5500, time: 15, label: 'Oライン', cat: 'part', subCat: 'VIO', imgs: { body: 'part_o_line' }, hasFace: false },
 
     part_eyebrow_upper: { price: 4400, time: 13, label: '眉上', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_eyebrow_upper' }, hasFace: true },
     part_eyebrow_middle: { price: 4400, time: 10, label: '眉間（眉中）', cat: 'part', subCat: '特殊部位', imgs: { face: 'part_eyebrow_middle' }, hasFace: true },
@@ -181,15 +231,17 @@ var menuData = {
 };
 
 var setIncludes = {
-    set_fullbody_all:['set_fullbody_noface', 'set_upperbody', 'set_lowerbody', 'set_fullface', 'set_vio', 'set_fullface_vio', 'set_chest_abdomen', 'set_arms_legs', 'set_arms', 'set_legs', 'part_chest_nipple'],
-    set_fullbody_noface:['set_lowerbody', 'set_vio', 'set_arms', 'set_legs', 'part_nape', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_back_upper', 'part_back_lower', 'part_buttocks'],
+    set_fullbody_all:['set_fullbody_noface', 'set_upperbody', 'set_lowerbody', 'set_fullface', 'set_vio', 'set_fullface_vio', 'set_chest_abdomen', 'set_arms_legs', 'set_arms', 'set_legs', 'part_chest_nipple', 'set_vio_buttocks', 'set_abdomen_vio'],
+    set_fullbody_noface:['set_lowerbody', 'set_vio', 'set_arms', 'set_legs', 'part_nape', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_back_upper', 'part_back_lower', 'part_buttocks', 'set_vio_buttocks', 'set_abdomen_vio'],
     set_upperbody:['set_fullface', 'set_arms', 'part_armpit', 'part_chest_nipple', 'part_abdomen_navel', 'part_nape', 'part_back_upper', 'part_back_lower'],
-    set_lowerbody:['set_vio', 'set_legs', 'part_buttocks'],
+    set_lowerbody:['set_vio', 'set_legs', 'part_buttocks', 'set_vio_buttocks'],
     set_fullface_vio:['set_fullface', 'set_vio'],
     set_fullface_eyebrow:['set_fullface', 'set_eyebrow'],
     set_eyebrow:['part_eyebrow_upper', 'part_eyebrow_lower', 'part_eyebrow_middle'],
     set_fullface:['part_nose_under', 'part_mouth_under', 'part_cheek', 'part_face_line', 'part_neck'],
     set_vio:['part_v_line', 'part_i_line', 'part_o_line'],
+    set_vio_buttocks:['set_vio', 'part_buttocks'],
+    set_abdomen_vio:['part_abdomen_navel', 'set_vio'],
     set_chest_abdomen:['part_chest_nipple', 'part_abdomen_navel'],
     set_arms_legs:['set_arms', 'set_legs'],
     set_arms:['part_elbow_upper', 'part_elbow_lower', 'part_hand_finger'],
@@ -247,17 +299,16 @@ function createImg(parent, name) {
 
 function changeTab(tab) { currentTab = tab; render(); }
 
-// 【修正】直近で選んだアイテムを記憶
 function toggleItem(id) {
     var idx = selected.indexOf(id);
     if (idx !== -1) {
         selected.splice(idx, 1);
-        lastToggledItem = null; // 削除時はクリア
+        lastToggledItem = null;
     } else {
         selected.push(id);
-        lastToggledItem = id; // ここで「最後にタップした部位」を記憶
+        lastToggledItem = id; 
     }
-    checkSuggestion();
+    checkSuggestion(false);
     render();
 }
 
@@ -341,12 +392,8 @@ function getOriginalPrice(setId) {
     return total;
 }
 
-// 【コンテキスト認識AI】
-function checkSuggestion() {
-    suggestionId = null;
-    suggestionReplaceItems =[];
-    document.getElementById('suggestion-box').style.display = 'none';
-
+// 【コンシェルジュAI 分析ロジック】
+function analyzeSuggestions(isManual) {
     var selectedLeaves =[];
     selected.forEach(function(id) {
         if(itemLeaves[id]) {
@@ -356,20 +403,18 @@ function checkSuggestion() {
         }
     });
 
-    if (selectedLeaves.length < 2) return;
-
-    var cheaperCandidates = [];
+    var cheaperCandidates =[];
     var samePriceCandidates =[];
-    var upsellCandidates = [];
+    var upsellCandidates =[];
 
     Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
         if (selected.indexOf(sid) !== -1) return;
-        if (dismissedSuggestions.indexOf(sid) !== -1) return;
+        // 手動呼び出し(isManual)の時は、一度断られたものも再評価する
+        if (!isManual && dismissedSuggestions.indexOf(sid) !== -1) return;
 
         var candidateLeaves = itemLeaves[sid];
         if (!candidateLeaves) return;
 
-        // 直近でタップしたアイテム（lastToggledItem）が、このセットに含まれるかをチェック
         var includesLastToggled = false;
         if (lastToggledItem && itemLeaves[lastToggledItem]) {
             var lastLeaves = itemLeaves[lastToggledItem];
@@ -413,7 +458,8 @@ function checkSuggestion() {
             }
         });
 
-        if (intersectingItems.length > 0 && isCovered) {
+        // 【修正】セット内に含まれたパーツが2つ以上選ばれた時のみ作動
+        if (intersectingItems.length >= 2 && isCovered) {
             var oldPrice = 0;
             intersectingItems.forEach(function(itemId) { oldPrice += menuData[itemId].price; });
             var newPrice = menuData[sid].price;
@@ -426,67 +472,81 @@ function checkSuggestion() {
                 addedLeavesCount: addedLeavesCount,
                 intersectingItems: intersectingItems,
                 oldPrice: oldPrice,
-                includesLastToggled: includesLastToggled // 文脈の記憶
+                includesLastToggled: includesLastToggled
             };
 
             if (diffPrice < 0) {
+                simData.type = 'cheaper';
                 cheaperCandidates.push(simData);
             } else if (diffPrice === 0 && addedLeavesCount > 0) {
+                simData.type = 'samePrice';
                 samePriceCandidates.push(simData);
             } else if (diffPrice > 0 && addedLeavesCount > 0) {
-                // 【超重要】アップセルは「今タップした部位を拡張するセット」のみに限定！
-                // 上限も 12,000円 に引き上げ（肘上→両腕の差額11,000円を通すため）
-                if (includesLastToggled && diffPrice <= Math.max(12000, oldPrice * 1.5)) {
+                // 【修正】追加金額が10,000円以内
+                if (includesLastToggled && diffPrice <= 10000) {
+                    simData.type = 'upsell';
                     upsellCandidates.push(simData);
                 }
             }
         }
     });
 
-    var bestSuggestion = null;
-    var suggestionMsg = "";
-
     if (cheaperCandidates.length > 0) {
-        // 安くなる提案が複数ある場合は、直近の操作に関連するものを優先
         cheaperCandidates.sort(function(a, b) { 
             if (a.includesLastToggled !== b.includesLastToggled) return b.includesLastToggled ? 1 : -1;
             return a.diffPrice - b.diffPrice; 
         });
-        var best = cheaperCandidates[0];
-        bestSuggestion = best.sid;
-        suggestionReplaceItems = best.intersectingItems;
-        suggestionMsg = "「<strong>" + menuData[bestSuggestion].label + "</strong>」へ切り替えると、<span class='sug-price-badge'>¥" + menuData[bestSuggestion].price.toLocaleString() + "</span> になりお得です。";
+        return cheaperCandidates[0];
     } 
-    else if (samePriceCandidates.length > 0) {
+    if (samePriceCandidates.length > 0) {
         samePriceCandidates.sort(function(a, b) { 
             if (a.includesLastToggled !== b.includesLastToggled) return b.includesLastToggled ? 1 : -1;
             return b.addedLeavesCount - a.addedLeavesCount; 
         });
-        var best = samePriceCandidates[0];
-        bestSuggestion = best.sid;
-        suggestionReplaceItems = best.intersectingItems;
-        suggestionMsg = "同じ金額で「<strong>" + menuData[bestSuggestion].label + "</strong>」に切り替え可能ですがいかがですか？";
+        return samePriceCandidates[0];
     } 
-    else if (upsellCandidates.length > 0) {
+    if (upsellCandidates.length > 0) {
         upsellCandidates.sort(function(a, b) { return a.diffPrice - b.diffPrice; });
-        var best = upsellCandidates[0];
-        bestSuggestion = best.sid;
-        suggestionReplaceItems = best.intersectingItems;
+        return upsellCandidates[0];
+    }
 
-        var originalPrice = getOriginalPrice(bestSuggestion);
-        var savedAmount = originalPrice - menuData[bestSuggestion].price;
+    return null;
+}
 
-        suggestionMsg = "あと <span class='sug-price-badge'>+¥" + best.diffPrice.toLocaleString() + "</span> で、さらに部位が充実した「<strong>" + menuData[bestSuggestion].label + "</strong>」にアップグレードできます！";
+// 【表示制御ロジック】
+function checkSuggestion(isManual) {
+    document.getElementById('suggestion-box').style.display = 'none';
+
+    var best = analyzeSuggestions(isManual);
+
+    if (!best) {
+        if (isManual) showConciergeBubble("現在、最適なプランのご提案はございません。<br>引き続きメニューをお選びください。");
+        suggestionId = null;
+        return;
+    }
+
+    // 自動呼び出しの時、すでに2回断られていたらポップアップを出さない
+    if (!isManual && cancelCount >= 2) return;
+
+    suggestionId = best.sid;
+    suggestionReplaceItems = best.intersectingItems;
+
+    var suggestionMsg = "";
+    if (best.type === 'cheaper') {
+        suggestionMsg = "「<strong>" + menuData[best.sid].label + "</strong>」へ切り替えると、<span class='sug-price-badge'>¥" + menuData[best.sid].price.toLocaleString() + "</span> になりお得です。";
+    } else if (best.type === 'samePrice') {
+        suggestionMsg = "同じ金額で「<strong>" + menuData[best.sid].label + "</strong>」に切り替え可能ですがいかがですか？";
+    } else if (best.type === 'upsell') {
+        var originalPrice = getOriginalPrice(best.sid);
+        var savedAmount = originalPrice - menuData[best.sid].price;
+        suggestionMsg = "あと <span class='sug-price-badge'>+¥" + best.diffPrice.toLocaleString() + "</span> で、さらに部位が充実した「<strong>" + menuData[best.sid].label + "</strong>」にアップグレードできます！";
         if (savedAmount >= 2000) {
             suggestionMsg += "<br><span class='sug-discount'>※パーツを別々に追加するより ¥" + savedAmount.toLocaleString() + " もお得です！</span>";
         }
     }
 
-    if (bestSuggestion) {
-        suggestionId = bestSuggestion;
-        document.getElementById('suggestion-text').innerHTML = suggestionMsg;
-        document.getElementById('suggestion-box').style.display = 'block';
-    }
+    document.getElementById('suggestion-text').innerHTML = suggestionMsg;
+    document.getElementById('suggestion-box').style.display = 'block';
 }
 
 function applyOptimalSet() {
@@ -508,12 +568,72 @@ function applyOptimalSet() {
 }
 
 function hideSuggestion() { 
-    if (suggestionId) dismissedSuggestions.push(suggestionId);
+    if (suggestionId) {
+        dismissedSuggestions.push(suggestionId);
+        cancelCount++;
+        // 2回断られたら待機モードへ
+        if (cancelCount === 2) {
+            document.getElementById('concierge-wrapper').style.display = 'flex';
+            showConciergeBubble("いつでも待機していますので、<br>必要な時に呼んでくださいね♪");
+        }
+    }
     document.getElementById('suggestion-box').style.display = 'none'; 
 }
 
+function showConciergeBubble(msg) {
+    var bubble = document.getElementById('concierge-bubble');
+    document.getElementById('concierge-msg').innerHTML = msg;
+    bubble.style.display = 'block';
+    
+    setTimeout(function() { bubble.style.opacity = '1'; }, 10);
+    
+    if (bubbleTimer) clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(function() {
+        bubble.style.opacity = '0';
+        setTimeout(function() { bubble.style.display = 'none'; }, 300);
+    }, 5000); // 5秒後に消える
+}
+
+// 【最終確認＆コピー処理】
 function copyResult() {
     if (selected.length === 0) return alert("選択してください");
+
+    // 待機モードに入っている場合、コピー直前で「安くなる・同額の提案」がないか最終確認
+    if (cancelCount >= 2) {
+        var best = analyzeSuggestions(true); // 手動モード(dismissed無視)で解析
+        if (best && (best.type === 'cheaper' || best.type === 'samePrice')) {
+            suggestionId = best.sid;
+            suggestionReplaceItems = best.intersectingItems;
+            
+            var msg = "<strong>【最後にご確認です】</strong><br><br>";
+            if (best.type === 'cheaper') {
+                msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + Math.abs(best.diffPrice).toLocaleString() + "</span> お安くなります！";
+            } else {
+                msg += "同じ金額でさらに部位が多い「<strong>" + menuData[best.sid].label + "</strong>」に変更できます！";
+            }
+            msg += "<br><br>このまま変更せずに予約に進みますか？";
+
+            document.getElementById('final-confirm-text').innerHTML = msg;
+            document.getElementById('final-confirm-modal').style.display = 'flex';
+            return; // 一旦止めてモーダルを表示
+        }
+    }
+
+    doActualCopy();
+}
+
+function acceptFinalConfirm() {
+    document.getElementById('final-confirm-modal').style.display = 'none';
+    applyOptimalSet();
+    setTimeout(doActualCopy, 200); // UI反映を少し待ってからコピー実行
+}
+
+function rejectFinalConfirm() {
+    document.getElementById('final-confirm-modal').style.display = 'none';
+    doActualCopy();
+}
+
+function doActualCopy() {
     var slot = document.getElementById('total-time-slot').innerText;
     var priceStr = document.getElementById('total-price').innerText;
     var txt = "【NARX脱毛予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
