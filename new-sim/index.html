@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.18.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.18.1</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
@@ -50,17 +50,15 @@
     /* 中央ポップアップ */
     #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: linear-gradient(135deg, #f7d05e 0%, #d4af37 100%); color: #111; padding: 20px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid #fff; }
     .sug-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 6px; }
-    
-    /* 差額をわかりやすく表示するボックス */
     .sug-price-box { background: rgba(255, 255, 255, 0.4); padding: 12px; border-radius: 8px; text-align: center; margin: 12px 0; font-size: 0.95rem; border: 1px dashed rgba(0,0,0,0.3); }
     .sug-discount { display: inline-block; background: #c00; color: #fff; font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; margin-top: 8px; font-weight: bold; }
 
     /* コンシェルジュ待機アイコン＆吹き出し（中央配置） */
-    #concierge-wrapper { display: flex; position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 1000; align-items: center; flex-direction: column; }
-    #concierge-bubble { display:none; background: #fff; color: #111; padding: 12px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.3s ease; position:relative; line-height: 1.5; white-space: nowrap; text-align: center; }
+    #concierge-wrapper { display: flex; position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 1000; align-items: center; flex-direction: column; pointer-events: none; }
+    #concierge-bubble { display:none; background: #fff; color: #111; padding: 12px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.3s ease; position:relative; line-height: 1.5; white-space: nowrap; text-align: center; pointer-events: auto; }
     .bubble-tail { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid #fff; }
     
-    .concierge-icon { width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.8); transition: transform 0.2s, background 0.3s, border 0.3s; }
+    .concierge-icon { width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.8); transition: transform 0.2s, background 0.3s, border 0.3s; pointer-events: auto; }
     .concierge-icon:active { transform: scale(0.9); }
     
     /* ON状態（金背景×黒アイコン） */
@@ -97,6 +95,7 @@
     <div class="modal-content">
         <h2 style="color: var(--gold); margin-bottom: 10px;">WELCOME</h2>
         <p style="font-size: 0.85rem; line-height: 1.8; margin-bottom: 35px; color: #bbb;">現在の状況を選択してください。</p>
+        <!-- 安全装置を通したボタン -->
         <button class="btn btn-reserve" style="width: 100%; margin-bottom: 15px;" onclick="forceStart('new')">初めて来店する（初回価格）</button>
         <button class="btn btn-copy" style="width: 100%;" onclick="forceStart('repeat')">既に会員である（通常価格）</button>
     </div>
@@ -128,7 +127,6 @@
         <div class="bubble-tail"></div>
         <span id="concierge-msg"></span>
     </div>
-    <!-- 初期状態はON（onクラス） -->
     <div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()">
         <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
             <path class="suit" d="M30 20 h40 v12 h-40 z"/>
@@ -175,6 +173,39 @@
     </div>
 </div>
 
+<!-- ==========================================
+ 安全装置ブロック（絶対にモーダルを消す）
+=========================================== -->
+<script>
+function forceStart(type) {
+    // 1. 何があっても画面のロック（モーダル）は解除する
+    var modal = document.getElementById('gate-modal');
+    if (modal) modal.style.display = 'none';
+
+    try {
+        var badge = document.getElementById('mode-display');
+        if (badge) {
+            badge.innerText = type === 'new' ? "【ご新規様】初回限定価格モード" : "【会員様】通常価格モード";
+            badge.style.background = type === 'new' ? "var(--gold)" : "#666";
+        }
+        
+        // 2. メインプログラムへ処理を引き継ぐ
+        if (typeof window.startApp === 'function') {
+            window.startApp(type);
+        } else {
+            // コピー漏れでエラーが起きている場合は警告を出す
+            alert("【エラー】\nコードが最後までコピーされていない可能性があります。\n一番下の </html> まで全てコピーし直してください。");
+        }
+    } catch(e) {
+        console.error(e);
+        alert("起動中にエラーが発生しました。");
+    }
+}
+</script>
+
+<!-- ==========================================
+ メインシステム（各種データ・ロジック）
+=========================================== -->
 <script>
 var userType = 'new';
 var currentTab = 'set';
@@ -185,7 +216,6 @@ var itemLeaves = {};
 var dismissedSuggestions =[];
 var lastToggledItem = null;
 
-// 【コンシェルジュ状態管理】
 var isConciergeON = true; 
 var cancelCount = 0;
 var bubbleTimer = null;
@@ -264,19 +294,10 @@ var setIncludes = {
     set_legs:['part_knee_upper', 'part_knee_lower', 'part_foot_toe']
 };
 
-function forceStart(type) {
-    var modal = document.getElementById('gate-modal');
-    if (modal) modal.style.display = 'none';
-    try {
-        userType = type;
-        var badge = document.getElementById('mode-display');
-        if (badge) {
-            badge.innerText = type === 'new' ? "【ご新規様】初回限定価格モード" : "【会員様】通常価格モード";
-            badge.style.background = type === 'new' ? "var(--gold)" : "#666";
-        }
-        setTimeout(function() { initApp(); render(); }, 50);
-    } catch(e) { console.error(e); }
-}
+window.startApp = function(type) {
+    userType = type;
+    setTimeout(function() { initApp(); render(); }, 50);
+};
 
 function initApp() {
     function getLeafNodes(id) {
@@ -408,16 +429,15 @@ function getOriginalPrice(setId) {
     return total;
 }
 
-// 【アイコンのON/OFF切り替え】
 function toggleConcierge(forceState) {
     if (typeof forceState !== 'undefined') {
         isConciergeON = forceState;
     } else {
-        isConciergeON = !isConciergeON; // トグル
+        isConciergeON = !isConciergeON; 
         if (isConciergeON) {
-            cancelCount = 0; // ONにしたら回数リセット
+            cancelCount = 0; 
             showConciergeBubble("コンシェルジュをONにしました！<br>最適なプランをご提案します。");
-            checkSuggestion(true); // 直ちに判定
+            checkSuggestion(true); 
         } else {
             showConciergeBubble("コンシェルジュを待機させました。<br>（アイコンタップでONになります）");
             document.getElementById('suggestion-box').style.display = 'none';
@@ -431,7 +451,6 @@ function toggleConcierge(forceState) {
     }
 }
 
-// 【コンシェルジュAI 分析ロジック】
 function analyzeSuggestions(isManual) {
     var selectedLeaves =[];
     selected.forEach(function(id) {
@@ -496,7 +515,6 @@ function analyzeSuggestions(isManual) {
             }
         });
 
-        // セット内に含まれるパーツが「2つ以上」選ばれた場合のみ作動
         if (intersectingItems.length >= 2 && isCovered) {
             var oldPrice = 0;
             intersectingItems.forEach(function(itemId) { oldPrice += menuData[itemId].price; });
@@ -520,7 +538,6 @@ function analyzeSuggestions(isManual) {
                 simData.type = 'samePrice';
                 samePriceCandidates.push(simData);
             } else if (diffPrice > 0 && addedLeavesCount > 0) {
-                // 【修正】追加金額の上限を 10,000円以内 に変更
                 if (includesLastToggled && diffPrice <= 10000) {
                     simData.type = 'upsell';
                     upsellCandidates.push(simData);
@@ -551,17 +568,14 @@ function analyzeSuggestions(isManual) {
     return null;
 }
 
-// 【表示制御ロジック】
 function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').style.display = 'none';
     
-    // コンシェルジュがOFFなら自動提案はしない
     if (!isConciergeON && !isManual) return;
 
     var best = analyzeSuggestions(isManual);
 
     if (!best) {
-        // アイコンを手動タップしたが何も提案がない場合
         if (isManual && isConciergeON) showConciergeBubble("現在、最適なプランのご提案はございません。<br>引き続きメニューをお選びください。");
         suggestionId = null;
         return;
@@ -570,7 +584,6 @@ function checkSuggestion(isManual) {
     suggestionId = best.sid;
     suggestionReplaceItems = best.intersectingItems;
 
-    // 現在の合計金額と新しい合計金額の計算
     var currentTotalPrice = 0;
     selected.forEach(function(id) { currentTotalPrice += menuData[id].price; });
     var newTotalPrice = currentTotalPrice - best.oldPrice + menuData[best.sid].price;
@@ -625,7 +638,6 @@ function hideSuggestion() {
     if (suggestionId) {
         dismissedSuggestions.push(suggestionId);
         cancelCount++;
-        // 2回断られたら待機モード（OFF）へ移行
         if (cancelCount >= 2 && isConciergeON) {
             toggleConcierge(false);
             showConciergeBubble("いつでも待機していますので、<br>必要な時に呼んでくださいね♪");
@@ -648,13 +660,11 @@ function showConciergeBubble(msg) {
     }, 5000); 
 }
 
-// 【最終確認＆コピー処理】
 function copyResult() {
     if (selected.length === 0) return alert("選択してください");
 
-    // 待機モード（OFF状態）でコピーを押した時、見逃している「お得な提案」があれば最終確認する
     if (!isConciergeON) {
-        var best = analyzeSuggestions(true); // 手動モード(dismissed無視)で解析
+        var best = analyzeSuggestions(true); 
         if (best && (best.type === 'cheaper' || best.type === 'samePrice')) {
             suggestionId = best.sid;
             suggestionReplaceItems = best.intersectingItems;
@@ -674,7 +684,7 @@ function copyResult() {
 
             document.getElementById('final-confirm-text').innerHTML = msg;
             document.getElementById('final-confirm-modal').style.display = 'flex';
-            return; // 一旦止めてモーダルを表示
+            return; 
         }
     }
 
@@ -688,4 +698,21 @@ function acceptFinalConfirm() {
 }
 
 function rejectFinalConfirm() {
-    docume
+    document.getElementById('final-confirm-modal').style.display = 'none';
+    doActualCopy();
+}
+
+function doActualCopy() {
+    var slot = document.getElementById('total-time-slot').innerText;
+    var priceStr = document.getElementById('total-price').innerText;
+    var txt = "【NARX脱毛予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
+    selected.forEach(function(id) { txt += "・" + menuData[id].label + "\n"; });
+    txt += "──────────\n";
+    txt += "合計金額：" + priceStr + "\n";
+    txt += "予約枠目安：" + slot;
+    navigator.clipboard.writeText(txt).then(function() { alert("コピーしました。"); });
+}
+</script>
+<!-- ここまでコピーしてください -->
+</body>
+</html>
