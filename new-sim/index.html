@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.19.1</title>
+<title>NARX 料金＆時間シミュレーター Ver.20.0</title>
 <style>
     :root { --gold: #d4af37; --black: #000; --dark-gray: #151515; --light-gray: #333; --white: #fff; --panel-bg: #fdfdfd; }
     body { background-color: var(--black); color: var(--white); font-family: serif; margin: 0; padding-bottom: 240px; overflow-x: hidden; }
@@ -47,7 +47,7 @@
     .item-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-top: 2px; }
     .item-sub { display: block; font-size: 0.7rem; color: #888; margin-top: 5px; line-height: 1.4; }
 
-    /* 中央ポップアップ（デザイン大改修） */
+    /* 中央ポップアップ */
     #suggestion-box { position: fixed; bottom: 190px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 420px; background: linear-gradient(135deg, #f7d05e 0%, #d4af37 100%); color: #111; padding: 20px; border-radius: 12px; display: none; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid #fff; }
     .sug-title { font-weight: bold; font-size: 0.85rem; color: #555; margin-bottom: 8px; }
     .sug-menu-name { font-size: 1.25rem; font-weight: bold; color: #111; margin-bottom: 2px; }
@@ -65,7 +65,7 @@
     .sug-discount-badge { display: inline-block; background: #c00; color: #fff; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; margin-bottom: 12px; font-weight: bold; }
     .sug-note { font-size: 0.65rem; color: #444; text-align: left; line-height: 1.5; margin-top: 15px; border-top: 1px dashed rgba(0,0,0,0.2); padding-top: 8px; }
 
-    /* コンシェルジュ待機アイコン＆吹き出し */
+    /* コンシェルジュ待機アイコン＆吹き出し（中央配置） */
     #concierge-wrapper { display: flex; position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 1000; align-items: center; flex-direction: column; pointer-events: none; }
     #concierge-bubble { display:none; background: #fff; color: #111; padding: 12px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.3s ease; position:relative; line-height: 1.5; white-space: nowrap; text-align: center; pointer-events: auto; }
     .bubble-tail { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid #fff; }
@@ -130,4 +130,54 @@
     <div id="menu-area"></div>
 </div>
 
-<!-- コンシェルジュ -
+<!-- コンシェルジュ（中央配置・トグル式） -->
+<div id="concierge-wrapper">
+    <div id="concierge-bubble">
+        <div class="bubble-tail"></div>
+        <span id="concierge-msg"></span>
+    </div>
+    <div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()">
+        <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path class="suit" d="M30 20 h40 v12 h-40 z"/>
+            <path class="suit" d="M22 32 h56 v4 h-56 z"/>
+            <path class="skin" d="M34 36 v10 c0 9 7 16 16 16 c9 0 16 -7 16 -16 v-10 z"/>
+            <circle class="skin" cx="30" cy="45" r="4"/>
+            <circle class="skin" cx="70" cy="45" r="4"/>
+            <path class="suit" d="M34 66 l-20 16 v18 h72 v-18 l-20 -16 z"/>
+            <path class="line" d="M34 66 L50 82 L66 66" stroke-width="4" fill="none"/>
+            <line class="line" x1="50" y1="82" x2="50" y2="100" stroke-width="4"/>
+            <line class="line" x1="68" y1="80" x2="78" y2="80" stroke-width="3"/>
+            <circle class="btn" cx="44" cy="88" r="2"/>
+            <circle class="btn" cx="44" cy="96" r="2"/>
+        </svg>
+    </div>
+</div>
+
+<div id="suggestion-box"></div>
+
+<div id="final-confirm-modal">
+    <div class="final-modal-content">
+        <h3 style="color: var(--gold); margin-top:0; font-size:1.1rem; letter-spacing:1px;">💡 最終ご提案</h3>
+        <p id="final-confirm-text" style="font-size: 0.85rem; line-height: 1.6; color: #ddd; margin-bottom: 20px;"></p>
+        <button onclick="acceptFinalConfirm()" style="width: 100%; background: var(--gold); color: #000; border: none; padding: 14px; border-radius: 6px; font-weight: bold; margin-bottom: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">お得なプランに変更してコピー</button>
+        <button onclick="rejectFinalConfirm()" style="width: 100%; background: transparent; color: #888; border: 1px solid #444; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">変更せずにコピーする</button>
+    </div>
+</div>
+
+<div class="bottom-bar">
+    <div class="summary-grid">
+        <div class="summary-item"><span class="label">料金合計 (税込)</span><span class="val" id="total-price">¥0</span></div>
+        <div class="summary-item" style="text-align: right;"><span class="label">ご予約時間枠</span><span class="val" id="total-time-slot">0.0 時間枠</span></div>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-copy" onclick="copyResult()">内容をコピー</button>
+        <a href="https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585" class="btn btn-reserve" target="_blank">予約ページへ</a>
+    </div>
+</div>
+
+<!-- ==========================================
+ 安全装置ブロック
+=========================================== -->
+<script>
+function forceStart(type) {
+    var modal = docume
