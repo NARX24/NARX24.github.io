@@ -3,22 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.29.1</title>
+<title>NARX 料金＆時間シミュレーター Ver.30.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
 
-/* ロゴエリア：提案B 白ロゴを際立たせるクリーンなスタイル */
-.header-logo-container {
-    text-align: center;
-    padding: 30px 0 15px;
-    background: var(--black);
-}
-.logo-img {
-    height: 60px; /* 必要に応じて調整してください */
-    display: block;
-    margin: 0 auto;
-}
+.header-logo-container { text-align: center; padding: 30px 0 15px; background: var(--black); }
+.logo-img { height: 60px; display: block; margin: 0 auto; }
 
 #gate-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.98);z-index:99999;display:flex;justify-content:center;align-items:center;}
 .modal-content{border:1px solid var(--gold);padding:40px 20px;width:85%;max-width:400px;background:var(--black);text-align:center;border-radius:8px;}
@@ -53,7 +44,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .btn-reset { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 4px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer; }
 .chips-container { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px; }
-.chip-close { background: var(--gold); color: #000; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-size: 0.6rem; font-weight: bold; }
+.chip-close { background: var(--gold); color: #000; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-size: 0.6rem; font-weight: bold; cursor: pointer; }
 
 .subcat-header{display:flex;align-items:center;justify-content:center;margin:30px 0 15px;color:var(--gold);font-size:0.85rem;letter-spacing:0.4em;font-weight:bold;}
 .subcat-header::before,.subcat-header::after{content:"";flex:1;height:1px;background:linear-gradient(to right,transparent,var(--gold));margin:0 20px;opacity:0.6;}
@@ -69,14 +60,21 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 .item-sub{display:block;font-size:0.7rem;color:#888;margin-top:5px;line-height:1.4;}
 
+/* 【復活・復刻】コンシェルジュモーダルのスタイル */
 #suggestion-box{position:fixed;bottom:190px;left:50%;transform:translateX(-50%);width:92%;max-width:420px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:20px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.85rem;color:#555;margin-bottom:12px;text-align:center;}
-.sug-benefit-msg {text-align:center;font-size:0.75rem;color:var(--gold);background:#111;padding:6px 10px;border-radius:4px;font-weight:bold;margin-bottom:12px;}
-.sug-menu-name{font-size:1.25rem;font-weight:bold;color:#111;margin-bottom:2px; text-align:center;}
-.sug-compare-panel{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.65);padding:12px 10px;border-radius:8px;margin-bottom:10px;}
+.sug-benefit-msg {text-align:center;font-size:0.75rem;color:var(--gold);background:#111;padding:6px 10px;border-radius:4px;font-weight:bold;margin-bottom:12px;letter-spacing:0.5px;}
+.sug-menu-name{font-size:1.25rem;font-weight:bold;color:#111;margin-bottom:2px;text-align:center;}
+.sug-menu-sub{font-size:0.75rem;color:#444;margin-bottom:12px;line-height:1.3;text-align:center;}
+.sug-compare-panel{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.75);padding:12px 10px;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.1);}
 .sug-col{flex:1;text-align:center;}
-.sug-col-price{font-size:1.1rem;color:#111;font-weight:bold;}
-.sug-col-price.new{color:#c00; font-size: 1.3rem;}
+.sug-col-label{font-size:0.65rem;color:#555;display:block;margin-bottom:2px;font-weight:bold;}
+.sug-col-price{font-size:1rem;color:#111;font-weight:bold;}
+.sug-col-price.old{text-decoration:line-through;color:#888;font-size:0.9rem;}
+.sug-col-price.new{font-size:1.3rem;color:#c00;}
+.sug-arrow{padding:0 5px;color:#c00;font-weight:bold;text-align:center;font-size:1.2rem;}
+.sug-discount-badge{display:inline-block;background:#c00;color:#fff;font-size:0.75rem;padding:4px 10px;border-radius:12px;margin-bottom:12px;font-weight:bold;}
+.sug-note{font-size:0.65rem;color:#444;text-align:left;line-height:1.5;margin-top:15px;border-top:1px dashed rgba(0,0,0,0.2);padding-top:8px;}
 
 #concierge-wrapper{display:flex;position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:1000;align-items:center;flex-direction:column;pointer-events:none;}
 #concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.3s ease;position:relative;text-align:center;pointer-events:auto;}
@@ -144,9 +142,10 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <div id="concierge-wrapper">
     <div id="concierge-bubble"><div class="bubble-tail"></div><span id="concierge-msg"></span></div>
+    <!-- 【修正】アイコンを以前のものに戻し、位置を中央調整 -->
     <div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()">
-        <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
-            <path d="M30 20 h40 v12 h-40 z" fill="#111" class="icon-path"/><path d="M34 36 v10 c0 9 7 16 16 16 s16 -7 16 -16 v-10 z" fill="#d4af37"/><path d="M34 66 l-20 16 v18 h72 v-18 l-20 -16 z" fill="#111"/>
+        <svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg" style="transform: translateY(-2px);">
+            <path class="suit" d="M30 20 h40 v12 h-40 z" fill="#111"/><path class="suit" d="M22 32 h56 v4 h-56 z" fill="#111"/><path class="skin" d="M34 36 v10 c0 9 7 16 16 16 c9 0 16 -7 16 -16 v-10 z" fill="#d4af37"/><circle class="skin" cx="30" cy="45" r="4" fill="#d4af37"/><circle class="skin" cx="70" cy="45" r="4" fill="#d4af37"/><path class="suit" d="M34 66 l-20 16 v18 h72 v-18 l-20 -16 z" fill="#111"/><path class="line" d="M34 66 L50 82 L66 66" stroke="#d4af37" stroke-width="4" fill="none"/><line class="line" x1="50" y1="82" x2="50" y2="100" stroke="#d4af37" stroke-width="4"/><line class="line" x1="68" y1="80" x2="78" y2="80" stroke="#d4af37" stroke-width="3"/><circle class="btn" cx="44" cy="88" r="2" fill="#d4af37"/><circle class="btn" cx="44" cy="96" r="2" fill="#d4af37"/>
         </svg>
     </div>
 </div>
@@ -190,7 +189,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 【Ver.29.1：新規価格ロジック＆白ロゴ対応】
+// 【Ver.30.0：画像整合・旧コンシェルジュ復刻・旧モーダル復刻】
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -211,7 +210,7 @@ var menuData = {
     set_lowerbody:{price:30800,time:150,label:'下半身セット',cat:'set',sub:'VIO・臀部・脚全体',imgs:{body:'set_lowerbody_body'},hasFace:false},
     set_fullface_vio:{price:27500,time:100,label:'全顔+VIOセット',cat:'set',sub:'全顔セット＋VIOセット',imgs:{body:'set_fullface_vio_body',face:'set_fullface_vio_face'},hasFace:true},
     set_fullface_eyebrow:{price:22000,time:105,label:'全顔+眉毛セット',cat:'set',sub:'全顔セット＋眉毛セット',imgs:{face:'set_fullface_eyebrow_face'},hasFace:true},
-    set_eyebrow:{price:11000,time:40,label:'眉毛セット',cat:'set',sub:'眉上・眉下・眉間・デザイン込',imgs:{face:'set_eyebrow_face'},hasFace:true,isSpecial:true},
+    set_eyebrow:{price:11000,time:40,label:'眉毛セット',cat:'set',sub:'眉上・眉下・眉間・デザイン込',imgs:{face:'set_eyebrow_face'},hasFace:true},
     set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set',sub:'鼻下・口下・頬・フェイスライン・首',imgs:{face:'set_fullface'},hasFace:true},
     set_vio:{price:16500,time:50,label:'VIOセット',cat:'set',sub:'Vライン・Iライン・Oライン',imgs:{body:'set_vio'},hasFace:false},
     set_vio_buttocks:{price:20900,time:65,label:'VIO+臀部セット',cat:'set',sub:'VIOセット＋臀部（おしり）',imgs:{body:'set_vio'},hasFace:false},
@@ -222,18 +221,19 @@ var menuData = {
     set_legs:{price:17600,time:65,label:'両足セット',cat:'set',sub:'膝上・下・足の甲指',imgs:{body:'set_legs'},hasFace:false},
     set_ear_whole:{price:8800,time:25,label:'耳全体セット',cat:'set',sub:'耳珠＋耳たぶ',imgs:{face:'set_ear_whole'},hasFace:true},
     
+    /* 【修正】ファイル名との整合性 */
     part_nose_under:{price:4400,time:10,label:'鼻下',cat:'part',subCat:'顔',imgs:{face:'part_nose_under'},hasFace:true},
     part_mouth_under:{price:4400,time:10,label:'口下',cat:'part',subCat:'顔',imgs:{face:'part_mouth_under'},hasFace:true},
-    part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
+    part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'顔',imgs:{face:'part_cheek'},hasFace:true},
     part_face_line:{price:4400,time:10,label:'フェイスライン',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
     part_neck:{price:4400,time:10,label:'首',cat:'part',subCat:'顔',imgs:{face:'part_neck'},hasFace:true},
-    part_forehead:{price:4400,time:10,label:'額',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
+    part_forehead:{price:4400,time:10,label:'額',cat:'part',subCat:'顔',imgs:{face:'part_forehead'},hasFace:true},
 
     part_nape:{price:4400,time:10,label:'うなじ',cat:'part',subCat:'上半身',imgs:{body:'part_nape'}},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'上半身',imgs:{body:'part_armpit'}},
-    part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'上半身',imgs:{body:'part_chest_nipple'}},
+    part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'上半身',imgs:{body:'part_nipple_around'}},
     part_chest_nipple:{price:6600,time:16,label:'胸',cat:'part',subCat:'上半身',imgs:{body:'part_chest_nipple'}},
-    part_navel_around:{price:4400,time:10,label:'へそ周り',cat:'part',subCat:'上半身',imgs:{body:'part_abdomen_navel'}},
+    part_navel_under:{price:4400,time:10,label:'ヘソ下',cat:'part',subCat:'上半身',imgs:{body:'part_navel_under'}},
     part_abdomen_navel:{price:6600,time:16,label:'腹部',cat:'part',subCat:'上半身',imgs:{body:'part_abdomen_navel'}},
     part_back_upper:{price:6600,time:20,label:'背中上',cat:'part',subCat:'上半身',imgs:{body:'part_back_upper'}},
     part_back_lower:{price:6600,time:20,label:'背中下',cat:'part',subCat:'上半身',imgs:{body:'part_back_lower'}},
@@ -248,14 +248,15 @@ var menuData = {
     part_i_line:{price:7700,time:15,label:'Iライン',cat:'part',subCat:'VIO',imgs:{body:'part_i_line'}},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'VIO',imgs:{body:'part_o_line'}},
     
-    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'特殊部位',imgs:{face:'set_ear_whole'},hasFace:true},
-    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'特殊部位',imgs:{face:'set_ear_whole'},hasFace:true},
+    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'特殊部位',imgs:{face:'part_tragus'},hasFace:true},
+    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'特殊部位',imgs:{face:'part_earlobe'},hasFace:true},
     part_eyebrow_upper:{price:4400,time:13,label:'眉上',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_upper'},hasFace:true},
     part_eyebrow_middle:{price:4400,time:10,label:'眉間',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_middle'},hasFace:true},
     part_eyebrow_lower:{price:6600,time:13,label:'眉下',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_lower'},hasFace:true},
     part_nose_hair:{price:4400,time:20,label:'鼻毛',cat:'part',subCat:'特殊部位',imgs:{face:'part_nose_hair'}},
     part_under_eyes:{price:4400,time:10,label:'目の下',cat:'part',subCat:'特殊部位',imgs:{face:'part_under_eyes'},hasFace:true},
     
+    /* 【修正】その他メニューも光るように設定 */
     other_lala_peel:{price:12100,time:90,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},hasFace:true},
     other_face_correction:{price:22000,time:90,label:'小顔矯正術',cat:'other',imgs:{face:'other_face_correction'},hasFace:true},
     other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other',imgs:{face:'other_derma_injection'},hasFace:true},
@@ -265,9 +266,9 @@ var menuData = {
 
 var setIncludes = {
     set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_ear_whole'],
-    set_fullbody_noface:['set_lowerbody','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
-    set_fullbody_novio:['set_upperbody','set_arms','set_legs','set_fullface','part_nape','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
-    set_upperbody:['set_fullface','set_arms','part_armpit','part_chest_nipple','part_abdomen_navel','part_nape','part_back_upper','part_back_lower','part_nipple_around','part_navel_around'],
+    set_fullbody_noface:['set_lowerbody','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_navel_under','part_back_upper','part_back_lower','part_buttocks'],
+    set_fullbody_novio:['set_upperbody','set_arms','set_legs','set_fullface','part_nape','part_chest_nipple','part_navel_under','part_back_upper','part_back_lower'],
+    set_upperbody:['set_fullface','set_arms','part_armpit','part_chest_nipple','part_navel_under','part_nape','part_back_upper','part_back_lower','part_nipple_around'],
     set_lowerbody:['set_vio','set_legs','part_buttocks'],
     set_fullface_vio:['set_fullface','set_vio'],
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
@@ -275,8 +276,8 @@ var setIncludes = {
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
     set_vio_buttocks:['set_vio','part_buttocks'],
-    set_abdomen_vio:['part_abdomen_navel','set_vio','part_navel_around'],
-    set_chest_abdomen:['part_chest_nipple','part_abdomen_navel','part_nipple_around','part_navel_around'],
+    set_abdomen_vio:['part_navel_under','set_vio'],
+    set_chest_abdomen:['part_chest_nipple','part_navel_under','part_nipple_around'],
     set_arms_legs:['set_arms','set_legs'],
     set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
     set_legs:['part_knee_upper','part_knee_lower','part_foot_toe'],
@@ -423,21 +424,42 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = slot + " 時間枠";
 }
 
+// 【復刻修正】ご提案モーダルのロジック
 function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').style.display = 'none';
     if (!isConciergeON && !isManual) { suggestionId = null; return; }
     var best = analyzeSuggestions(isManual);
     if (!best) { suggestionId = null; return; }
-    suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
+    
+    suggestionId = best.sid; 
+    suggestionReplaceItems = best.intersectingItems;
     var currentT = 0; selected.forEach(function(id) { currentT += getItemPrice(id); });
     var newT = currentT - best.oldPrice + getItemPrice(best.sid);
+    var saving = currentT - newT;
+
     var html = '<div class="sug-title">👑 AIコンシェルジュからのご提案</div>';
-    if (best.type === 'cheaper') { html += '<div class="sug-benefit-msg">✨ お安くなります！ ✨</div>'; } 
-    else if (best.type === 'samePrice') { html += '<div class="sug-benefit-msg">✨ 範囲が広がります！ ✨</div>'; }
+    html += '<div class="sug-benefit-msg">✨ お安くなります！ ✨</div>';
     html += '<div class="sug-menu-name">' + menuData[best.sid].label + '</div>';
-    html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-price">¥' + currentT.toLocaleString() + '</span></div><div style="color:#c00;">▶</div><div class="sug-col"><span class="sug-col-price new">¥' + newT.toLocaleString() + '</span></div></div>';
-    html += '<div style="display:flex; gap:10px;"><button onclick="applyOptimalSet()" style="background:#000; color:#d4af37; border:1px solid #000; padding:12px; border-radius:6px; font-weight:bold; flex:2;">変更する</button><button onclick="suggestionId=null; document.getElementById(\'suggestion-box\').style.display=\'none\'; render();" style="background:transparent; color:#333; border:none; flex:1;">今はしない</button></div>';
-    document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block';
+    if(menuData[best.sid].sub) html += '<div class="sug-menu-sub">（' + menuData[best.sid].sub + '）</div>';
+    
+    html += '<div class="sug-compare-panel">';
+    html += '<div class="sug-col"><span class="sug-col-label">現在の選択合計</span><span class="sug-col-price old">¥' + currentT.toLocaleString() + '</span></div>';
+    html += '<div class="sug-arrow">▶▶</div>';
+    html += '<div class="sug-col"><span class="sug-col-label">プラン変更後</span><span class="sug-col-price new">¥' + newT.toLocaleString() + '</span></div>';
+    html += '</div>';
+
+    if(saving > 0) {
+        html += '<div style="text-align:center;"><span class="sug-discount-badge">✨ ¥' + saving.toLocaleString() + ' お得になります！</span></div>';
+    }
+
+    html += '<div class="sug-note">※セット内の不要な部位は避けて照射することも可能です。<br>（デザイン脱毛をご希望の際もご相談ください）</div>';
+    html += '<div style="display:flex; gap:10px; margin-top:15px;">';
+    html += '<button onclick="applyOptimalSet()" style="background:#000; color:#d4af37; border:1px solid #000; padding:12px; border-radius:6px; font-weight:bold; flex:2;">変更する</button>';
+    html += '<button onclick="suggestionId=null; document.getElementById(\'suggestion-box\').style.display=\'none\'; render();" style="background:transparent; color:#333; border:none; flex:1; font-weight:bold;">今はしない</button>';
+    html += '</div>';
+    
+    document.getElementById('suggestion-box').innerHTML = html; 
+    document.getElementById('suggestion-box').style.display = 'block';
 }
 
 function analyzeSuggestions(isManual) {
