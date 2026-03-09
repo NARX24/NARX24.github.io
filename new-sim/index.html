@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.24.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.25.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -21,6 +21,18 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .base-img{opacity:0.3;z-index:1;}
 .layer-part{opacity:0;z-index:2;}
 .layer-part.active{opacity:1;filter:drop-shadow(0 0 3px var(--gold));}
+
+/* 【追加】増える部位の点滅アニメーション */
+@keyframes blink-gold {
+    0% { opacity: 0; filter: drop-shadow(0 0 2px var(--gold)); }
+    50% { opacity: 0.85; filter: drop-shadow(0 0 10px var(--gold)); }
+    100% { opacity: 0; filter: drop-shadow(0 0 2px var(--gold)); }
+}
+.layer-part.suggest-blink {
+    animation: blink-gold 1.2s infinite ease-in-out;
+    z-index: 3;
+}
+
 .tabs{display:flex;gap:5px;margin-bottom:15px;border-bottom:1px solid var(--light-gray);}
 .tab{flex:1;padding:12px 5px;text-align:center;color:#777;cursor:pointer;font-size:0.85rem;}
 .tab.active{color:var(--gold);border-bottom:2px solid var(--gold);font-weight:bold;}
@@ -134,7 +146,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 【ES5完全対応 Ver.24.0：コンシェルジュ アップセル差額上限10,000円に変更】
+// 【ES5完全対応 Ver.25.0：点滅アニメーション追加＆アップセル条件変更】
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -279,6 +291,47 @@ function toggleItem(id) {
     render();
 }
 
+// 【追加】提案される増える部位だけを点滅させる関数
+function applySuggestionBlink() {
+    // 全リセット
+    document.querySelectorAll('.layer-part').forEach(function(img) {
+        img.classList.remove('suggest-blink');
+    });
+
+    var box = document.getElementById('suggestion-box');
+    if (box.style.display === 'none' || !suggestionId) return;
+
+    var sugLeaves = itemLeaves[suggestionId];
+    if (!sugLeaves) return;
+
+    // 現在選ばれている全末端パーツを取得
+    var selectedLeaves =[];
+    selected.forEach(function(id) {
+        if(itemLeaves[id]) {
+            itemLeaves[id].forEach(function(leaf) {
+                if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf);
+            });
+        }
+    });
+
+    // 提案セットのうち、選ばれていないパーツ（増えるパーツ）だけ点滅させる
+    sugLeaves.forEach(function(leaf) {
+        if (selectedLeaves.indexOf(leaf) === -1) {
+            var item = menuData[leaf];
+            if (item && item.imgs) {
+                if (item.imgs.body) {
+                    var i = document.getElementById("img-" + item.imgs.body);
+                    if (i && !i.classList.contains('active')) i.classList.add('suggest-blink');
+                }
+                if (item.imgs.face) {
+                    var f = document.getElementById("img-" + item.imgs.face);
+                    if (f && !f.classList.contains('active')) f.classList.add('suggest-blink');
+                }
+            }
+        }
+    });
+}
+
 function render() {
     var area = document.getElementById('menu-area');
     if (!area) return;
@@ -339,6 +392,9 @@ function render() {
         area.appendChild(div);
     });
     updateTotal();
+    
+    // UI再描画後に点滅を適用
+    applySuggestionBlink();
 }
 
 function updateTotal() {
@@ -378,6 +434,7 @@ function toggleConcierge(forceState) {
         } else {
             showConciergeBubble("コンシェルジュを待機させました。<br>（アイコンタップでONになります）");
             document.getElementById('suggestion-box').style.display = 'none';
+            applySuggestionBlink(); // OFF時は点滅も消す
         }
     }
     var icon = document.getElementById('concierge-icon');
@@ -458,8 +515,8 @@ function analyzeSuggestions(isManual) {
             } else if (diffPrice === 0 && addedLeavesCount > 0 && intersectingItems.length >= 2) {
                 simData.type = 'samePrice'; samePriceCandidates.push(simData);
             } else if (diffPrice > 0 && addedLeavesCount > 0) {
-                // 【修正】アップセルの差額上限を元の 10,000円 に戻しました。
-                if (includesLastToggled && diffPrice <= 10000) {
+                // 【条件変更】アップセルはメニューを2つ以上選んでいる時のみ発動！
+                if (includesLastToggled && diffPrice <= 10000 && selected.length >= 2) {
                     simData.type = 'upsell'; upsellCandidates.push(simData);
                 }
             }
@@ -489,15 +546,24 @@ function analyzeSuggestions(isManual) {
 
 function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').style.display = 'none';
-    if (!isConciergeON && !isManual) return;
+    if (!isConciergeON && !isManual) {
+        suggestionId = null;
+        applySuggestionBlink();
+        return;
+    }
     var best = analyzeSuggestions(isManual);
 
     if (!best) {
         if (isManual && isConciergeON) showConciergeBubble("現在、最適なプランのご提案はございません。<br>引き続きメニューをお選びください。");
         suggestionId = null;
+        applySuggestionBlink();
         return;
     }
-    if (!isManual && cancelCount >= 2) return;
+    if (!isManual && cancelCount >= 2) {
+        suggestionId = null;
+        applySuggestionBlink();
+        return;
+    }
 
     suggestionId = best.sid;
     suggestionReplaceItems = best.intersectingItems;
@@ -534,6 +600,9 @@ function checkSuggestion(isManual) {
 
     document.getElementById('suggestion-box').innerHTML = html;
     document.getElementById('suggestion-box').style.display = 'block';
+    
+    // 提案表示後に点滅を発動
+    applySuggestionBlink();
 }
 
 function applyOptimalSet() {
@@ -548,7 +617,7 @@ function applyOptimalSet() {
     suggestionId = null;
     suggestionReplaceItems =[];
     document.getElementById('suggestion-box').style.display = 'none';
-    render();
+    render(); // 再描画で点滅も消え、新しい部位が光る
 }
 
 function hideSuggestion() { 
@@ -560,7 +629,9 @@ function hideSuggestion() {
             showConciergeBubble("いつでも待機していますので、<br>必要な時に呼んでくださいね♪");
         }
     }
+    suggestionId = null;
     document.getElementById('suggestion-box').style.display = 'none'; 
+    applySuggestionBlink(); // 点滅を消す
 }
 
 function showConciergeBubble(msg) {
