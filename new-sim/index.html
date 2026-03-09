@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.25.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.26.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -22,7 +22,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .layer-part{opacity:0;z-index:2;}
 .layer-part.active{opacity:1;filter:drop-shadow(0 0 3px var(--gold));}
 
-/* 【追加】増える部位の点滅アニメーション */
 @keyframes blink-gold {
     0% { opacity: 0; filter: drop-shadow(0 0 2px var(--gold)); }
     50% { opacity: 0.85; filter: drop-shadow(0 0 10px var(--gold)); }
@@ -74,7 +73,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon.off svg .skin,.concierge-icon.off svg .suit{fill:var(--gold);}
 .concierge-icon.off svg .line{stroke:#111;}
 .concierge-icon.off svg .btn{fill:#111;}
-#final-confirm-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100000;display:none;justify-content:center;align-items:center;}
+#final-confirm-modal, #copy-complete-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100000;display:none;justify-content:center;align-items:center;}
 .final-modal-content{border:1px solid var(--gold);padding:30px 20px;width:85%;max-width:400px;background:var(--black);text-align:center;border-radius:8px;}
 .bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
 .summary-grid{display:grid;grid-template-columns:1fr 1.1fr;margin-bottom:12px;}
@@ -84,6 +83,13 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .btn{flex:1;padding:15px;text-align:center;border-radius:6px;font-weight:bold;font-size:0.9rem;border:none;cursor:pointer;text-decoration:none;}
 .btn-copy{background:#222;color:#fff;}
 .btn-reserve{background:var(--gold);color:#000;}
+
+/* 【追加】コピー完了モーダル内のステップデザイン */
+.step-box {background: #111; border: 1px solid #333; border-radius: 8px; padding: 18px; margin: 20px 0; text-align: left;}
+.step-item {margin-bottom: 15px;}
+.step-item:last-child {margin-bottom: 0;}
+.step-label {font-size: 0.7rem; color: var(--gold); display: block; margin-bottom: 3px; font-weight: bold;}
+.step-val {font-size: 0.95rem; font-weight: bold; color: #fff;}
 </style>
 </head>
 <body>
@@ -125,6 +131,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <div id="suggestion-box"></div>
 
+<!-- 【既存】アップグレード等最終確認モーダル -->
 <div id="final-confirm-modal">
     <div class="final-modal-content">
         <h3 style="color:var(--gold);margin-top:0;font-size:1.1rem;letter-spacing:1px;">💡 最終ご提案</h3>
@@ -134,19 +141,45 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     </div>
 </div>
 
+<!-- 【追加】コピー完了＆エルメ予約誘導モーダル -->
+<div id="copy-complete-modal">
+    <div class="final-modal-content" style="padding: 35px 20px;">
+        <div style="font-size:2.5rem; margin-bottom:10px;">📋</div>
+        <h3 style="color:var(--gold); font-size: 1.1rem; letter-spacing: 2px; margin-top:0;">COPY COMPLETED</h3>
+        <p style="font-size: 0.8rem; color: #ccc; line-height: 1.6; margin-top: 15px;">ご希望の部位をコピーいたしました。<br>予約ページへ移動後、以下の手順でご予約ください。</p>
+        
+        <div class="step-box">
+            <div class="step-item">
+                <span class="step-label">① メニュー選択</span>
+                <span class="step-val">複数メニュー予約【時間枠】</span>
+            </div>
+            <div class="step-item">
+                <span class="step-label">② 時間枠の選択</span>
+                <span class="step-val" id="modal-time-slot-text" style="color:var(--gold); font-size: 1.2rem;"></span>
+            </div>
+            <div class="step-item">
+                <span class="step-label">③ お客様情報の入力</span>
+                <span class="step-val">「備考欄」にコピーした内容をペースト</span>
+            </div>
+        </div>
+
+        <button onclick="goToReserve()" style="width:100%;background:var(--gold);color:#000;border:none;padding:16px;border-radius:6px;font-weight:bold;margin-bottom:15px;cursor:pointer;font-size:0.95rem;box-shadow:0 4px 10px rgba(0,0,0,0.4);">予約ページへ進む</button>
+        <button onclick="closeCopyModal()" style="width:100%;background:transparent;color:#888;border:none;padding:10px;font-size:0.8rem;cursor:pointer;">閉じる</button>
+    </div>
+</div>
+
 <div class="bottom-bar">
     <div class="summary-grid">
         <div class="summary-item"><span class="label">料金合計 (税込)</span><span class="val" id="total-price">¥0</span></div>
         <div class="summary-item" style="text-align:right;"><span class="label">ご予約時間枠</span><span class="val" id="total-time-slot">0.0 時間枠</span></div>
     </div>
     <div class="btn-group">
-        <button class="btn btn-copy" onclick="copyResult()">内容をコピー</button>
-        <a href="https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585" class="btn btn-reserve" target="_blank">予約ページへ</a>
+        <button class="btn btn-copy" onclick="copyResult()">内容をコピーして予約へ</button>
     </div>
 </div>
 
 <script>
-// 【ES5完全対応 Ver.25.0：点滅アニメーション追加＆アップセル条件変更】
+// 【ES5完全対応 Ver.26.0：高級コピー完了モーダル＆エルメ誘導追加】
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -178,7 +211,7 @@ var menuData = {
     set_ear_whole:{price:8800,time:25,label:'耳全体セット',cat:'set',sub:'耳珠＋耳たぶ',imgs:{face:'set_ear_whole'},hasFace:true,isSpecial:true},
     part_nose_under:{price:4400,time:16,label:'鼻下',cat:'part',subCat:'顔',imgs:{face:'part_nose_under'},hasFace:true},
     part_mouth_under:{price:4400,time:16,label:'口下',cat:'part',subCat:'顔',imgs:{face:'part_mouth_under'},hasFace:true},
-    part_cheek:{price:4400,time:16,label:'頬',cat:'part',subCat:'顔',imgs:{face:'part_cheek'},hasFace:true},
+    part_cheek:{price:4400,time:16,label:'頬',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
     part_face_line:{price:4400,time:16,label:'フェイスライン',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
     part_neck:{price:4400,time:16,label:'首',cat:'part',subCat:'顔',imgs:{face:'part_neck'},hasFace:true},
     part_nape:{price:4400,time:16,label:'うなじ',cat:'part',subCat:'上半身',imgs:{body:'part_nape'},hasFace:false},
@@ -291,9 +324,7 @@ function toggleItem(id) {
     render();
 }
 
-// 【追加】提案される増える部位だけを点滅させる関数
 function applySuggestionBlink() {
-    // 全リセット
     document.querySelectorAll('.layer-part').forEach(function(img) {
         img.classList.remove('suggest-blink');
     });
@@ -304,7 +335,6 @@ function applySuggestionBlink() {
     var sugLeaves = itemLeaves[suggestionId];
     if (!sugLeaves) return;
 
-    // 現在選ばれている全末端パーツを取得
     var selectedLeaves =[];
     selected.forEach(function(id) {
         if(itemLeaves[id]) {
@@ -314,7 +344,6 @@ function applySuggestionBlink() {
         }
     });
 
-    // 提案セットのうち、選ばれていないパーツ（増えるパーツ）だけ点滅させる
     sugLeaves.forEach(function(leaf) {
         if (selectedLeaves.indexOf(leaf) === -1) {
             var item = menuData[leaf];
@@ -393,7 +422,6 @@ function render() {
     });
     updateTotal();
     
-    // UI再描画後に点滅を適用
     applySuggestionBlink();
 }
 
@@ -434,7 +462,7 @@ function toggleConcierge(forceState) {
         } else {
             showConciergeBubble("コンシェルジュを待機させました。<br>（アイコンタップでONになります）");
             document.getElementById('suggestion-box').style.display = 'none';
-            applySuggestionBlink(); // OFF時は点滅も消す
+            applySuggestionBlink(); 
         }
     }
     var icon = document.getElementById('concierge-icon');
@@ -515,7 +543,6 @@ function analyzeSuggestions(isManual) {
             } else if (diffPrice === 0 && addedLeavesCount > 0 && intersectingItems.length >= 2) {
                 simData.type = 'samePrice'; samePriceCandidates.push(simData);
             } else if (diffPrice > 0 && addedLeavesCount > 0) {
-                // 【条件変更】アップセルはメニューを2つ以上選んでいる時のみ発動！
                 if (includesLastToggled && diffPrice <= 10000 && selected.length >= 2) {
                     simData.type = 'upsell'; upsellCandidates.push(simData);
                 }
@@ -601,7 +628,6 @@ function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').innerHTML = html;
     document.getElementById('suggestion-box').style.display = 'block';
     
-    // 提案表示後に点滅を発動
     applySuggestionBlink();
 }
 
@@ -617,7 +643,7 @@ function applyOptimalSet() {
     suggestionId = null;
     suggestionReplaceItems =[];
     document.getElementById('suggestion-box').style.display = 'none';
-    render(); // 再描画で点滅も消え、新しい部位が光る
+    render(); 
 }
 
 function hideSuggestion() { 
@@ -631,7 +657,7 @@ function hideSuggestion() {
     }
     suggestionId = null;
     document.getElementById('suggestion-box').style.display = 'none'; 
-    applySuggestionBlink(); // 点滅を消す
+    applySuggestionBlink(); 
 }
 
 function showConciergeBubble(msg) {
@@ -686,6 +712,7 @@ function rejectFinalConfirm() {
     doActualCopy();
 }
 
+// 【変更】コピー処理成功後に専用モーダルを立ち上げる
 function doActualCopy() {
     var slot = document.getElementById('total-time-slot').innerText;
     var priceStr = document.getElementById('total-price').innerText;
@@ -694,7 +721,26 @@ function doActualCopy() {
     txt += "──────────\n";
     txt += "合計金額：" + priceStr + "\n";
     txt += "予約枠目安：" + slot;
-    navigator.clipboard.writeText(txt).then(function() { alert("コピーしました。"); });
+    
+    navigator.clipboard.writeText(txt).then(function() { 
+        // モーダル内の時間枠テキストを書き換え
+        document.getElementById('modal-time-slot-text').innerText = slot;
+        // モーダルを表示
+        document.getElementById('copy-complete-modal').style.display = 'flex';
+    }).catch(function() {
+        alert("コピーに失敗しました。お使いのブラウザや設定によりクリップボードがブロックされている可能性があります。");
+    });
+}
+
+// 【追加】予約ページへ飛ぶ関数
+function goToReserve() {
+    document.getElementById('copy-complete-modal').style.display = 'none';
+    window.open("https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585", "_blank");
+}
+
+// 【追加】モーダルを閉じる関数
+function closeCopyModal() {
+    document.getElementById('copy-complete-modal').style.display = 'none';
 }
 </script>
 </body>
