@@ -3,16 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.28.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.29.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
+
+/* ロゴエリアの改善：黒ロゴでも見えるグロー効果 */
+.header-logo-container {
+    text-align: center;
+    padding: 20px 0 10px;
+}
+.logo-img {
+    height: 50px; /* 必要に応じて調整 */
+    filter: drop-shadow(0 0 5px var(--gold)); /* ゴールドの後光 */
+}
+
 #gate-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.98);z-index:99999;display:flex;justify-content:center;align-items:center;}
 .modal-content{border:1px solid var(--gold);padding:40px 20px;width:85%;max-width:400px;background:var(--black);text-align:center;border-radius:8px;}
 .container{max-width:600px;margin:0 auto;padding:20px;}
 .header{text-align:center;padding:10px 0;border-bottom:1px solid var(--gold);margin-bottom:20px;}
 .header h1{color:var(--gold);margin:0;font-size:1.4rem;letter-spacing:3px;}
 #mode-display{font-size:0.75rem;color:var(--black);background:var(--gold);padding:4px 15px;border-radius:20px;margin-top:8px;display:inline-block;}
+
 .dual-visual-container{display:flex;gap:4px;height:240px;position:sticky;top:10px;z-index:50;background:var(--light-gray);border:2px solid var(--gold);margin-bottom:20px;border-radius:8px;overflow:hidden;}
 .view-panel{flex:1;position:relative;display:flex;justify-content:center;align-items:center;background-color:var(--panel-bg);}
 .view-panel:first-child{border-right:1px solid #ddd;}
@@ -36,7 +48,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .tab{flex:1;padding:12px 5px;text-align:center;color:#777;cursor:pointer;font-size:0.85rem;}
 .tab.active{color:var(--gold);border-bottom:2px solid var(--gold);font-weight:bold;}
 
-/* 【追加】チップスUIのスタイル */
 #selected-chips-area { margin-bottom: 15px; background: #0a0a0a; padding: 12px; border-radius: 8px; border: 1px solid #222; }
 .chips-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .chips-title { font-size: 0.75rem; color: var(--gold); font-weight: bold; letter-spacing: 1px; }
@@ -49,6 +60,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .subcat-header{display:flex;align-items:center;justify-content:center;margin:30px 0 15px;color:var(--gold);font-size:0.85rem;letter-spacing:0.4em;font-weight:bold;}
 .subcat-header::before,.subcat-header::after{content:"";flex:1;height:1px;background:linear-gradient(to right,transparent,var(--gold));margin:0 20px;opacity:0.6;}
 .subcat-header::after{background:linear-gradient(to left,transparent,var(--gold));}
+
 .item{background:var(--dark-gray);margin-bottom:8px;padding:16px;border-radius:6px;display:flex;align-items:center;cursor:pointer;border:1px solid transparent;transition:0.2s;}
 .item.selected{border-color:var(--gold);background:#080808;}
 .item.disabled{opacity:0.15;cursor:default;filter:grayscale(1);}
@@ -56,7 +68,9 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-info{flex:1;}
 .item-name{display:block;font-size:0.95rem;}
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
+.price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 .item-sub{display:block;font-size:0.7rem;color:#888;margin-top:5px;line-height:1.4;}
+
 #suggestion-box{position:fixed;bottom:190px;left:50%;transform:translateX(-50%);width:92%;max-width:420px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:20px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.85rem;color:#555;margin-bottom:12px;text-align:center;}
 .sug-benefit-msg {text-align:center;font-size:0.75rem;color:var(--gold);background:#111;padding:6px 10px;border-radius:4px;font-weight:bold;margin-bottom:12px;letter-spacing:0.5px;}
@@ -71,6 +85,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .sug-arrow{padding:0 5px;color:#c00;font-weight:bold;text-align:center;font-size:0.8rem;}
 .sug-discount-badge{display:inline-block;background:#c00;color:#fff;font-size:0.75rem;padding:4px 10px;border-radius:12px;margin-bottom:12px;font-weight:bold;}
 .sug-note{font-size:0.65rem;color:#444;text-align:left;line-height:1.5;margin-top:15px;border-top:1px dashed rgba(0,0,0,0.2);padding-top:8px;}
+
 #concierge-wrapper{display:flex;position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:1000;align-items:center;flex-direction:column;pointer-events:none;}
 #concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.3s ease;position:relative;line-height:1.5;white-space:nowrap;text-align:center;pointer-events:auto;}
 .bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
@@ -84,12 +99,14 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon.off svg .skin,.concierge-icon.off svg .suit{fill:var(--gold);}
 .concierge-icon.off svg .line{stroke:#111;}
 .concierge-icon.off svg .btn{fill:#111;}
+
 #final-confirm-modal, #copy-complete-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100000;display:none;justify-content:center;align-items:center;}
 .final-modal-content{border:1px solid var(--gold);padding:30px 20px;width:85%;max-width:400px;background:var(--black);text-align:center;border-radius:8px;}
 .bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
 .summary-grid{display:grid;grid-template-columns:1fr 1.1fr;margin-bottom:12px;}
 .summary-item .label{font-size:0.7rem;color:#999;display:block;}
 .summary-item .val{font-size:1.35rem;color:var(--gold);font-weight:bold;}
+.summary-item .counseling-note{font-size:0.6rem;color:#fff;background:#c00;padding:2px 6px;border-radius:4px;display:inline-block;margin-top:2px;}
 .btn-group{display:flex;gap:10px;}
 .btn{flex:1;padding:15px;text-align:center;border-radius:6px;font-weight:bold;font-size:0.9rem;border:none;cursor:pointer;text-decoration:none;}
 .btn-copy{background:#222;color:#fff;}
@@ -106,7 +123,11 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <div id="gate-modal">
     <div class="modal-content">
-        <h2 style="color: var(--gold); margin-bottom: 10px;">WELCOME</h2>
+        <!-- ロゴエリア（例） -->
+        <div class="header-logo-container">
+            <img src="logo.png" class="logo-img" alt="NARX LOGO" onerror="this.style.display='none'">
+        </div>
+        <h2 style="color: var(--gold); margin-bottom: 10px; letter-spacing: 2px;">WELCOME</h2>
         <p style="font-size: 0.85rem; line-height: 1.8; margin-bottom: 35px; color: #bbb;">現在の状況を選択してください。</p>
         <button class="btn btn-reserve" style="width: 100%; margin-bottom: 15px;" onclick="forceStart('new')">初めて来店する（初回価格）</button>
         <button class="btn btn-copy" style="width: 100%;" onclick="forceStart('repeat')">既に会員である（通常価格）</button>
@@ -128,7 +149,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
         <div id="tab-other" class="tab" onclick="changeTab('other')">その他</div>
     </div>
     
-    <!-- 【追加】選択中のメニューを表示するチップスエリア -->
     <div id="selected-chips-area" style="display: none;">
         <div class="chips-header">
             <span class="chips-title">現在選択中のメニュー</span>
@@ -168,7 +188,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
         
         <div class="step-box">
             <div class="step-item">
-                <span class="step-label">① メニュー選択</span>
+                <span class="step-label">① メメニュー選択</span>
                 <span class="step-val">複数メニュー予約【時間枠】</span>
             </div>
             <div class="step-item">
@@ -189,7 +209,11 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div class="bottom-bar">
     <div class="summary-grid">
         <div class="summary-item"><span class="label">料金合計 (税込)</span><span class="val" id="total-price">¥0</span></div>
-        <div class="summary-item" style="text-align:right;"><span class="label">ご予約時間枠</span><span class="val" id="total-time-slot">0.0 時間枠</span></div>
+        <div class="summary-item" style="text-align:right;">
+            <span class="label">ご予約時間枠</span>
+            <span class="val" id="total-time-slot">0.0 時間枠</span>
+            <div id="counseling-badge-area"></div>
+        </div>
     </div>
     <div class="btn-group">
         <button class="btn btn-copy" onclick="copyResult()">内容をコピーして予約へ</button>
@@ -197,7 +221,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 【ES5完全対応 Ver.28.0：チップスUI＆リセットボタン搭載】
+// 【ES5完全対応 Ver.29.0：名称変更・新規価格ロジック・新部位追加】
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -211,14 +235,15 @@ var cancelCount = 0;
 var bubbleTimer = null;
 
 var menuData = {
-    set_fullbody_all:{price:52800,time:240,label:'全身オール（顔VIO込）',cat:'set',sub:'全顔＋上半身＋下半身＋VIO＋耳たぶ等すべて',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'},hasFace:true},
-    set_fullbody_noface:{price:41800,time:200,label:'顔なし全身',cat:'set',sub:'脇・うなじ・背中・胸・腹・腕全体・VIO・脚全体',imgs:{body:'set_fullbody_noface_body'},hasFace:false},
+    set_fullbody_all:{price:52800,time:240,label:'全身オールセット（顔VIO込）',cat:'set',sub:'全顔＋上半身＋下半身＋VIO＋耳たぶ等すべて',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'},hasFace:true},
+    set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット',cat:'set',sub:'脇・うなじ・背中・胸・腹・腕全体・VIO・脚全体',imgs:{body:'set_fullbody_noface_body'},hasFace:false},
+    set_fullbody_novio:{price:41800,time:220,label:'VIOなし全身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕全体・脚全体',imgs:{body:'set_arms_legs',face:'set_fullface'},hasFace:true},
     set_upperbody:{price:30800,time:140,label:'上半身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕全体',imgs:{body:'set_upperbody_body',face:'set_upperbody_face'},hasFace:true},
     set_lowerbody:{price:30800,time:150,label:'下半身セット',cat:'set',sub:'VIOセット・臀部（おしり）・脚全体',imgs:{body:'set_lowerbody_body'},hasFace:false},
     set_fullface_vio:{price:27500,time:100,label:'全顔+VIOセット',cat:'set',sub:'全顔セット＋VIOセット',imgs:{body:'set_fullface_vio_body',face:'set_fullface_vio_face'},hasFace:true},
     set_fullface_eyebrow:{price:22000,time:105,label:'全顔+眉毛脱毛セット',cat:'set',sub:'全顔セット＋眉毛セット',imgs:{face:'set_fullface_eyebrow_face'},hasFace:true},
     set_eyebrow:{price:11000,time:40,label:'眉毛セット',cat:'set',sub:'眉上・眉下・眉中・デザイン込',imgs:{face:'set_eyebrow_face'},hasFace:true,isSpecial:true},
-    set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set',sub:'鼻下・口下・頬・フェイスライン・首',imgs:{face:'set_fullface'},hasFace:true},
+    set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set',sub:'額・鼻下・口下・頬・フェイスライン・首',imgs:{face:'set_fullface'},hasFace:true},
     set_vio:{price:16500,time:50,label:'VIOセット',cat:'set',sub:'Vライン・Iライン・Oライン',imgs:{body:'set_vio'},hasFace:false},
     set_vio_buttocks:{price:20900,time:65,label:'VIO+臀部(おしり)セット',cat:'set',sub:'VIOセット＋臀部（おしり）',imgs:{body:'set_vio'},hasFace:false},
     set_abdomen_vio:{price:18700,time:65,label:'ヘソ下+VIOセット',cat:'set',sub:'腹部（ヘソ下込）＋VIOセット',imgs:{body:'set_chest_abdomen'},hasFace:false},
@@ -228,6 +253,7 @@ var menuData = {
     set_legs:{price:17600,time:65,label:'両足セット',cat:'set',sub:'膝上・下・足の甲指',imgs:{body:'set_legs'},hasFace:false},
     set_ear_whole:{price:8800,time:25,label:'耳全体セット',cat:'set',sub:'耳珠＋耳たぶ',imgs:{face:'set_ear_whole'},hasFace:true,isSpecial:true},
     
+    part_forehead:{price:4400,time:10,label:'額',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
     part_nose_under:{price:4400,time:10,label:'鼻下',cat:'part',subCat:'顔',imgs:{face:'part_nose_under'},hasFace:true},
     part_mouth_under:{price:4400,time:10,label:'口下',cat:'part',subCat:'顔',imgs:{face:'part_mouth_under'},hasFace:true},
     part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
@@ -236,8 +262,10 @@ var menuData = {
     
     part_nape:{price:4400,time:10,label:'うなじ',cat:'part',subCat:'上半身',imgs:{body:'part_nape'},hasFace:false},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'上半身',imgs:{body:'part_armpit'},hasFace:false},
-    part_chest_nipple:{price:6600,time:16,label:'胸（乳輪込）',cat:'part',subCat:'上半身',imgs:{body:'part_chest_nipple'},hasFace:false},
-    part_abdomen_navel:{price:6600,time:16,label:'腹部（ヘソ下込）',cat:'part',subCat:'上半身',imgs:{body:'part_abdomen_navel'},hasFace:false},
+    part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'上半身',imgs:{body:'part_chest_nipple'},hasFace:false},
+    part_chest_nipple:{price:6600,time:16,label:'胸',cat:'part',subCat:'上半身',imgs:{body:'part_chest_nipple'},hasFace:false},
+    part_navel_around:{price:4400,time:10,label:'へそ周り',cat:'part',subCat:'上半身',imgs:{body:'part_abdomen_navel'},hasFace:false},
+    part_abdomen_navel:{price:6600,time:16,label:'腹部',cat:'part',subCat:'上半身',imgs:{body:'part_abdomen_navel'},hasFace:false},
     part_back_upper:{price:6600,time:20,label:'背中上',cat:'part',subCat:'上半身',imgs:{body:'part_back_upper'},hasFace:false},
     part_back_lower:{price:6600,time:20,label:'背中下',cat:'part',subCat:'上半身',imgs:{body:'part_back_lower'},hasFace:false},
     part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'上半身',imgs:{body:'part_elbow_upper'},hasFace:false},
@@ -253,6 +281,8 @@ var menuData = {
     part_i_line:{price:7700,time:15,label:'Iライン',cat:'part',subCat:'VIO',imgs:{body:'part_i_line'},hasFace:false},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'VIO',imgs:{body:'part_o_line'},hasFace:false},
     
+    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'特殊部位',imgs:{face:'set_ear_whole'},hasFace:true},
+    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'特殊部位',imgs:{face:'set_ear_whole'},hasFace:true},
     part_eyebrow_upper:{price:4400,time:13,label:'眉上',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_upper'},hasFace:true},
     part_eyebrow_middle:{price:4400,time:10,label:'眉間（眉中）',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_middle'},hasFace:true},
     part_eyebrow_lower:{price:6600,time:13,label:'眉下',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_lower'},hasFace:true,isSpecial:true},
@@ -261,27 +291,29 @@ var menuData = {
     
     other_lala_peel:{price:12100,time:90,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},hasFace:true},
     other_face_correction:{price:22000,time:90,label:'小顔矯正術',cat:'other',imgs:{face:'other_face_correction'},hasFace:true},
-    other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション(顔)',cat:'other',imgs:{face:'other_derma_injection'},hasFace:true},
+    other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other',imgs:{face:'other_derma_injection'},hasFace:true},
     other_scalp_care:{price:22000,time:25,label:'スカルプケア',cat:'other',imgs:{face:'other_scalp_care'},hasFace:false},
     other_s_planning:{price:11000,time:60,label:'エスプランニング',cat:'other',imgs:{face:'other_s_planning'},hasFace:false}
 };
 
 var setIncludes = {
-    set_fullbody_all:['set_fullbody_noface','set_upperbody','set_lowerbody','set_fullface','set_vio','set_fullface_vio','set_chest_abdomen','set_arms_legs','set_arms','set_legs','part_chest_nipple','set_vio_buttocks','set_abdomen_vio'],
+    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_fullface_vio','set_chest_abdomen','set_arms_legs','set_arms','set_legs','set_vio_buttocks','set_abdomen_vio','set_ear_whole'],
     set_fullbody_noface:['set_lowerbody','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks','set_vio_buttocks','set_abdomen_vio'],
-    set_upperbody:['set_fullface','set_arms','part_armpit','part_chest_nipple','part_abdomen_navel','part_nape','part_back_upper','part_back_lower'],
+    set_fullbody_novio:['set_upperbody','set_arms','set_legs','part_nape','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','set_fullface'],
+    set_upperbody:['set_fullface','set_arms','part_armpit','part_chest_nipple','part_abdomen_navel','part_nape','part_back_upper','part_back_lower','part_nipple_around','part_navel_around'],
     set_lowerbody:['set_vio','set_legs','part_buttocks','set_vio_buttocks'],
     set_fullface_vio:['set_fullface','set_vio'],
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_lower','part_eyebrow_middle'],
-    set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
+    set_fullface:['part_forehead','part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
     set_vio_buttocks:['set_vio','part_buttocks'],
-    set_abdomen_vio:['part_abdomen_navel','set_vio'],
-    set_chest_abdomen:['part_chest_nipple','part_abdomen_navel'],
+    set_abdomen_vio:['part_abdomen_navel','set_vio','part_navel_around'],
+    set_chest_abdomen:['part_chest_nipple','part_abdomen_navel','part_nipple_around','part_navel_around'],
     set_arms_legs:['set_arms','set_legs'],
     set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
-    set_legs:['part_knee_upper','part_knee_lower','part_foot_toe']
+    set_legs:['part_knee_upper','part_knee_lower','part_foot_toe'],
+    set_ear_whole:['part_tragus','part_earlobe']
 };
 
 function forceStart(type) {
@@ -296,7 +328,7 @@ function forceStart(type) {
         initApp(); 
         render();
     } catch(e) { 
-        alert("システムエラーが発生しました。\nコードが最後までコピーされていない可能性があります。"); 
+        alert("システムエラーが発生しました。"); 
     }
 }
 
@@ -337,7 +369,6 @@ function createImg(parent, name) {
 
 function changeTab(tab) { currentTab = tab; render(); }
 
-// 【追加】全てをリセットする機能
 function resetSelection() {
     selected =[];
     lastToggledItem = null;
@@ -345,10 +376,7 @@ function resetSelection() {
     suggestionId = null;
     suggestionReplaceItems =[];
     document.getElementById('suggestion-box').style.display = 'none';
-    
-    if (isConciergeON) {
-        showConciergeBubble("すべてクリアしました。<br>最初からメニューをお選びください。");
-    }
+    if (isConciergeON) { showConciergeBubble("すべてクリアしました。<br>最初からメニューをお選びください。"); }
     render();
 }
 
@@ -365,25 +393,17 @@ function toggleItem(id) {
     render();
 }
 
-// 【追加】チップスUIの描画機能
 function renderChips() {
     var area = document.getElementById('selected-chips-area');
     var container = document.getElementById('chips-container');
     if (!area || !container) return;
-    
-    if (selected.length === 0) {
-        area.style.display = 'none';
-        return;
-    }
-    
+    if (selected.length === 0) { area.style.display = 'none'; return; }
     area.style.display = 'block';
     container.innerHTML = '';
-    
     selected.forEach(function(id) {
         var item = menuData[id];
         var chip = document.createElement('div');
         chip.className = 'chip';
-        // チップスの×ボタンを押した時、親のクリックイベントを止めて個別解除する
         chip.innerHTML = '<span>' + item.label + '</span><span class="chip-close" onclick="event.stopPropagation(); toggleItem(\'' + id + '\')">×</span>';
         container.appendChild(chip);
     });
@@ -393,64 +413,52 @@ function applySuggestionBlink() {
     document.querySelectorAll('.layer-part').forEach(function(img) {
         img.classList.remove('suggest-blink');
     });
-
     var box = document.getElementById('suggestion-box');
     if (box.style.display === 'none' || !suggestionId) return;
-
     var sugLeaves = itemLeaves[suggestionId];
     if (!sugLeaves) return;
-
     var selectedLeaves =[];
     selected.forEach(function(id) {
         if(itemLeaves[id]) {
-            itemLeaves[id].forEach(function(leaf) {
-                if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf);
-            });
+            itemLeaves[id].forEach(function(leaf) { if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf); });
         }
     });
-
     sugLeaves.forEach(function(leaf) {
         if (selectedLeaves.indexOf(leaf) === -1) {
             var item = menuData[leaf];
             if (item && item.imgs) {
-                if (item.imgs.body) {
-                    var i = document.getElementById("img-" + item.imgs.body);
-                    if (i && !i.classList.contains('active')) i.classList.add('suggest-blink');
-                }
-                if (item.imgs.face) {
-                    var f = document.getElementById("img-" + item.imgs.face);
-                    if (f && !f.classList.contains('active')) f.classList.add('suggest-blink');
-                }
+                if (item.imgs.body) { var i = document.getElementById("img-" + item.imgs.body); if (i && !i.classList.contains('active')) i.classList.add('suggest-blink'); }
+                if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if (f && !f.classList.contains('active')) f.classList.add('suggest-blink'); }
             }
         }
     });
+}
+
+// 【Ver.29.0価格ロジック】
+function getItemPrice(id) {
+    var item = menuData[id];
+    if (userType === 'new') {
+        if (item.hasFace || item.isSpecial) return 1000;
+        return item.price * 0.5;
+    }
+    return item.price;
 }
 
 function render() {
     var area = document.getElementById('menu-area');
     if (!area) return;
     area.innerHTML = '';
-
-    // タブの切り替え
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
     var activeTab = document.getElementById("tab-" + currentTab);
     if(activeTab) activeTab.classList.add('active');
-    
-    // 【追加】チップスUIの更新
     renderChips();
-
-    // 画像の更新
     document.querySelectorAll('.layer-part').forEach(function(img) { img.classList.remove('active'); });
-
     var selectedLeaves =[];
     selected.forEach(function(id) {
         if(itemLeaves[id]) {
-            itemLeaves[id].forEach(function(leaf) {
-                if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf);
-            });
+            itemLeaves[id].forEach(function(leaf) { if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf); });
         }
     });
-
     selected.forEach(function(id) {
         var item = menuData[id];
         if (item.imgs) {
@@ -458,7 +466,6 @@ function render() {
             if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
         }
     });
-
     selectedLeaves.forEach(function(leaf) {
         var item = menuData[leaf];
         if (item && item.imgs) {
@@ -483,25 +490,35 @@ function render() {
         div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
         div.onclick = function() { if(!isDis) toggleItem(id); };
         
+        var displayPrice = getItemPrice(id);
         var inner = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '>';
         inner += '<div class="item-info"><span class="item-name">' + item.label + '</span>';
         if(item.sub) inner += '<span class="item-sub">' + item.sub + '</span>';
-        inner += '</div><div class="item-price">¥' + item.price.toLocaleString() + '</div>';
+        inner += '</div><div class="item-price">¥' + displayPrice.toLocaleString();
+        if(userType === 'new') inner += '<span class="price-tag-new">初回</span>';
+        inner += '</div>';
         div.innerHTML = inner;
         area.appendChild(div);
     });
     updateTotal();
-    
     applySuggestionBlink();
 }
 
 function updateTotal() {
     var p = 0, t = 0, f = false;
     selected.forEach(function(id) {
-        var item = menuData[id]; p += item.price; t += item.time; if(item.hasFace) f = true;
+        p += getItemPrice(id); t += menuData[id].time; if(menuData[id].hasFace) f = true;
     });
     if (selected.length > 0) {
-        if (userType === 'new') t += 90; else if (f) t += 20;
+        if (userType === 'new') {
+            t += 90;
+            document.getElementById('counseling-badge-area').innerHTML = '<span class="counseling-note">※無料カウンセリング込</span>';
+        } else {
+            if (f) t += 20;
+            document.getElementById('counseling-badge-area').innerHTML = '';
+        }
+    } else {
+        document.getElementById('counseling-badge-area').innerHTML = '';
     }
     var rounded = Math.ceil(t / 30) * 30;
     var slot = Math.floor(rounded / 60) + "." + ((rounded % 60) === 30 ? '5' : '0');
@@ -509,129 +526,70 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = slot + " 時間枠";
 }
 
-function getOriginalPrice(setId) {
-    var leaves = itemLeaves[setId];
+function getOriginalTotal(idList) {
     var total = 0;
-    if(leaves) {
-        leaves.forEach(function(leaf) {
-            if (menuData[leaf]) total += menuData[leaf].price;
-        });
-    }
+    idList.forEach(function(id) { total += getItemPrice(id); });
     return total;
 }
 
 function toggleConcierge(forceState) {
-    if (typeof forceState !== 'undefined') {
-        isConciergeON = forceState;
-    } else {
-        isConciergeON = !isConciergeON; 
-        if (isConciergeON) {
-            cancelCount = 0; 
-            showConciergeBubble("コンシェルジュをONにしました！<br>最適なプランをご提案します。");
-            checkSuggestion(true); 
-        } else {
-            showConciergeBubble("コンシェルジュを待機させました。<br>（アイコンタップでONになります）");
-            document.getElementById('suggestion-box').style.display = 'none';
-            applySuggestionBlink(); 
-        }
-    }
+    if (typeof forceState !== 'undefined') { isConciergeON = forceState; } 
+    else { isConciergeON = !isConciergeON; }
     var icon = document.getElementById('concierge-icon');
-    if (isConciergeON) { icon.className = 'concierge-icon on'; } 
-    else { icon.className = 'concierge-icon off'; }
+    if (isConciergeON) {
+        icon.className = 'concierge-icon on';
+        showConciergeBubble("コンシェルジュをONにしました！<br>最適なプランをご提案します。");
+        checkSuggestion(true);
+    } else {
+        icon.className = 'concierge-icon off';
+        showConciergeBubble("コンシェルジュを待機させました。");
+        document.getElementById('suggestion-box').style.display = 'none';
+        applySuggestionBlink();
+    }
 }
 
 function analyzeSuggestions(isManual) {
     var selectedLeaves =[];
-    selected.forEach(function(id) {
-        if(itemLeaves[id]) {
-            itemLeaves[id].forEach(function(leaf) {
-                if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf);
-            });
-        }
-    });
-
-    var cheaperCandidates =[];
-    var samePriceCandidates =[];
-    var upsellCandidates =[];
-
+    selected.forEach(function(id) { if(itemLeaves[id]) { itemLeaves[id].forEach(function(leaf) { if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf); }); } });
+    var cheaperCandidates =[], samePriceCandidates =[], upsellCandidates =[];
     Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
         if (selected.indexOf(sid) !== -1) return;
         if (!isManual && dismissedSuggestions.indexOf(sid) !== -1) return;
-
         var candidateLeaves = itemLeaves[sid];
         if (!candidateLeaves) return;
-
         var includesLastToggled = false;
         if (lastToggledItem && itemLeaves[lastToggledItem]) {
             var lastLeaves = itemLeaves[lastToggledItem];
             includesLastToggled = true;
-            for (var k = 0; k < lastLeaves.length; k++) {
-                if (candidateLeaves.indexOf(lastLeaves[k]) === -1) {
-                    includesLastToggled = false; break;
-                }
-            }
+            for (var k = 0; k < lastLeaves.length; k++) { if (candidateLeaves.indexOf(lastLeaves[k]) === -1) { includesLastToggled = false; break; } }
         }
-
-        var intersectingItems =[];
-        var intersectingLeaves =[];
+        var intersectingItems =[], intersectingLeaves =[];
         var isCovered = true; 
-
         selected.forEach(function(selId) {
             var selLeaves = itemLeaves[selId];
             if (!selLeaves) return;
             var hasIntersection = false;
             var fullyContained = true;
-            selLeaves.forEach(function(leaf) {
-                if (candidateLeaves.indexOf(leaf) !== -1) { hasIntersection = true; } 
-                else { fullyContained = false; }
-            });
-            if (hasIntersection) {
-                intersectingItems.push(selId);
-                if (!fullyContained) { isCovered = false; } 
-                else {
-                    selLeaves.forEach(function(leaf) {
-                        if (intersectingLeaves.indexOf(leaf) === -1) intersectingLeaves.push(leaf);
-                    });
-                }
-            }
+            selLeaves.forEach(function(leaf) { if (candidateLeaves.indexOf(leaf) !== -1) { hasIntersection = true; } else { fullyContained = false; } });
+            if (hasIntersection) { intersectingItems.push(selId); if (!fullyContained) { isCovered = false; } else { selLeaves.forEach(function(leaf) { if (intersectingLeaves.indexOf(leaf) === -1) intersectingLeaves.push(leaf); }); } }
         });
-
         if (intersectingItems.length >= 1 && isCovered) {
-            var oldPrice = 0;
-            intersectingItems.forEach(function(itemId) { oldPrice += menuData[itemId].price; });
-            var newPrice = menuData[sid].price;
+            var oldPrice = getOriginalTotal(intersectingItems);
+            var newPrice = getItemPrice(sid);
             var diffPrice = newPrice - oldPrice;
             var addedLeavesCount = candidateLeaves.length - intersectingLeaves.length;
-
-            var simData = {
-                sid: sid, diffPrice: diffPrice, addedLeavesCount: addedLeavesCount,
-                intersectingItems: intersectingItems, oldPrice: oldPrice, includesLastToggled: includesLastToggled
-            };
-
-            if (diffPrice < 0 && intersectingItems.length >= 2) {
-                simData.type = 'cheaper'; cheaperCandidates.push(simData);
-            } else if (diffPrice === 0 && addedLeavesCount > 0 && intersectingItems.length >= 2) {
-                simData.type = 'samePrice'; samePriceCandidates.push(simData);
-            } else if (diffPrice > 0 && addedLeavesCount > 0) {
-                if (includesLastToggled && diffPrice <= 10000 && selected.length >= 2) {
-                    simData.type = 'upsell'; upsellCandidates.push(simData);
-                }
-            }
+            var simData = { sid: sid, diffPrice: diffPrice, addedLeavesCount: addedLeavesCount, intersectingItems: intersectingItems, oldPrice: oldPrice, includesLastToggled: includesLastToggled };
+            if (diffPrice < 0 && intersectingItems.length >= 2) { simData.type = 'cheaper'; cheaperCandidates.push(simData); } 
+            else if (diffPrice === 0 && addedLeavesCount > 0 && intersectingItems.length >= 2) { simData.type = 'samePrice'; samePriceCandidates.push(simData); } 
+            else if (diffPrice > 0 && addedLeavesCount > 0) { if (includesLastToggled && diffPrice <= 10000 && selected.length >= 2) { simData.type = 'upsell'; upsellCandidates.push(simData); } }
         }
     });
-
     if (cheaperCandidates.length > 0) {
-        cheaperCandidates.sort(function(a, b) { 
-            if (a.includesLastToggled !== b.includesLastToggled) return b.includesLastToggled ? 1 : -1;
-            return a.diffPrice - b.diffPrice; 
-        });
+        cheaperCandidates.sort(function(a, b) { if (a.includesLastToggled !== b.includesLastToggled) return b.includesLastToggled ? 1 : -1; return a.diffPrice - b.diffPrice; });
         return cheaperCandidates[0];
     } 
     if (samePriceCandidates.length > 0) {
-        samePriceCandidates.sort(function(a, b) { 
-            if (a.includesLastToggled !== b.includesLastToggled) return b.includesLastToggled ? 1 : -1;
-            return b.addedLeavesCount - a.addedLeavesCount; 
-        });
+        samePriceCandidates.sort(function(a, b) { if (a.includesLastToggled !== b.includesLastToggled) return b.includesLastToggled ? 1 : -1; return b.addedLeavesCount - a.addedLeavesCount; });
         return samePriceCandidates[0];
     } 
     if (upsellCandidates.length > 0) {
@@ -643,88 +601,51 @@ function analyzeSuggestions(isManual) {
 
 function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').style.display = 'none';
-    if (!isConciergeON && !isManual) {
-        suggestionId = null;
-        applySuggestionBlink();
-        return;
-    }
+    if (!isConciergeON && !isManual) { suggestionId = null; applySuggestionBlink(); return; }
     var best = analyzeSuggestions(isManual);
-
     if (!best) {
-        if (isManual && isConciergeON) showConciergeBubble("現在、最適なプランのご提案はございません。<br>引き続きメニューをお選びください。");
-        suggestionId = null;
-        applySuggestionBlink();
-        return;
+        if (isManual && isConciergeON) showConciergeBubble("現在、最適なプランのご提案はございません。");
+        suggestionId = null; applySuggestionBlink(); return;
     }
-    if (!isManual && cancelCount >= 2) {
-        suggestionId = null;
-        applySuggestionBlink();
-        return;
-    }
-
+    if (!isManual && cancelCount >= 2) { suggestionId = null; applySuggestionBlink(); return; }
     suggestionId = best.sid;
     suggestionReplaceItems = best.intersectingItems;
-
     var currentTotalPrice = 0;
-    selected.forEach(function(id) { currentTotalPrice += menuData[id].price; });
-    var newTotalPrice = currentTotalPrice - best.oldPrice + menuData[best.sid].price;
+    selected.forEach(function(id) { currentTotalPrice += getItemPrice(id); });
+    var newTotalPrice = currentTotalPrice - best.oldPrice + getItemPrice(best.sid);
     var setItem = menuData[best.sid];
-
     var html = '<div class="sug-title">👑 AIコンシェルジュからのご提案</div>';
-    
     if (best.type === 'cheaper') {
-        html += '<div class="sug-benefit-msg">✨ ご希望の部位をすべて含んだまま、セット価格でお安くなります！ ✨</div>';
-        var savingAmount = currentTotalPrice - newTotalPrice;
+        html += '<div class="sug-benefit-msg">✨ お安くなります！ ✨</div>';
         html += '<div class="sug-menu-name">' + setItem.label + '</div><div class="sug-menu-sub">（' + setItem.sub + '）</div>';
-        html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在の選択合計</span><span class="sug-col-price old">¥' + currentTotalPrice.toLocaleString() + '</span></div><div class="sug-arrow">▶▶</div><div class="sug-col"><span class="sug-col-label">プラン変更後</span><span class="sug-col-price new">¥' + newTotalPrice.toLocaleString() + '</span></div></div>';
-        html += '<div style="text-align:center;"><span class="sug-discount-badge">✨ ¥' + savingAmount.toLocaleString() + ' お得になります！</span></div>';
+        html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price old">¥' + currentTotalPrice.toLocaleString() + '</span></div><div class="sug-arrow">▶▶</div><div class="sug-col"><span class="sug-col-label">変更後</span><span class="sug-col-price new">¥' + newTotalPrice.toLocaleString() + '</span></div></div>';
     } else if (best.type === 'samePrice') {
-        html += '<div class="sug-benefit-msg">✨ ご希望の部位を含んだまま、同じ金額で照射範囲が広がります！ ✨</div>';
+        html += '<div class="sug-benefit-msg">✨ 範囲が広がります！ ✨</div>';
         html += '<div class="sug-menu-name">' + setItem.label + '</div><div class="sug-menu-sub">（' + setItem.sub + '）</div>';
-        html += '<div class="sug-compare-panel" style="justify-content:center;"><div class="sug-col"><span class="sug-col-label">現在の合計金額と同じ</span><span class="sug-col-price new">¥' + currentTotalPrice.toLocaleString() + '</span><span style="font-size:0.75rem; color:#111; font-weight:bold; display:block; margin-top:4px;">のままで切り替え可能です！</span></div></div>';
+        html += '<div class="sug-compare-panel" style="justify-content:center;"><div class="sug-col"><span class="sug-col-label">金額そのまま</span><span class="sug-col-price new">¥' + currentTotalPrice.toLocaleString() + '</span></div></div>';
     } else if (best.type === 'upsell') {
-        html += '<div class="sug-benefit-msg">✨ ご希望の部位を含んだまま、お得にアップグレード可能です！ ✨</div>';
+        html += '<div class="sug-benefit-msg">✨ お得にアップグレード！ ✨</div>';
         var addAmount = newTotalPrice - currentTotalPrice;
-        var originalPrice = getOriginalPrice(best.sid);
-        var theoreticalSaving = originalPrice - menuData[best.sid].price;
-        html += '<div class="sug-menu-name">' + setItem.label + ' <span style="font-size:0.9rem;">へのアップグレード</span></div><div class="sug-menu-sub">（' + setItem.sub + '）</div>';
-        html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在の選択</span><span class="sug-col-price">¥' + currentTotalPrice.toLocaleString() + '</span></div><div class="sug-col" style="flex:1.2; padding:0 5px;"><span class="sug-col-label" style="color:#c00;">追加</span><span class="sug-col-price" style="color:#c00;">+¥' + addAmount.toLocaleString() + '</span><div class="sug-arrow" style="font-size:0.7rem;">▶</div></div><div class="sug-col"><span class="sug-col-label">アップグレード後</span><span class="sug-col-price new">¥' + newTotalPrice.toLocaleString() + '</span></div></div>';
-        if (theoreticalSaving >= 2000) { html += '<div style="text-align:center;"><span class="sug-discount-badge" style="background:#111;">※パーツを別々に追加するより ¥' + theoreticalSaving.toLocaleString() + ' もお得です！</span></div>'; }
+        html += '<div class="sug-menu-name">' + setItem.label + '</div>';
+        html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price">¥' + currentTotalPrice.toLocaleString() + '</span></div><div class="sug-col" style="flex:1.2; padding:0 5px;"><span class="sug-col-label" style="color:#c00;">追加</span><span class="sug-col-price" style="color:#c00;">+¥' + addAmount.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後</span><span class="sug-col-price new">¥' + newTotalPrice.toLocaleString() + '</span></div></div>';
     }
-
-    html += '<div class="sug-note">※セット内の不要な部位は避けて照射することも可能です。<br>（デザイン脱毛をご希望の際もご相談ください）</div>';
     html += '<div style="display: flex; gap: 10px; margin-top: 15px;"><button onclick="applyOptimalSet()" style="background: var(--black); color: var(--gold); border: 1px solid var(--black); padding: 12px 20px; border-radius: 6px; font-weight: bold; flex: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">変更する</button><button onclick="hideSuggestion()" style="background: transparent; color: #333; border: none; font-size: 0.8rem; flex: 1; font-weight: bold;">今はしない</button></div>';
-
     document.getElementById('suggestion-box').innerHTML = html;
     document.getElementById('suggestion-box').style.display = 'block';
-    
     applySuggestionBlink();
 }
 
 function applyOptimalSet() {
     if (!suggestionId) return;
-    if (suggestionReplaceItems && suggestionReplaceItems.length > 0) {
-        suggestionReplaceItems.forEach(function(itemId) {
-            var idx = selected.indexOf(itemId);
-            if (idx !== -1) selected.splice(idx, 1);
-        });
-    }
+    if (suggestionReplaceItems) { suggestionReplaceItems.forEach(function(itemId) { var idx = selected.indexOf(itemId); if (idx !== -1) selected.splice(idx, 1); }); }
     selected.push(suggestionId);
-    suggestionId = null;
-    suggestionReplaceItems =[];
+    suggestionId = null; suggestionReplaceItems =[];
     document.getElementById('suggestion-box').style.display = 'none';
     render(); 
 }
 
 function hideSuggestion() { 
-    if (suggestionId) {
-        dismissedSuggestions.push(suggestionId);
-        cancelCount++;
-        if (cancelCount >= 2 && isConciergeON) {
-            toggleConcierge(false);
-            showConciergeBubble("いつでも待機していますので、<br>必要な時に呼んでくださいね♪");
-        }
-    }
+    if (suggestionId) { dismissedSuggestions.push(suggestionId); cancelCount++; }
     suggestionId = null;
     document.getElementById('suggestion-box').style.display = 'none'; 
     applySuggestionBlink(); 
@@ -744,25 +665,15 @@ function showConciergeBubble(msg) {
 
 function copyResult() {
     if (selected.length === 0) return alert("選択してください");
-
     if (!isConciergeON) {
         var best = analyzeSuggestions(true); 
         if (best && (best.type === 'cheaper' || best.type === 'samePrice')) {
-            suggestionId = best.sid;
-            suggestionReplaceItems = best.intersectingItems;
-            var currentTotalPrice = 0;
-            selected.forEach(function(id) { currentTotalPrice += menuData[id].price; });
-            var newTotalPrice = currentTotalPrice - best.oldPrice + menuData[best.sid].price;
-
+            suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
+            var currentTotal = 0; selected.forEach(function(id) { currentTotal += getItemPrice(id); });
+            var newTotal = currentTotal - best.oldPrice + getItemPrice(best.sid);
             var msg = "<strong>【最後にご確認です】</strong><br><br>";
-            if (best.type === 'cheaper') {
-                var savingAmount = currentTotalPrice - newTotalPrice;
-                msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + savingAmount.toLocaleString() + "</span> お安くなります！";
-            } else {
-                msg += "同じ金額でさらに部位が多い「<strong>" + menuData[best.sid].label + "</strong>」に変更できます！";
-            }
-            msg += "<br><br>このまま変更せずに予約に進みますか？";
-
+            if (best.type === 'cheaper') { msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + (currentTotal - newTotal).toLocaleString() + "</span> お安くなります！"; } 
+            else { msg += "同じ金額でさらに部位が多い「<strong>" + menuData[best.sid].label + "</strong>」に変更できます！"; }
             document.getElementById('final-confirm-text').innerHTML = msg;
             document.getElementById('final-confirm-modal').style.display = 'flex';
             return; 
@@ -771,42 +682,23 @@ function copyResult() {
     doActualCopy();
 }
 
-function acceptFinalConfirm() {
-    document.getElementById('final-confirm-modal').style.display = 'none';
-    applyOptimalSet();
-    setTimeout(doActualCopy, 200); 
-}
-
-function rejectFinalConfirm() {
-    document.getElementById('final-confirm-modal').style.display = 'none';
-    doActualCopy();
-}
+function acceptFinalConfirm() { document.getElementById('final-confirm-modal').style.display = 'none'; applyOptimalSet(); setTimeout(doActualCopy, 200); }
+function rejectFinalConfirm() { document.getElementById('final-confirm-modal').style.display = 'none'; doActualCopy(); }
 
 function doActualCopy() {
     var slot = document.getElementById('total-time-slot').innerText;
     var priceStr = document.getElementById('total-price').innerText;
     var txt = "【NARX脱毛予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
     selected.forEach(function(id) { txt += "・" + menuData[id].label + "\n"; });
-    txt += "──────────\n";
-    txt += "合計金額：" + priceStr + "\n";
-    txt += "予約枠目安：" + slot;
-    
+    txt += "──────────\n合計金額：" + priceStr + "\n予約枠目安：" + slot;
     navigator.clipboard.writeText(txt).then(function() { 
         document.getElementById('modal-time-slot-text').innerText = slot;
         document.getElementById('copy-complete-modal').style.display = 'flex';
-    }).catch(function() {
-        alert("コピーに失敗しました。お使いのブラウザや設定によりクリップボードがブロックされている可能性があります。");
-    });
+    }).catch(function() { alert("コピーに失敗しました。"); });
 }
 
-function goToReserve() {
-    document.getElementById('copy-complete-modal').style.display = 'none';
-    window.open("https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585", "_blank");
-}
-
-function closeCopyModal() {
-    document.getElementById('copy-complete-modal').style.display = 'none';
-}
+function goToReserve() { window.open("https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585", "_blank"); }
+function closeCopyModal() { document.getElementById('copy-complete-modal').style.display = 'none'; }
 </script>
 </body>
 </html>
