@@ -3,21 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.31.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.32.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
 
-/* ロゴエリア：リネーム指定した名前に対応 */
-.header-logo-container { text-align: center; padding: 25px 0 10px; background: var(--black); }
-.logo-img { height: 55px; display: block; margin: 0 auto; }
+/* トップ画面ロゴサイズ調整 */
+.gate-logo-container { text-align: center; margin-bottom: 30px; }
+.gate-logo-img { width: 220px; height: auto; }
+
+/* シミュレーター上部ロゴ調整 */
+.header-logo-container { text-align: center; padding: 15px 0; border-bottom: 1px solid var(--gold); margin-bottom: 15px; }
+.header-logo-img { height: 45px; width: auto; }
 
 #gate-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.98);z-index:99999;display:flex;justify-content:center;align-items:center;}
-.modal-content{border:1px solid var(--gold);padding:40px 20px;width:85%;max-width:400px;background:var(--black);text-align:center;border-radius:8px;}
-.container{max-width:600px;margin:0 auto;padding:20px;}
-.header{text-align:center;padding:10px 0;border-bottom:1px solid var(--gold);margin-bottom:20px;}
-.header h1{color:var(--gold);margin:0;font-size:1.4rem;letter-spacing:3px;}
-#mode-display{font-size:0.75rem;color:var(--black);background:var(--gold);padding:4px 15px;border-radius:20px;margin-top:8px;display:inline-block;}
+.modal-content{border:1px solid var(--gold);padding:40px 20px;width:85%;max-width:420px;background:var(--black);text-align:center;border-radius:12px;box-shadow: 0 0 30px rgba(212,175,55,0.2);}
+.container{max-width:600px;margin:0 auto;padding:0 20px;}
+
+#mode-display{font-size:0.75rem;color:var(--black);background:var(--gold);padding:4px 15px;border-radius:20px;margin-top:8px;display:inline-block;font-weight:bold;}
 
 .dual-visual-container{display:flex;gap:4px;height:240px;position:sticky;top:10px;z-index:50;background:var(--light-gray);border:2px solid var(--gold);margin-bottom:20px;border-radius:8px;overflow:hidden;}
 .view-panel{flex:1;position:relative;display:flex;justify-content:center;align-items:center;background-color:var(--panel-bg);}
@@ -59,13 +62,11 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-name{display:block;font-size:0.95rem;}
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
-.item-sub{display:block;font-size:0.7rem;color:#888;margin-top:5px;line-height:1.4;}
 
 #suggestion-box{position:fixed;bottom:190px;left:50%;transform:translateX(-50%);width:92%;max-width:420px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:20px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.85rem;color:#555;margin-bottom:12px;text-align:center;}
 .sug-benefit-msg {text-align:center;font-size:0.75rem;color:var(--gold);background:#111;padding:6px 10px;border-radius:4px;font-weight:bold;margin-bottom:12px;}
 .sug-menu-name{font-size:1.25rem;font-weight:bold;color:#111;margin-bottom:2px;text-align:center;}
-.sug-menu-sub{font-size:0.75rem;color:#444;margin-bottom:12px;line-height:1.3;text-align:center;}
 .sug-compare-panel{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.75);padding:12px 10px;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.1);}
 .sug-col{flex:1;text-align:center;}
 .sug-col-label{font-size:0.65rem;color:#555;display:block;margin-bottom:2px;font-weight:bold;}
@@ -78,9 +79,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 #concierge-wrapper{display:flex;position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:1000;align-items:center;flex-direction:column;pointer-events:none;}
 #concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.3s ease;position:relative;text-align:center;pointer-events:auto;}
 .bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
-
-/* 【完全復刻】コンシェルジュアイコンのSVGデザイン */
-.concierge-icon{width:55px;height:55px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;transition: 0.2s;}
+.concierge-icon{width:55px;height:55px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;}
 .concierge-icon.on{background:var(--gold);border:2px solid var(--gold);}
 .concierge-icon.off{background:#111;border:3px solid var(--gold);}
 
@@ -105,8 +104,8 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <div id="gate-modal">
     <div class="modal-content">
-        <div class="header-logo-container">
-            <img src="logo_white.png" class="logo-img" alt="NARX LOGO" onerror="this.style.display='none'">
+        <div class="gate-logo-container">
+            <img src="logo_white.png" class="gate-logo-img" alt="NARX LOGO" onerror="this.style.display='none'">
         </div>
         <h2 style="color: var(--gold); margin-bottom: 10px; letter-spacing: 2px;">WELCOME</h2>
         <p style="font-size: 0.85rem; line-height: 1.8; margin-bottom: 35px; color: #bbb;">現在の状況を選択してください。</p>
@@ -116,14 +115,17 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <div class="container">
-    <div class="header">
-        <h1>NARX</h1>
-        <div id="mode-display">新規予約モード</div>
+    <!-- テキストのNARXをロゴ画像へ変更 -->
+    <div class="header-logo-container">
+        <img src="logo_white.png" class="header-logo-img" alt="NARX LOGO" onerror="this.style.display='none'">
+        <div><div id="mode-display">新規予約モード</div></div>
     </div>
+
     <div class="dual-visual-container">
         <div class="view-panel" id="body-panel"><span>BODY</span><img src="base_body.png" class="base-img"></div>
         <div class="view-panel" id="face-panel"><span>FACE</span><img src="base_face.png" class="base-img"></div>
     </div>
+
     <div class="tabs">
         <div id="tab-set" class="tab active" onclick="changeTab('set')">セットメニュー</div>
         <div id="tab-part" class="tab" onclick="changeTab('part')">パーツメニュー</div>
@@ -144,7 +146,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div id="concierge-wrapper">
     <div id="concierge-bubble"><div class="bubble-tail"></div><span id="concierge-msg"></span></div>
     <div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()">
-        <!-- 【復刻】帽子も顔も元のデザインに戻したSVG。重心を中央寄りに調整 -->
         <svg viewBox="0 0 100 100" width="38" height="38" xmlns="http://www.w3.org/2000/svg" style="transform: translateY(-3px);">
             <path d="M30 20 h40 v12 h-40 z" fill="#111" /><path d="M22 32 h56 v4 h-56 z" fill="#111" />
             <path d="M34 36 v10 c0 9 7 16 16 16 c9 0 16 -7 16 -16 v-10 z" fill="#d4af37" />
@@ -187,7 +188,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 【Ver.31.0：画像整合・旧デザイン復刻・AI新規対応】
+// 【Ver.32.0：ロゴ・画像整合・特殊部位除外ロジック】
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -201,7 +202,7 @@ var cancelCount = 0;
 var bubbleTimer = null;
 
 var menuData = {
-    set_fullbody_all:{price:52800,time:240,label:'全身オールセット（顔VIO込）',cat:'set',sub:'全顔＋上半身＋下半身＋VIO＋耳全体',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'},hasFace:true},
+    set_fullbody_all:{price:52800,time:240,label:'全身オールセット（顔VIO込）',cat:'set',sub:'全顔＋上半身＋下半身＋VIO',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'},hasFace:true},
     set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット',cat:'set',sub:'脇・うなじ・背中・胸・腹・腕・VIO・脚',imgs:{body:'set_fullbody_noface_body'},hasFace:false},
     set_fullbody_novio:{price:41800,time:220,label:'VIOなし全身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕・脚',imgs:{body:'set_fullbody_novio_body',face:'set_fullbody_novio_face'},hasFace:true},
     set_upperbody:{price:30800,time:140,label:'上半身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕全体',imgs:{body:'set_upperbody_body',face:'set_upperbody_face'},hasFace:true},
@@ -212,7 +213,7 @@ var menuData = {
     set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set',sub:'鼻下・口下・頬・フェイスライン・首',imgs:{face:'set_fullface'},hasFace:true},
     set_vio:{price:16500,time:50,label:'VIOセット',cat:'set',sub:'Vライン・Iライン・Oライン',imgs:{body:'set_vio'},hasFace:false},
     set_vio_buttocks:{price:20900,time:65,label:'VIO+臀部セット',cat:'set',sub:'VIOセット＋臀部（おしり）',imgs:{body:'set_vio'},hasFace:false},
-    set_abdomen_vio:{price:18700,time:65,label:'ヘソ下+VIOセット',cat:'set',sub:'腹部＋VIOセット',imgs:{body:'set_chest_abdomen'},hasFace:false},
+    set_abdomen_vio:{price:18700,time:65,label:'ヘソ下+VIOセット',cat:'set',sub:'腹部＋VIOセット',imgs:{body:'part_navel_under'},hasFace:false},
     set_chest_abdomen:{price:9900,time:35,label:'胸＋腹部セット',cat:'set',sub:'胸（乳輪込）＋腹部（ヘソ込）',imgs:{body:'set_chest_abdomen'},hasFace:false},
     set_arms_legs:{price:28600,time:125,label:'両腕+両足セット',cat:'set',sub:'両腕全体＋両脚全体',imgs:{body:'set_arms_legs'},hasFace:false},
     set_arms:{price:15400,time:65,label:'両腕セット',cat:'set',sub:'肘上・下・手の甲指',imgs:{body:'set_arms'},hasFace:false},
@@ -243,23 +244,26 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'VIO',imgs:{body:'part_v_line'}},
     part_i_line:{price:7700,time:15,label:'Iライン',cat:'part',subCat:'VIO',imgs:{body:'part_i_line'}},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'VIO',imgs:{body:'part_o_line'}},
+    
     part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'特殊部位',imgs:{face:'part_tragus'},hasFace:true},
     part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'特殊部位',imgs:{face:'part_earlobe'},hasFace:true},
     part_eyebrow_upper:{price:4400,time:13,label:'眉上',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_upper'},hasFace:true},
     part_eyebrow_middle:{price:4400,time:10,label:'眉間',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_middle'},hasFace:true},
     part_eyebrow_lower:{price:6600,time:13,label:'眉下',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_lower'},hasFace:true},
     part_nose_hair:{price:4400,time:20,label:'鼻毛',cat:'part',subCat:'特殊部位',imgs:{face:'part_nose_hair'}},
+    part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'特殊部位',imgs:{face:'part_nose_wing'},hasFace:true},
     part_under_eyes:{price:4400,time:10,label:'目の下',cat:'part',subCat:'特殊部位',imgs:{face:'part_under_eyes'},hasFace:true},
     
     other_lala_peel:{price:12100,time:90,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},hasFace:true},
     other_face_correction:{price:22000,time:90,label:'小顔矯正術',cat:'other',imgs:{face:'other_face_correction'},hasFace:true},
     other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other',imgs:{face:'other_derma_injection'},hasFace:true},
     other_scalp_care:{price:22000,time:25,label:'スカルプケア',cat:'other',imgs:{face:'other_scalp_care'}},
-    other_s_planning:{price:11000,time:60,label:'エスプランニング',cat:'other',imgs:{face:'other_s_planning'}}
+    other_s_planning:{price:11000,time:60,label:'エスプランニング',cat:'other',imgs:{body:'other_s_planning'}}
 };
 
+// 【重要】セットに何を含めるか（排他制御用）の定義。特殊部位は必要な箇所のみに限定。
 var setIncludes = {
-    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_ear_whole'],
+    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio'],
     set_fullbody_noface:['set_lowerbody','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_navel_under','part_back_upper','part_back_lower','part_buttocks'],
     set_fullbody_novio:['set_upperbody','set_arms','set_legs','set_fullface','part_nape','part_chest_nipple','part_navel_under','part_back_upper','part_back_lower'],
     set_upperbody:['set_fullface','set_arms','part_armpit','part_chest_nipple','part_navel_under','part_nape','part_back_upper','part_back_lower','part_nipple_around'],
@@ -295,7 +299,6 @@ function forceStart(type) {
     var badge = document.getElementById('mode-display');
     if (badge) {
         badge.innerText = type === 'new' ? "【ご新規様】初回限定価格モード" : "【会員様】通常価格モード";
-        badge.style.background = type === 'new' ? "var(--gold)" : "#666";
     }
     initApp(); render();
 }
@@ -310,6 +313,7 @@ function initApp() {
         traverse(id); return leaves;
     }
     Object.keys(menuData).forEach(function(id) { itemLeaves[id] = getLeafNodes(id); });
+    
     var bPanel = document.getElementById('body-panel'), fPanel = document.getElementById('face-panel');
     Object.keys(menuData).forEach(function(id) {
         var item = menuData[id];
@@ -325,7 +329,7 @@ function createImg(parent, name) {
     if (document.getElementById(layerId)) return;
     var img = document.createElement('img');
     img.src = name + ".png"; img.id = layerId; img.className = 'layer-part';
-    img.onerror = function() { this.style.display = 'none'; }; // 「？」バグ防止
+    img.onerror = function() { this.style.display = 'none'; };
     parent.appendChild(img);
 }
 
@@ -387,7 +391,6 @@ function render() {
         var p = getItemPrice(id);
         var inner = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '>';
         inner += '<div class="item-info"><span class="item-name">' + item.label + '</span>';
-        if(item.sub) inner += '<span class="item-sub">' + item.sub + '</span>';
         inner += '</div><div class="item-price">¥' + p.toLocaleString();
         if(userType === 'new') inner += '<span class="price-tag-new">初回</span>';
         inner += '</div>';
@@ -430,15 +433,12 @@ function checkSuggestion(isManual) {
     var html = '<div class="sug-title">👑 AIコンシェルジュからのご提案</div>';
     html += '<div class="sug-benefit-msg">✨ お安くなります！ ✨</div>';
     html += '<div class="sug-menu-name">' + menuData[best.sid].label + '</div>';
-    if(menuData[best.sid].sub) html += '<div class="sug-menu-sub">（' + menuData[best.sid].sub + '）</div>';
     html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在の選択合計</span><span class="sug-col-price old">¥' + currentT.toLocaleString() + '</span></div>';
     html += '<div class="sug-arrow">▶▶</div><div class="sug-col"><span class="sug-col-label">プラン変更後</span><span class="sug-col-price new">¥' + newT.toLocaleString() + '</span></div></div>';
     if(saving > 0) { html += '<div style="text-align:center;"><span class="sug-discount-badge">✨ ¥' + saving.toLocaleString() + ' お得になります！</span></div>'; }
-    html += '<div class="sug-note">※セット内の不要な部位は避けて照射することも可能です。<br>（デザイン脱毛をご希望の際もご相談ください）</div>';
     html += '<div style="display:flex; gap:10px; margin-top:15px;"><button onclick="applyOptimalSet()" style="background:#000; color:#d4af37; border:1px solid #000; padding:12px; border-radius:6px; font-weight:bold; flex:2;">変更する</button>';
     html += '<button onclick="suggestionId=null; document.getElementById(\'suggestion-box\').style.display=\'none\'; render();" style="background:transparent; color:#333; border:none; flex:1; font-weight:bold;">今はしない</button></div>';
-    document.getElementById('suggestion-box').innerHTML = html; 
-    document.getElementById('suggestion-box').style.display = 'block';
+    document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block';
 }
 
 function analyzeSuggestions(isManual) {
@@ -455,7 +455,6 @@ function analyzeSuggestions(isManual) {
             var oldP = 0; intersectingItems.forEach(function(id) { oldP += getItemPrice(id); });
             var diff = getItemPrice(sid) - oldP;
             if (diff < 0 && intersectingItems.length >= 2) candidates.push({sid:sid, type:'cheaper', oldPrice:oldP, diff:diff, intersectingItems:intersectingItems});
-            else if (diff === 0 && candLeaves.length > intersectingLeaves.length && intersectingItems.length >= 2) candidates.push({sid:sid, type:'samePrice', oldPrice:oldP, diff:diff, intersectingItems:intersectingItems});
         }
     });
     return candidates.length > 0 ? candidates[0] : null;
