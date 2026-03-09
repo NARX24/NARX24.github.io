@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.26.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.27.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -84,7 +84,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .btn-copy{background:#222;color:#fff;}
 .btn-reserve{background:var(--gold);color:#000;}
 
-/* 【追加】コピー完了モーダル内のステップデザイン */
 .step-box {background: #111; border: 1px solid #333; border-radius: 8px; padding: 18px; margin: 20px 0; text-align: left;}
 .step-item {margin-bottom: 15px;}
 .step-item:last-child {margin-bottom: 0;}
@@ -131,7 +130,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <div id="suggestion-box"></div>
 
-<!-- 【既存】アップグレード等最終確認モーダル -->
 <div id="final-confirm-modal">
     <div class="final-modal-content">
         <h3 style="color:var(--gold);margin-top:0;font-size:1.1rem;letter-spacing:1px;">💡 最終ご提案</h3>
@@ -141,7 +139,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     </div>
 </div>
 
-<!-- 【追加】コピー完了＆エルメ予約誘導モーダル -->
 <div id="copy-complete-modal">
     <div class="final-modal-content" style="padding: 35px 20px;">
         <div style="font-size:2.5rem; margin-bottom:10px;">📋</div>
@@ -179,7 +176,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 【ES5完全対応 Ver.26.0：高級コピー完了モーダル＆エルメ誘導追加】
+// 【ES5完全対応 Ver.27.0：料金・時間の完全反映 ＆ 新メニュー追加】
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -193,9 +190,9 @@ var cancelCount = 0;
 var bubbleTimer = null;
 
 var menuData = {
-    set_fullbody_all:{price:52800,time:270,label:'全身オール（顔VIO込）',cat:'set',sub:'全顔＋上半身＋下半身＋VIO＋耳たぶ等すべて',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'},hasFace:true},
+    set_fullbody_all:{price:52800,time:240,label:'全身オール（顔VIO込）',cat:'set',sub:'全顔＋上半身＋下半身＋VIO＋耳たぶ等すべて',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'},hasFace:true},
     set_fullbody_noface:{price:41800,time:200,label:'顔なし全身',cat:'set',sub:'脇・うなじ・背中・胸・腹・腕全体・VIO・脚全体',imgs:{body:'set_fullbody_noface_body'},hasFace:false},
-    set_upperbody:{price:30800,time:170,label:'上半身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕全体',imgs:{body:'set_upperbody_body',face:'set_upperbody_face'},hasFace:true},
+    set_upperbody:{price:30800,time:140,label:'上半身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕全体',imgs:{body:'set_upperbody_body',face:'set_upperbody_face'},hasFace:true},
     set_lowerbody:{price:30800,time:150,label:'下半身セット',cat:'set',sub:'VIOセット・臀部（おしり）・脚全体',imgs:{body:'set_lowerbody_body'},hasFace:false},
     set_fullface_vio:{price:27500,time:100,label:'全顔+VIOセット',cat:'set',sub:'全顔セット＋VIOセット',imgs:{body:'set_fullface_vio_body',face:'set_fullface_vio_face'},hasFace:true},
     set_fullface_eyebrow:{price:22000,time:105,label:'全顔+眉毛脱毛セット',cat:'set',sub:'全顔セット＋眉毛セット',imgs:{face:'set_fullface_eyebrow_face'},hasFace:true},
@@ -209,35 +206,43 @@ var menuData = {
     set_arms:{price:15400,time:65,label:'両腕セット',cat:'set',sub:'肘上・下・手の甲指',imgs:{body:'set_arms'},hasFace:false},
     set_legs:{price:17600,time:65,label:'両足セット',cat:'set',sub:'膝上・下・足の甲指',imgs:{body:'set_legs'},hasFace:false},
     set_ear_whole:{price:8800,time:25,label:'耳全体セット',cat:'set',sub:'耳珠＋耳たぶ',imgs:{face:'set_ear_whole'},hasFace:true,isSpecial:true},
-    part_nose_under:{price:4400,time:16,label:'鼻下',cat:'part',subCat:'顔',imgs:{face:'part_nose_under'},hasFace:true},
-    part_mouth_under:{price:4400,time:16,label:'口下',cat:'part',subCat:'顔',imgs:{face:'part_mouth_under'},hasFace:true},
-    part_cheek:{price:4400,time:16,label:'頬',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
-    part_face_line:{price:4400,time:16,label:'フェイスライン',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
-    part_neck:{price:4400,time:16,label:'首',cat:'part',subCat:'顔',imgs:{face:'part_neck'},hasFace:true},
-    part_nape:{price:4400,time:16,label:'うなじ',cat:'part',subCat:'上半身',imgs:{body:'part_nape'},hasFace:false},
-    part_armpit:{price:4400,time:13,label:'脇',cat:'part',subCat:'上半身',imgs:{body:'part_armpit'},hasFace:false},
+    
+    part_nose_under:{price:4400,time:10,label:'鼻下',cat:'part',subCat:'顔',imgs:{face:'part_nose_under'},hasFace:true},
+    part_mouth_under:{price:4400,time:10,label:'口下',cat:'part',subCat:'顔',imgs:{face:'part_mouth_under'},hasFace:true},
+    part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
+    part_face_line:{price:4400,time:10,label:'フェイスライン',cat:'part',subCat:'顔',imgs:{face:'part_face_line'},hasFace:true},
+    part_neck:{price:4400,time:10,label:'首',cat:'part',subCat:'顔',imgs:{face:'part_neck'},hasFace:true},
+    
+    part_nape:{price:4400,time:10,label:'うなじ',cat:'part',subCat:'上半身',imgs:{body:'part_nape'},hasFace:false},
+    part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'上半身',imgs:{body:'part_armpit'},hasFace:false},
     part_chest_nipple:{price:6600,time:16,label:'胸（乳輪込）',cat:'part',subCat:'上半身',imgs:{body:'part_chest_nipple'},hasFace:false},
     part_abdomen_navel:{price:6600,time:16,label:'腹部（ヘソ下込）',cat:'part',subCat:'上半身',imgs:{body:'part_abdomen_navel'},hasFace:false},
     part_back_upper:{price:6600,time:20,label:'背中上',cat:'part',subCat:'上半身',imgs:{body:'part_back_upper'},hasFace:false},
     part_back_lower:{price:6600,time:20,label:'背中下',cat:'part',subCat:'上半身',imgs:{body:'part_back_lower'},hasFace:false},
     part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'上半身',imgs:{body:'part_elbow_upper'},hasFace:false},
-    part_elbow_lower:{price:6600,time:18,label:'肘下',cat:'part',subCat:'上半身',imgs:{body:'part_elbow_lower'},hasFace:false},
+    part_elbow_lower:{price:6600,time:25,label:'肘下',cat:'part',subCat:'上半身',imgs:{body:'part_elbow_lower'},hasFace:false},
     part_hand_finger:{price:4400,time:15,label:'手の甲・指',cat:'part',subCat:'上半身',imgs:{body:'part_hand_finger'},hasFace:false},
+    
     part_buttocks:{price:6600,time:16,label:'臀部（おしり）',cat:'part',subCat:'下半身',imgs:{body:'part_buttocks'},hasFace:false},
     part_knee_upper:{price:8800,time:30,label:'膝上',cat:'part',subCat:'下半身',imgs:{body:'part_knee_upper'},hasFace:false},
     part_knee_lower:{price:8800,time:35,label:'膝下',cat:'part',subCat:'下半身',imgs:{body:'part_knee_lower'},hasFace:false},
     part_foot_toe:{price:4400,time:15,label:'足の甲・指',cat:'part',subCat:'下半身',imgs:{body:'part_foot_toe'},hasFace:false},
+    
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'VIO',imgs:{body:'part_v_line'},hasFace:false},
     part_i_line:{price:7700,time:15,label:'Iライン',cat:'part',subCat:'VIO',imgs:{body:'part_i_line'},hasFace:false},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'VIO',imgs:{body:'part_o_line'},hasFace:false},
+    
     part_eyebrow_upper:{price:4400,time:13,label:'眉上',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_upper'},hasFace:true},
     part_eyebrow_middle:{price:4400,time:10,label:'眉間（眉中）',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_middle'},hasFace:true},
     part_eyebrow_lower:{price:6600,time:13,label:'眉下',cat:'part',subCat:'特殊部位',imgs:{face:'part_eyebrow_lower'},hasFace:true,isSpecial:true},
-    part_nose_hair:{price:4400,time:20,label:'鼻毛',cat:'part',subCat:'特殊部位',imgs:{face:'part_nose_hair'},hasFace:true,isSpecial:true},
+    part_nose_hair:{price:4400,time:20,label:'鼻毛',cat:'part',subCat:'特殊部位',imgs:{face:'part_nose_hair'},hasFace:false,isSpecial:true},
     part_under_eyes:{price:4400,time:10,label:'目の下',cat:'part',subCat:'特殊部位',imgs:{face:'part_under_eyes'},hasFace:true,isSpecial:true},
+    
     other_lala_peel:{price:12100,time:90,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},hasFace:true},
     other_face_correction:{price:22000,time:90,label:'小顔矯正術',cat:'other',imgs:{face:'other_face_correction'},hasFace:true},
-    other_derma_injection:{price:22000,time:60,label:'ダーマインジェクション',cat:'other',imgs:{face:'other_derma_injection'},hasFace:true}
+    other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション(顔)',cat:'other',imgs:{face:'other_derma_injection'},hasFace:true},
+    other_scalp_care:{price:22000,time:25,label:'スカルプケア',cat:'other',imgs:{face:'other_scalp_care'},hasFace:false},
+    other_s_planning:{price:11000,time:60,label:'エスプランニング',cat:'other',imgs:{face:'other_s_planning'},hasFace:false}
 };
 
 var setIncludes = {
@@ -712,7 +717,6 @@ function rejectFinalConfirm() {
     doActualCopy();
 }
 
-// 【変更】コピー処理成功後に専用モーダルを立ち上げる
 function doActualCopy() {
     var slot = document.getElementById('total-time-slot').innerText;
     var priceStr = document.getElementById('total-price').innerText;
@@ -723,22 +727,18 @@ function doActualCopy() {
     txt += "予約枠目安：" + slot;
     
     navigator.clipboard.writeText(txt).then(function() { 
-        // モーダル内の時間枠テキストを書き換え
         document.getElementById('modal-time-slot-text').innerText = slot;
-        // モーダルを表示
         document.getElementById('copy-complete-modal').style.display = 'flex';
     }).catch(function() {
         alert("コピーに失敗しました。お使いのブラウザや設定によりクリップボードがブロックされている可能性があります。");
     });
 }
 
-// 【追加】予約ページへ飛ぶ関数
 function goToReserve() {
     document.getElementById('copy-complete-modal').style.display = 'none';
     window.open("https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585", "_blank");
 }
 
-// 【追加】モーダルを閉じる関数
 function closeCopyModal() {
     document.getElementById('copy-complete-modal').style.display = 'none';
 }
