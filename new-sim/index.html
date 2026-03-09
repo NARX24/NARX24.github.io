@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.27.0</title>
+<title>NARX 料金＆時間シミュレーター Ver.28.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -35,6 +35,17 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .tabs{display:flex;gap:5px;margin-bottom:15px;border-bottom:1px solid var(--light-gray);}
 .tab{flex:1;padding:12px 5px;text-align:center;color:#777;cursor:pointer;font-size:0.85rem;}
 .tab.active{color:var(--gold);border-bottom:2px solid var(--gold);font-weight:bold;}
+
+/* 【追加】チップスUIのスタイル */
+#selected-chips-area { margin-bottom: 15px; background: #0a0a0a; padding: 12px; border-radius: 8px; border: 1px solid #222; }
+.chips-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.chips-title { font-size: 0.75rem; color: var(--gold); font-weight: bold; letter-spacing: 1px; }
+.btn-reset { background: transparent; border: 1px solid #555; color: #aaa; border-radius: 4px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; }
+.btn-reset:active { background: #333; }
+.chips-container { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px; }
+.chip-close { background: var(--gold); color: #000; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-size: 0.6rem; font-weight: bold; cursor: pointer; }
+
 .subcat-header{display:flex;align-items:center;justify-content:center;margin:30px 0 15px;color:var(--gold);font-size:0.85rem;letter-spacing:0.4em;font-weight:bold;}
 .subcat-header::before,.subcat-header::after{content:"";flex:1;height:1px;background:linear-gradient(to right,transparent,var(--gold));margin:0 20px;opacity:0.6;}
 .subcat-header::after{background:linear-gradient(to left,transparent,var(--gold));}
@@ -116,6 +127,16 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
         <div id="tab-part" class="tab" onclick="changeTab('part')">パーツメニュー</div>
         <div id="tab-other" class="tab" onclick="changeTab('other')">その他</div>
     </div>
+    
+    <!-- 【追加】選択中のメニューを表示するチップスエリア -->
+    <div id="selected-chips-area" style="display: none;">
+        <div class="chips-header">
+            <span class="chips-title">現在選択中のメニュー</span>
+            <button class="btn-reset" onclick="resetSelection()">↻ 全てクリア</button>
+        </div>
+        <div class="chips-container" id="chips-container"></div>
+    </div>
+
     <div id="menu-area"></div>
 </div>
 
@@ -176,7 +197,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 【ES5完全対応 Ver.27.0：料金・時間の完全反映 ＆ 新メニュー追加】
+// 【ES5完全対応 Ver.28.0：チップスUI＆リセットボタン搭載】
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -316,6 +337,21 @@ function createImg(parent, name) {
 
 function changeTab(tab) { currentTab = tab; render(); }
 
+// 【追加】全てをリセットする機能
+function resetSelection() {
+    selected =[];
+    lastToggledItem = null;
+    cancelCount = 0;
+    suggestionId = null;
+    suggestionReplaceItems =[];
+    document.getElementById('suggestion-box').style.display = 'none';
+    
+    if (isConciergeON) {
+        showConciergeBubble("すべてクリアしました。<br>最初からメニューをお選びください。");
+    }
+    render();
+}
+
 function toggleItem(id) {
     var idx = selected.indexOf(id);
     if (idx !== -1) {
@@ -327,6 +363,30 @@ function toggleItem(id) {
     }
     checkSuggestion(false);
     render();
+}
+
+// 【追加】チップスUIの描画機能
+function renderChips() {
+    var area = document.getElementById('selected-chips-area');
+    var container = document.getElementById('chips-container');
+    if (!area || !container) return;
+    
+    if (selected.length === 0) {
+        area.style.display = 'none';
+        return;
+    }
+    
+    area.style.display = 'block';
+    container.innerHTML = '';
+    
+    selected.forEach(function(id) {
+        var item = menuData[id];
+        var chip = document.createElement('div');
+        chip.className = 'chip';
+        // チップスの×ボタンを押した時、親のクリックイベントを止めて個別解除する
+        chip.innerHTML = '<span>' + item.label + '</span><span class="chip-close" onclick="event.stopPropagation(); toggleItem(\'' + id + '\')">×</span>';
+        container.appendChild(chip);
+    });
 }
 
 function applySuggestionBlink() {
@@ -371,10 +431,15 @@ function render() {
     if (!area) return;
     area.innerHTML = '';
 
+    // タブの切り替え
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
     var activeTab = document.getElementById("tab-" + currentTab);
     if(activeTab) activeTab.classList.add('active');
     
+    // 【追加】チップスUIの更新
+    renderChips();
+
+    // 画像の更新
     document.querySelectorAll('.layer-part').forEach(function(img) { img.classList.remove('active'); });
 
     var selectedLeaves =[];
