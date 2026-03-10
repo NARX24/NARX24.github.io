@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.36.2</title>
+<title>NARX 料金＆時間シミュレーター Ver.36.3</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -11,8 +11,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 /* ロゴデザイン */
 .gate-logo-container { text-align: center; margin-bottom: 30px; }
 .gate-logo-img { width: 220px; height: auto; }
-
-/* ヘッダーロゴのバランスを大きく美しく調整 */
 .header-logo-container { text-align: center; padding: 20px 0 15px; border-bottom: 1px solid var(--gold); margin-bottom: 20px; }
 .header-logo-img { width: 170px; height: auto; margin-bottom: 8px; }
 
@@ -59,7 +57,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
-/* AIコンシェルジュ 提案モーダル（画像デザイン完全再現） */
+/* AIコンシェルジュ 提案モーダル */
 #suggestion-box{position:fixed;bottom:190px;left:50%;transform:translateX(-50%);width:92%;max-width:420px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:20px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.85rem;color:#555;margin-bottom:12px;text-align:center;}
 .sug-benefit-msg{text-align:center;font-size:0.75rem;color:var(--gold);background:#111;padding:10px;border-radius:4px;font-weight:bold;margin-bottom:15px;letter-spacing:0.5px;}
@@ -75,7 +73,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .sug-discount-box{background:#111;color:var(--gold);font-size:0.75rem;padding:10px;border-radius:4px;text-align:center;font-weight:bold;margin-bottom:15px;width:95%;margin-left:auto;margin-right:auto;box-sizing:border-box;}
 .sug-note{font-size:0.65rem;color:#333;text-align:left;line-height:1.5;margin-top:15px;border-top:1px dashed rgba(0,0,0,0.2);padding-top:12px;}
 
-/* 既存の compare-panel 系（安くなる・同額提案用） */
 .sug-compare-panel{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.75);padding:12px 10px;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.1);}
 .sug-col{flex:1;text-align:center;}
 .sug-col-label{font-size:0.65rem;color:#555;display:block;margin-bottom:2px;font-weight:bold;}
@@ -167,8 +164,8 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     <div class="final-modal-content">
         <h3 style="color:var(--gold);margin-top:0;">💡 最終ご提案</h3>
         <p id="final-confirm-text" style="font-size:0.85rem;line-height:1.6;color:#ddd;margin-bottom:20px;"></p>
-        <button onclick="acceptFinalConfirm()" style="width:100%;background:var(--gold);color:#000;border:none;padding:14px;border-radius:6px;font-weight:bold;margin-bottom:12px;">お得なプランに変更してコピー</button>
-        <button onclick="rejectFinalConfirm()" style="width:100%;background:transparent;color:#888;border:1px solid #444;padding:12px;border-radius:6px;font-weight:bold;">変更せずにコピーする</button>
+        <button onclick="acceptFinalConfirm()" style="width:100%;background:var(--gold);color:#000;border:none;padding:14px;border-radius:6px;font-weight:bold;margin-bottom:12px;">お得なプランに変更して予約へ</button>
+        <button onclick="rejectFinalConfirm()" style="width:100%;background:transparent;color:#888;border:1px solid #444;padding:12px;border-radius:6px;font-weight:bold;">変更せずに予約へ</button>
     </div>
 </div>
 
@@ -195,11 +192,16 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
+// 【エラー検知用安全装置】もしJSエラーが起きたら画面に表示します
+window.onerror = function(msg, url, line) {
+    alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
+};
+
 var userType = 'new';
 var currentTab = 'set';
-var selected =[]; 
+var selected = []; 
 var suggestionId = null;
-var suggestionReplaceItems = []; 
+var suggestionReplaceItems =[]; 
 var itemLeaves = {}; 
 var dismissedSuggestions =[];
 var lastToggledItem = null;
@@ -301,7 +303,9 @@ function getItemPrice(id) {
 
 function getOriginalTotal(idList) {
     var total = 0;
-    idList.forEach(function(id) { total += getItemPrice(id); });
+    for (var i = 0; i < idList.length; i++) {
+        total += getItemPrice(idList[i]);
+    }
     return total;
 }
 
@@ -309,9 +313,9 @@ function getTheoreticalOriginalPrice(setId) {
     var leaves = itemLeaves[setId];
     var total = 0;
     if(leaves) {
-        leaves.forEach(function(leaf) {
-            if (menuData[leaf]) total += getItemPrice(leaf);
-        });
+        for (var i = 0; i < leaves.length; i++) {
+            if (menuData[leaves[i]]) total += getItemPrice(leaves[i]);
+        }
     }
     return total;
 }
@@ -331,20 +335,30 @@ function initApp() {
     function getLeafNodes(id) {
         var leaves =[];
         function traverse(nodeId) {
-            if (setIncludes[nodeId]) { setIncludes[nodeId].forEach(function(subId) { traverse(subId); }); } 
-            else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); }
+            if (setIncludes[nodeId]) { 
+                for (var i = 0; i < setIncludes[nodeId].length; i++) {
+                    traverse(setIncludes[nodeId][i]);
+                }
+            } else { 
+                if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); 
+            }
         }
         traverse(id); return leaves;
     }
-    Object.keys(menuData).forEach(function(id) { itemLeaves[id] = getLeafNodes(id); });
+    
+    var keys = Object.keys(menuData);
+    for (var i = 0; i < keys.length; i++) {
+        itemLeaves[keys[i]] = getLeafNodes(keys[i]);
+    }
+    
     var bPanel = document.getElementById('body-panel'), fPanel = document.getElementById('face-panel');
-    Object.keys(menuData).forEach(function(id) {
-        var item = menuData[id];
+    for (var j = 0; j < keys.length; j++) {
+        var item = menuData[keys[j]];
         if (item.imgs) {
             if (item.imgs.body) createImg(bPanel, item.imgs.body);
             if (item.imgs.face) createImg(fPanel, item.imgs.face);
         }
-    });
+    }
 }
 
 function createImg(parent, name) {
@@ -357,7 +371,7 @@ function createImg(parent, name) {
 }
 
 function changeTab(tab) { currentTab = tab; render(); }
-function resetSelection() { selected =[]; lastToggledItem=null; suggestionId = null; document.getElementById('suggestion-box').style.display = 'none'; render(); }
+function resetSelection() { selected =[]; lastToggledItem = null; suggestionId = null; document.getElementById('suggestion-box').style.display = 'none'; render(); }
 function toggleItem(id) {
     var idx = selected.indexOf(id);
     if (idx !== -1) { selected.splice(idx, 1); lastToggledItem = null; } 
@@ -369,90 +383,151 @@ function renderChips() {
     var area = document.getElementById('selected-chips-area'), container = document.getElementById('chips-container');
     if (selected.length === 0) { area.style.display = 'none'; return; }
     area.style.display = 'block'; container.innerHTML = '';
-    selected.forEach(function(id) {
+    for (var i = 0; i < selected.length; i++) {
+        var id = selected[i];
         var item = menuData[id], chip = document.createElement('div');
         chip.className = 'chip';
         chip.innerHTML = '<span>' + item.label + '</span><span class="chip-close" onclick="event.stopPropagation(); toggleItem(\'' + id + '\')">×</span>';
         container.appendChild(chip);
-    });
+    }
 }
 
 function render() {
     var area = document.getElementById('menu-area'); area.innerHTML = '';
-    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-    var activeTab = document.getElementById("tab-" + currentTab); if(activeTab) activeTab.classList.add('active');
+    
+    // エラー防止のため forループに変更
+    var tabsElements = document.querySelectorAll('.tab');
+    for (var t = 0; t < tabsElements.length; t++) {
+        tabsElements[t].classList.remove('active');
+    }
+    var activeTab = document.getElementById("tab-" + currentTab); 
+    if(activeTab) activeTab.classList.add('active');
+    
     renderChips();
-    document.querySelectorAll('.layer-part').forEach(function(img) { img.classList.remove('active'); img.classList.remove('suggest-blink'); });
+    
+    var layerParts = document.querySelectorAll('.layer-part');
+    for (var p = 0; p < layerParts.length; p++) {
+        layerParts[p].classList.remove('active');
+        layerParts[p].classList.remove('suggest-blink');
+    }
     
     var selectedLeaves =[];
-    selected.forEach(function(id) { if(itemLeaves[id]) { itemLeaves[id].forEach(function(leaf) { if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf); }); } });
-    selected.forEach(function(id) {
-        var item = menuData[id];
+    for (var i = 0; i < selected.length; i++) {
+        var id = selected[i];
+        if(itemLeaves[id]) { 
+            for(var l = 0; l < itemLeaves[id].length; l++) {
+                var leaf = itemLeaves[id][l];
+                if(selectedLeaves.indexOf(leaf) === -1) selectedLeaves.push(leaf); 
+            }
+        }
+    }
+    
+    for (var j = 0; j < selected.length; j++) {
+        var item = menuData[selected[j]];
         if (item.imgs) {
-            if (item.imgs.body) { var i = document.getElementById("img-" + item.imgs.body); if(i) i.classList.add('active'); }
-            if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
+            if (item.imgs.body) { var bodyImg = document.getElementById("img-" + item.imgs.body); if(bodyImg) bodyImg.classList.add('active'); }
+            if (item.imgs.face) { var faceImg = document.getElementById("img-" + item.imgs.face); if(faceImg) faceImg.classList.add('active'); }
         }
-    });
-    selectedLeaves.forEach(function(leaf) {
-        var item = menuData[leaf];
-        if (item && item.imgs) {
-            if (item.imgs.body) { var i = document.getElementById("img-" + item.imgs.body); if(i) i.classList.add('active'); }
-            if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
+    }
+    
+    for (var k = 0; k < selectedLeaves.length; k++) {
+        var leafItem = menuData[selectedLeaves[k]];
+        if (leafItem && leafItem.imgs) {
+            if (leafItem.imgs.body) { var lBody = document.getElementById("img-" + leafItem.imgs.body); if(lBody) lBody.classList.add('active'); }
+            if (leafItem.imgs.face) { var lFace = document.getElementById("img-" + leafItem.imgs.face); if(lFace) lFace.classList.add('active'); }
         }
-    });
+    }
 
-    Object.keys(menuData).filter(function(id) { return menuData[id].cat === currentTab; }).forEach(function(id) {
-        var item = menuData[id];
-        var isSel = selected.indexOf(id) !== -1, isDis = false;
-        if (!isSel && itemLeaves[id]) { isDis = itemLeaves[id].some(function(leaf) { return selectedLeaves.indexOf(leaf) !== -1; }); }
-        var div = document.createElement('div'); div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
-        div.onclick = function() { if(!isDis) toggleItem(id); };
-        var p = getItemPrice(id);
+    var keys = Object.keys(menuData);
+    for (var m = 0; m < keys.length; m++) {
+        var menuId = keys[m];
+        var menuItem = menuData[menuId];
+        if (menuItem.cat !== currentTab) continue;
+        
+        var isSel = selected.indexOf(menuId) !== -1, isDis = false;
+        if (!isSel && itemLeaves[menuId]) { 
+            for (var n = 0; n < itemLeaves[menuId].length; n++) {
+                if (selectedLeaves.indexOf(itemLeaves[menuId][n]) !== -1) { isDis = true; break; }
+            }
+        }
+        
+        var div = document.createElement('div'); 
+        div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
+        div.setAttribute('data-id', menuId);
+        (function(id, disabled) {
+            div.onclick = function() { if(!disabled) toggleItem(id); };
+        })(menuId, isDis);
+        
+        var price = getItemPrice(menuId);
         var inner = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '>';
-        inner += '<div class="item-info"><span class="item-name">' + item.label + '</span>';
-        if(item.sub) inner += '<span class="item-sub" style="font-size:0.7rem; color:#888;">' + item.sub + '</span>';
-        inner += '</div><div class="item-price">¥' + p.toLocaleString();
+        inner += '<div class="item-info"><span class="item-name">' + menuItem.label + '</span>';
+        if(menuItem.sub) inner += '<span class="item-sub" style="font-size:0.7rem; color:#888;">' + menuItem.sub + '</span>';
+        inner += '</div><div class="item-price">¥' + price.toLocaleString();
         if(userType === 'new') inner += '<span class="price-tag-new">初回</span>';
         inner += '</div>';
-        div.innerHTML = inner; area.appendChild(div);
-    });
+        
+        div.innerHTML = inner; 
+        area.appendChild(div);
+    }
+    
     updateTotal();
+    
     if (suggestionId) {
-        itemLeaves[suggestionId].forEach(function(leaf) {
-            var item = menuData[leaf];
-            if (item && item.imgs) {
-                if (item.imgs.body) { var i = document.getElementById("img-" + item.imgs.body); if(i && !i.classList.contains('active')) i.classList.add('suggest-blink'); }
-                if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f && !f.classList.contains('active')) f.classList.add('suggest-blink'); }
+        var sLeaves = itemLeaves[suggestionId];
+        for (var s = 0; s < sLeaves.length; s++) {
+            var sItem = menuData[sLeaves[s]];
+            if (sItem && sItem.imgs) {
+                if (sItem.imgs.body) { var siBody = document.getElementById("img-" + sItem.imgs.body); if(siBody && !siBody.classList.contains('active')) siBody.classList.add('suggest-blink'); }
+                if (sItem.imgs.face) { var siFace = document.getElementById("img-" + sItem.imgs.face); if(siFace && !siFace.classList.contains('active')) siFace.classList.add('suggest-blink'); }
             }
-        });
+        }
     }
 }
 
 function updateTotal() {
     var p = 0, t = 0, f = false;
-    selected.forEach(function(id) { p += getItemPrice(id); t += menuData[id].time; if(menuData[id].hasFace) f = true; });
+    for (var i = 0; i < selected.length; i++) {
+        var id = selected[i];
+        p += getItemPrice(id); 
+        t += menuData[id].time; 
+        if(menuData[id].hasFace) f = true;
+    }
+    
     if (selected.length > 0) {
         if (userType === 'new') { t += 90; if (f) t += 20; document.getElementById('counseling-badge-area').innerHTML = '<span class="counseling-note">※無料カウンセリング込</span>'; } 
         else { if (f) t += 20; document.getElementById('counseling-badge-area').innerHTML = ''; }
     } else { document.getElementById('counseling-badge-area').innerHTML = ''; }
+    
     var rounded = Math.ceil(t / 30) * 30, slot = Math.floor(rounded / 60) + "." + ((rounded % 60) === 30 ? '5' : '0');
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
     document.getElementById('total-time-slot').innerText = slot + " 時間枠";
 }
 
 function analyzeSuggestions(isManual) {
-    var cheaperCandidates = [], samePriceCandidates = [], upsellCandidates =[];
+    var cheaperCandidates =[], samePriceCandidates = [], upsellCandidates =[];
     var upsellLimit = (userType === 'new') ? 5000 : 10000;
+    var keys = Object.keys(menuData);
 
-    Object.keys(menuData).filter(function(k) { return menuData[k].cat === 'set'; }).forEach(function(sid) {
-        if (selected.indexOf(sid) !== -1) return;
-        var candLeaves = itemLeaves[sid], intersectingItems = [], intersectingLeaves =[], isCovered = true;
+    for (var i = 0; i < keys.length; i++) {
+        var sid = keys[i];
+        if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
         
-        selected.forEach(function(selId) {
+        var candLeaves = itemLeaves[sid], intersectingItems =[], intersectingLeaves =[], isCovered = true;
+        
+        for (var j = 0; j < selected.length; j++) {
+            var selId = selected[j];
             var selLeaves = itemLeaves[selId], hasInt = false;
-            selLeaves.forEach(function(leaf) { if (candLeaves.indexOf(leaf) !== -1) { hasInt = true; } else { isCovered = false; } });
-            if (hasInt) { intersectingItems.push(selId); selLeaves.forEach(function(l) { if(intersectingLeaves.indexOf(l)===-1) intersectingLeaves.push(l); }); }
-        });
+            for (var k = 0; k < selLeaves.length; k++) {
+                if (candLeaves.indexOf(selLeaves[k]) !== -1) { hasInt = true; } 
+                else { isCovered = false; }
+            }
+            if (hasInt) { 
+                intersectingItems.push(selId); 
+                for (var l = 0; l < selLeaves.length; l++) {
+                    if(intersectingLeaves.indexOf(selLeaves[l]) === -1) intersectingLeaves.push(selLeaves[l]);
+                }
+            }
+        }
 
         if (intersectingItems.length >= 1 && isCovered) {
             var oldP = getOriginalTotal(intersectingItems);
@@ -463,3 +538,131 @@ function analyzeSuggestions(isManual) {
             if (diff < 0 && intersectingItems.length >= 2) {
                 cheaperCandidates.push({sid:sid, type:'cheaper', oldPrice:oldP, diff:diff, intersectingItems:intersectingItems});
             } else if (diff === 0 && addedLeaves > 0 && intersectingItems.length >= 2) {
+                samePriceCandidates.push({sid:sid, type:'samePrice', oldPrice:oldP, diff:0, intersectingItems:intersectingItems});
+            } else if (diff > 0 && addedLeaves > 0 && selected.length >= 2 && diff < upsellLimit) {
+                upsellCandidates.push({sid:sid, type:'upsell', oldPrice:oldP, diff:diff, intersectingItems:intersectingItems});
+            }
+        }
+    }
+
+    if (cheaperCandidates.length > 0) return cheaperCandidates[0];
+    if (samePriceCandidates.length > 0) return samePriceCandidates[0];
+    if (upsellCandidates.length > 0) return upsellCandidates[0];
+    return null;
+}
+
+function checkSuggestion(isManual) {
+    document.getElementById('suggestion-box').style.display = 'none';
+    if (!isConciergeON && !isManual) { suggestionId = null; return; }
+    var best = analyzeSuggestions(isManual);
+    if (!best) {
+        if (isManual && isConciergeON) showConciergeBubble("最適なプランを選んでいます。ご安心くださいね。");
+        suggestionId = null; return;
+    }
+    suggestionId = best.sid; 
+    suggestionReplaceItems = best.intersectingItems;
+    var currentT = getOriginalTotal(selected);
+    var setItem = menuData[best.sid];
+    var newT = currentT - best.oldPrice + getItemPrice(best.sid);
+
+    var html = '<div class="sug-title">🎉 AIコンシェルジュからのご提案</div>';
+
+    if (best.type === 'upsell') {
+        html += '<div class="sug-benefit-msg">✨ ご希望の部位を含んだまま、お得にアップグレード可能です！ ✨</div>';
+        var diffLabel = "+¥" + best.diff.toLocaleString();
+        var theoreticalSaving = getTheoreticalOriginalPrice(best.sid) - getItemPrice(best.sid);
+        
+        html += '<div class="sug-menu-name">' + setItem.label + ' へのアップグレード</div>';
+        if (setItem.sub) { html += '<div class="sug-menu-sub">(' + setItem.sub + ')</div>'; }
+        
+        html += '<div class="sug-upsell-panel">';
+        html += '  <div class="sug-upsell-col"><span class="sug-upsell-label">現在の選択</span><span class="sug-upsell-price">¥' + currentT.toLocaleString() + '</span></div>';
+        html += '  <div class="sug-upsell-col"><span class="sug-upsell-label">追加</span><span class="sug-upsell-price red">' + diffLabel + '</span><span class="sug-upsell-arrow">▶</span></div>';
+        html += '  <div class="sug-upsell-col"><span class="sug-upsell-label">アップグレード後</span><span class="sug-upsell-price large-red">¥' + newT.toLocaleString() + '</span></div>';
+        html += '</div>';
+
+        if (theoreticalSaving > 0) { html += '<div class="sug-discount-box">※パーツを別々に追加するより ¥' + theoreticalSaving.toLocaleString() + ' もお得です！</div>'; }
+        html += '<div class="sug-note">※セット内の不要な部位は避けて照射することも可能です。<br>(デザイン脱毛をご希望の際もご相談ください)</div>';
+    } else {
+        var saving = currentT - newT;
+        if (best.type === 'cheaper') html += '<div class="sug-benefit-msg">✨ ご希望の部位を含んだまま、お安くなります！ ✨</div>';
+        else html += '<div class="sug-benefit-msg">✨ 同じ金額で範囲が広がります！ ✨</div>';
+        
+        html += '<div class="sug-menu-name">' + setItem.label + '</div>';
+        if (setItem.sub) { html += '<div class="sug-menu-sub">(' + setItem.sub + ')</div>'; }
+
+        html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price old">¥' + currentT.toLocaleString() + '</span></div>';
+        html += '<div class="sug-arrow">▶▶</div><div class="sug-col"><span class="sug-col-label">変更後</span><span class="sug-col-price new">¥' + newT.toLocaleString() + '</span></div></div>';
+        
+        if(saving > 0) html += '<div class="sug-discount-box">✨ ¥' + saving.toLocaleString() + ' お得になります！</div>';
+        html += '<div class="sug-note">※セット内の不要な部位は避けて照射することも可能です。<br>(デザイン脱毛をご希望の際もご相談ください)</div>';
+    }
+
+    html += '<div style="display:flex; gap:10px; margin-top:15px;">';
+    html += '<button onclick="applyOptimalSet()" style="background:#000; color:#fff; border:1px solid #000; padding:14px; border-radius:6px; font-weight:bold; flex:2;">変更する</button>';
+    html += '<button onclick="suggestionId=null; document.getElementById(\'suggestion-box\').style.display=\'none\'; render();" style="background:transparent; color:#111; border:none; flex:1; font-weight:bold;">今はしない</button>';
+    html += '</div>';
+    
+    document.getElementById('suggestion-box').innerHTML = html; 
+    document.getElementById('suggestion-box').style.display = 'block';
+}
+
+function applyOptimalSet() {
+    for (var i = 0; i < suggestionReplaceItems.length; i++) {
+        var idx = selected.indexOf(suggestionReplaceItems[i]);
+        if (idx !== -1) selected.splice(idx, 1);
+    }
+    selected.push(suggestionId); suggestionId = null; document.getElementById('suggestion-box').style.display = 'none'; render();
+}
+
+function toggleConcierge() {
+    isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
+    icon.className = isConciergeON ? 'concierge-icon on' : 'concierge-icon off';
+    if (isConciergeON) { checkSuggestion(true); showConciergeBubble("AIコンシェルジュをONにしました！<br>最適なプランをご提案します。"); } 
+    else { showConciergeBubble("必要な際はいつでもお呼びください♪"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); }
+}
+
+function showConciergeBubble(msg) {
+    var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerHTML = msg;
+    b.style.display = 'block'; setTimeout(function() { b.style.opacity = '1'; }, 10);
+    if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 4000);
+}
+
+function copyResult() {
+    if (selected.length === 0) return alert("選択してください");
+    var best = analyzeSuggestions(true);
+    if (best && (best.type === 'cheaper' || best.type === 'samePrice')) {
+        suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
+        var currentT = getOriginalTotal(selected);
+        var newT = currentT - best.oldPrice + getItemPrice(best.sid);
+        var msg = "<strong>【最後にご確認です】</strong><br><br>";
+        if (best.type === 'cheaper') msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + (currentT - newT).toLocaleString() + "</span> お安くなります！";
+        else msg += "同じ金額でさらに部位が多い「<strong>" + menuData[best.sid].label + "</strong>」に変更できます！";
+        document.getElementById('final-confirm-text').innerHTML = msg;
+        document.getElementById('final-confirm-modal').style.display = 'flex';
+        return;
+    }
+    doActualCopy();
+}
+
+function acceptFinalConfirm() { document.getElementById('final-confirm-modal').style.display = 'none'; applyOptimalSet(); setTimeout(doActualCopy, 200); }
+function rejectFinalConfirm() { document.getElementById('final-confirm-modal').style.display = 'none'; doActualCopy(); }
+
+function doActualCopy() {
+    var slot = document.getElementById('total-time-slot').innerText, priceStr = document.getElementById('total-price').innerText;
+    var txt = "【NARX予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
+    for (var i = 0; i < selected.length; i++) {
+        txt += "・" + menuData[selected[i]].label + "\n";
+    }
+    txt += "──────────\n合計金額：" + priceStr + "\n予約枠目安：" + slot;
+    navigator.clipboard.writeText(txt).then(function() { 
+        document.getElementById('total-time-slot').innerText = slot;
+        document.getElementById('copy-complete-modal').style.display = 'flex';
+    });
+}
+
+function goToReserve() { window.open("https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585", "_blank"); }
+function closeCopyModal() { document.getElementById('copy-complete-modal').style.display = 'none'; }
+</script>
+</body>
+</html>
