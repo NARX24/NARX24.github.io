@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.36.6</title>
+<title>NARX 料金＆時間シミュレーター Ver.36.7</title>
 <script>
 // 【超強力エラー検知】HTML描画前でもエラーを拾って表示します
 window.onerror = function(msg, url, line) {
@@ -94,11 +94,11 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon.on{background:var(--gold);border:2px solid var(--gold);}
 .concierge-icon.off{background:#111;border:3px solid var(--gold);}
 
-/* カレンダー＆最終確認モーダル */
-#final-confirm-modal {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100000;display:none;justify-content:center;align-items:center;}
+/* 各種モーダル */
+#copy-complete-modal, #final-confirm-modal {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100000;display:none;justify-content:center;align-items:center;}
 .final-modal-content{border:1px solid var(--gold);padding:30px 20px;width:85%;max-width:420px;background:var(--black);text-align:center;border-radius:8px;}
 
-/* ======= カレンダー新デザイン（白背景×ゴールド） ======= */
+/* カレンダー新デザイン（白背景×ゴールド） */
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow-y: auto; padding-bottom: 50px; }
 .cal-header { position: sticky; top: 0; background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
 .cal-title { color: var(--gold); font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; }
@@ -108,30 +108,23 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .cal-week-btn { color: var(--gold); cursor: pointer; padding: 6px 12px; border: 1px solid #444; border-radius: 4px; background: #222; font-weight: bold; }
 .cal-note { font-size: 0.75rem; color: #ccc; text-align: center; margin-bottom: 10px; padding: 5px 15px; line-height: 1.6; }
 
-/* テーブルコンテナのみ白ベースにする */
 .cal-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0; margin-bottom: 20px; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
 .cal-table { width: 100%; border-collapse: collapse; text-align: center; background: #fff; }
 .cal-table th, .cal-table td { border: 1px solid #e0e0e0; padding: 15px 5px; min-width: 50px; font-size: 0.85rem; }
-
-/* ヘッダー行（日付） */
 .cal-table th { background: #f7f7f7; color: #333; font-weight: bold; line-height: 1.4; }
-
-/* 左端（時間） */
 .cal-table th.time-col { color: #111; font-weight: bold; position: sticky; left: 0; background: #fdfdfd; z-index: 2; border-right: 2px solid var(--gold); width: 50px; }
 
-/* 記号ステータス */
 .cal-status-o { color: #c09015; font-size: 1.4rem; cursor: pointer; transition: 0.2s; font-weight: bold; }
 .cal-status-o:active { background: #f0f0f0; transform: scale(0.9); }
 .cal-status-x { color: #bbb; font-size: 1.2rem; }
 .cal-status-hyphen { color: #eee; font-size: 1.2rem; }
-/* ========================================================= */
 
 .bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
 .summary-grid{display:grid;grid-template-columns:1fr 1.1fr;margin-bottom:12px;}
 .summary-item .label{font-size:0.7rem;color:#999;display:block;}
 .summary-item .val{font-size:1.35rem;color:var(--gold);font-weight:bold;}
 .summary-item .counseling-note{font-size:0.6rem;color:#fff;background:#c00;padding:2px 6px;border-radius:4px;display:inline-block;margin-top:2px;}
-.btn-group{display:flex;gap:10px;}
+.btn-group{display:flex;gap:10px; width: 100%;}
 .btn{flex:1;padding:15px;text-align:center;border-radius:6px;font-weight:bold;font-size:0.9rem;border:none;cursor:pointer;}
 .btn-reserve{background:var(--gold);color:#000;}
 </style>
@@ -145,6 +138,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
         </div>
         <h2 style="color: var(--gold); margin-bottom: 10px; letter-spacing: 2px;">WELCOME</h2>
         <p style="font-size: 0.85rem; line-height: 1.8; margin-bottom: 35px; color: #bbb;">現在の状況を選択してください。</p>
+        <!-- 新規ならカレンダーへ、会員ならコピーへ -->
         <button class="btn btn-reserve" style="width: 100%; margin-bottom: 15px;" onclick="forceStart('new')">初めて来店する（初回価格）</button>
         <button class="btn btn-reserve" style="width: 100%; background: #222; color: #fff;" onclick="forceStart('repeat')">既に会員である（通常価格）</button>
     </div>
@@ -195,16 +189,28 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <div id="suggestion-box"></div>
 
+<!-- 最終確認モーダル（ボタンの文言はJSで動的に変わります） -->
 <div id="final-confirm-modal">
     <div class="final-modal-content">
         <h3 style="color:var(--gold);margin-top:0;">💡 最終ご提案</h3>
         <p id="final-confirm-text" style="font-size:0.85rem;line-height:1.6;color:#ddd;margin-bottom:20px;"></p>
-        <button onclick="acceptFinalConfirm()" style="width:100%;background:var(--gold);color:#000;border:none;padding:14px;border-radius:6px;font-weight:bold;margin-bottom:12px;">お得なプランに変更して予約へ</button>
-        <button onclick="rejectFinalConfirm()" style="width:100%;background:transparent;color:#888;border:1px solid #444;padding:12px;border-radius:6px;font-weight:bold;">変更せずに予約へ</button>
+        <button id="final-confirm-btn-accept" style="width:100%;background:var(--gold);color:#000;border:none;padding:14px;border-radius:6px;font-weight:bold;margin-bottom:12px;"></button>
+        <button id="final-confirm-btn-reject" style="width:100%;background:transparent;color:#888;border:1px solid #444;padding:12px;border-radius:6px;font-weight:bold;"></button>
     </div>
 </div>
 
-<!-- 新デザイン：カレンダーモーダル -->
+<!-- コピー完了モーダル（会員用） -->
+<div id="copy-complete-modal">
+    <div class="final-modal-content" style="padding: 35px 20px;">
+        <div style="font-size:2.5rem; margin-bottom:10px;">📋</div>
+        <h3 style="color:var(--gold); letter-spacing: 2px;">COPY COMPLETED</h3>
+        <p style="font-size: 0.8rem; color: #ccc; line-height: 1.6; margin-top: 15px;">ご希望の部位をコピーいたしました。<br>予約ページへ移動後、以下の手順でご予約ください。</p>
+        <button onclick="goToReserve()" style="width:100%;background:var(--gold);color:#000;border:none;padding:16px;border-radius:6px;font-weight:bold;margin-bottom:15px;font-size:0.95rem;">予約ページへ進む</button>
+        <button onclick="closeCopyModal()" style="width:100%;background:transparent;color:#888;border:none;padding:10px;font-size:0.8rem;">閉じる</button>
+    </div>
+</div>
+
+<!-- カレンダーモーダル（新規用） -->
 <div id="calendar-modal">
     <div class="cal-header">
         <div class="cal-title">ご予約日時の選択</div>
@@ -231,7 +237,8 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
             <div id="counseling-badge-area"></div>
         </div>
     </div>
-    <div class="btn-group"><button class="btn btn-reserve" onclick="proceedToCalendar()">空き状況を確認して予約へ</button></div>
+    <!-- ユーザーの選択によってここが出し分けられます -->
+    <div class="btn-group" id="action-btn-container"></div>
 </div>
 
 <script>
@@ -358,6 +365,7 @@ function getTheoreticalOriginalPrice(setId) {
     return total;
 }
 
+// ここでUIとボタンを出し分けます
 function forceStart(type) {
     document.getElementById('gate-modal').style.display = 'none';
     userType = type;
@@ -366,6 +374,17 @@ function forceStart(type) {
         badge.innerText = type === 'new' ? "【ご新規様】初回限定価格モード" : "【会員様】通常価格モード";
         badge.style.background = type === 'new' ? "var(--gold)" : "#666";
     }
+    
+    // 【重要】新規と会員でボトムボタンの機能と見た目を切り替える
+    var btnContainer = document.getElementById('action-btn-container');
+    if (type === 'new') {
+        // 新規：カレンダーへ
+        btnContainer.innerHTML = '<button class="btn btn-reserve" onclick="proceedToCalendar()">空き状況を確認して予約へ</button>';
+    } else {
+        // 会員：コピーして既存フローへ
+        btnContainer.innerHTML = '<button class="btn btn-reserve" style="background:#222; color:#fff;" onclick="copyResult()">内容をコピーして予約へ</button>';
+    }
+
     initApp(); render();
 }
 
@@ -665,6 +684,10 @@ function showConciergeBubble(msg) {
     if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 4000);
 }
 
+
+/* ==============================================================
+   【新規様用】カレンダー予約フロー
+   ============================================================== */
 function proceedToCalendar() {
     if (selected.length === 0) return alert("メニューを選択してください。");
     var best = analyzeSuggestions(true);
@@ -675,15 +698,20 @@ function proceedToCalendar() {
         var msg = "<strong>【最後にご確認です】</strong><br><br>";
         if (best.type === 'cheaper') msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + (currentT - newT).toLocaleString() + "</span> お安くなります！";
         else msg += "同じ金額でさらに部位が多い「<strong>" + menuData[best.sid].label + "</strong>」に変更できます！";
+        
         document.getElementById('final-confirm-text').innerHTML = msg;
+        
+        // 最終確認モーダルのボタンアクションを「カレンダーへ」に設定
+        document.getElementById('final-confirm-btn-accept').innerText = "お得なプランに変更して予約へ";
+        document.getElementById('final-confirm-btn-reject').innerText = "変更せずに予約へ";
+        document.getElementById('final-confirm-btn-accept').onclick = function() { acceptFinalConfirm('calendar'); };
+        document.getElementById('final-confirm-btn-reject').onclick = function() { rejectFinalConfirm('calendar'); };
+        
         document.getElementById('final-confirm-modal').style.display = 'flex';
         return;
     }
     showCalendarModal();
 }
-
-function acceptFinalConfirm() { document.getElementById('final-confirm-modal').style.display = 'none'; applyOptimalSet(); setTimeout(showCalendarModal, 200); }
-function rejectFinalConfirm() { document.getElementById('final-confirm-modal').style.display = 'none'; showCalendarModal(); }
 
 function showCalendarModal() {
     renderCalendar();
@@ -694,6 +722,77 @@ function closeCalendarModal() {
     document.getElementById('calendar-modal').style.display = 'none';
 }
 
+
+/* ==============================================================
+   【会員様用】コピーして既存のエルメ予約へ飛ぶフロー
+   ============================================================== */
+function copyResult() {
+    if (selected.length === 0) return alert("メニューを選択してください。");
+    var best = analyzeSuggestions(true);
+    if (best && (best.type === 'cheaper' || best.type === 'samePrice')) {
+        suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
+        var currentT = getOriginalTotal(selected);
+        var newT = currentT - best.oldPrice + getItemPrice(best.sid);
+        var msg = "<strong>【最後にご確認です】</strong><br><br>";
+        if (best.type === 'cheaper') msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + (currentT - newT).toLocaleString() + "</span> お安くなります！";
+        else msg += "同じ金額でさらに部位が多い「<strong>" + menuData[best.sid].label + "</strong>」に変更できます！";
+        
+        document.getElementById('final-confirm-text').innerHTML = msg;
+        
+        // 最終確認モーダルのボタンアクションを「コピー実行」に設定
+        document.getElementById('final-confirm-btn-accept').innerText = "お得なプランに変更してコピー";
+        document.getElementById('final-confirm-btn-reject').innerText = "変更せずにコピーする";
+        document.getElementById('final-confirm-btn-accept').onclick = function() { acceptFinalConfirm('copy'); };
+        document.getElementById('final-confirm-btn-reject').onclick = function() { rejectFinalConfirm('copy'); };
+        
+        document.getElementById('final-confirm-modal').style.display = 'flex';
+        return;
+    }
+    doActualCopy();
+}
+
+function doActualCopy() {
+    var slot = document.getElementById('total-time-slot').innerText, priceStr = document.getElementById('total-price').innerText;
+    var txt = "【NARX予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
+    for (var i = 0; i < selected.length; i++) {
+        txt += "・" + menuData[selected[i]].label + "\n";
+    }
+    txt += "──────────\n合計金額：" + priceStr + "\n予約枠目安：" + slot;
+    
+    // クリップボードコピー処理（iOSエラー回避のcatch付き）
+    navigator.clipboard.writeText(txt).then(function() { 
+        document.getElementById('copy-complete-modal').style.display = 'flex';
+    }).catch(function() {
+        alert("コピーに失敗しました。画面のテキストを手動でコピーしてください。\n\n" + txt);
+    });
+}
+
+function goToReserve() { window.open("https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585", "_blank"); }
+function closeCopyModal() { document.getElementById('copy-complete-modal').style.display = 'none'; }
+
+
+/* ==============================================================
+   両方のフローで使う「提案の承認/拒否」の処理
+   ============================================================== */
+function acceptFinalConfirm(actionType) { 
+    document.getElementById('final-confirm-modal').style.display = 'none'; 
+    applyOptimalSet(); 
+    setTimeout(function() {
+        if(actionType === 'copy') doActualCopy();
+        else showCalendarModal();
+    }, 200); 
+}
+
+function rejectFinalConfirm(actionType) { 
+    document.getElementById('final-confirm-modal').style.display = 'none'; 
+    if(actionType === 'copy') doActualCopy();
+    else showCalendarModal();
+}
+
+
+/* ==============================================================
+   カレンダー生成・選択ロジック（モック用）
+   ============================================================== */
 function renderCalendar() {
     var wrapper = document.getElementById('calendar-container');
     var html = '<table class="cal-table">';
