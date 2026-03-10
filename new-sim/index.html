@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.36.1</title>
+<title>NARX 料金＆時間シミュレーター Ver.36.2</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -11,8 +11,10 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 /* ロゴデザイン */
 .gate-logo-container { text-align: center; margin-bottom: 30px; }
 .gate-logo-img { width: 220px; height: auto; }
-.header-logo-container { text-align: center; padding: 15px 0; border-bottom: 1px solid var(--gold); margin-bottom: 15px; }
-.header-logo-img { height: 45px; width: auto; }
+
+/* ヘッダーロゴのバランスを大きく美しく調整 */
+.header-logo-container { text-align: center; padding: 20px 0 15px; border-bottom: 1px solid var(--gold); margin-bottom: 20px; }
+.header-logo-img { width: 170px; height: auto; margin-bottom: 8px; }
 
 #gate-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.98);z-index:99999;display:flex;justify-content:center;align-items:center;}
 .modal-content{border:1px solid var(--gold);padding:40px 20px;width:85%;max-width:420px;background:var(--black);text-align:center;border-radius:12px;}
@@ -193,7 +195,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 【Ver.36.1：アップセルUI・文言を画像デザインに完全対応】
 var userType = 'new';
 var currentTab = 'set';
 var selected =[]; 
@@ -462,138 +463,3 @@ function analyzeSuggestions(isManual) {
             if (diff < 0 && intersectingItems.length >= 2) {
                 cheaperCandidates.push({sid:sid, type:'cheaper', oldPrice:oldP, diff:diff, intersectingItems:intersectingItems});
             } else if (diff === 0 && addedLeaves > 0 && intersectingItems.length >= 2) {
-                samePriceCandidates.push({sid:sid, type:'samePrice', oldPrice:oldP, diff:0, intersectingItems:intersectingItems});
-            } else if (diff > 0 && addedLeaves > 0 && selected.length >= 2 && diff < upsellLimit) {
-                upsellCandidates.push({sid:sid, type:'upsell', oldPrice:oldP, diff:diff, intersectingItems:intersectingItems});
-            }
-        }
-    });
-
-    if (cheaperCandidates.length > 0) return cheaperCandidates[0];
-    if (samePriceCandidates.length > 0) return samePriceCandidates[0];
-    if (upsellCandidates.length > 0) return upsellCandidates[0];
-    return null;
-}
-
-function checkSuggestion(isManual) {
-    document.getElementById('suggestion-box').style.display = 'none';
-    if (!isConciergeON && !isManual) { suggestionId = null; return; }
-    var best = analyzeSuggestions(isManual);
-    if (!best) {
-        if (isManual && isConciergeON) showConciergeBubble("最適なプランを選んでいます。ご安心くださいね。");
-        suggestionId = null; return;
-    }
-    suggestionId = best.sid; 
-    suggestionReplaceItems = best.intersectingItems;
-    var currentT = getOriginalTotal(selected);
-    var setItem = menuData[best.sid];
-    var newT = currentT - best.oldPrice + getItemPrice(best.sid);
-
-    var html = '<div class="sug-title">🎉 AIコンシェルジュからのご提案</div>';
-
-    if (best.type === 'upsell') {
-        html += '<div class="sug-benefit-msg">✨ ご希望の部位を含んだまま、お得にアップグレード可能です！ ✨</div>';
-        
-        var diffLabel = "+¥" + best.diff.toLocaleString();
-        var theoreticalSaving = getTheoreticalOriginalPrice(best.sid) - getItemPrice(best.sid);
-        
-        html += '<div class="sug-menu-name">' + setItem.label + ' へのアップグレード</div>';
-        if (setItem.sub) {
-            html += '<div class="sug-menu-sub">(' + setItem.sub + ')</div>';
-        }
-        
-        html += '<div class="sug-upsell-panel">';
-        html += '  <div class="sug-upsell-col"><span class="sug-upsell-label">現在の選択</span><span class="sug-upsell-price">¥' + currentT.toLocaleString() + '</span></div>';
-        html += '  <div class="sug-upsell-col"><span class="sug-upsell-label">追加</span><span class="sug-upsell-price red">' + diffLabel + '</span><span class="sug-upsell-arrow">▶</span></div>';
-        html += '  <div class="sug-upsell-col"><span class="sug-upsell-label">アップグレード後</span><span class="sug-upsell-price large-red">¥' + newT.toLocaleString() + '</span></div>';
-        html += '</div>';
-
-        if (theoreticalSaving > 0) {
-            html += '<div class="sug-discount-box">※パーツを別々に追加するより ¥' + theoreticalSaving.toLocaleString() + ' もお得です！</div>';
-        }
-        
-        html += '<div class="sug-note">※セット内の不要な部位は避けて照射することも可能です。<br>(デザイン脱毛をご希望の際もご相談ください)</div>';
-        
-    } else {
-        /* 安くなる場合・同じ金額の場合も文言と安心要素を統一 */
-        var saving = currentT - newT;
-        if (best.type === 'cheaper') html += '<div class="sug-benefit-msg">✨ ご希望の部位を含んだまま、お安くなります！ ✨</div>';
-        else html += '<div class="sug-benefit-msg">✨ 同じ金額で範囲が広がります！ ✨</div>';
-        
-        html += '<div class="sug-menu-name">' + setItem.label + '</div>';
-        if (setItem.sub) {
-            html += '<div class="sug-menu-sub">(' + setItem.sub + ')</div>';
-        }
-
-        html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price old">¥' + currentT.toLocaleString() + '</span></div>';
-        html += '<div class="sug-arrow">▶▶</div><div class="sug-col"><span class="sug-col-label">変更後</span><span class="sug-col-price new">¥' + newT.toLocaleString() + '</span></div></div>';
-        
-        if(saving > 0) html += '<div class="sug-discount-box">✨ ¥' + saving.toLocaleString() + ' お得になります！</div>';
-
-        html += '<div class="sug-note">※セット内の不要な部位は避けて照射することも可能です。<br>(デザイン脱毛をご希望の際もご相談ください)</div>';
-    }
-
-    /* 画像に合わせたボタンデザイン（変更する：黒背景に白文字、今はしない：文字黒） */
-    html += '<div style="display:flex; gap:10px; margin-top:15px;">';
-    html += '<button onclick="applyOptimalSet()" style="background:#000; color:#fff; border:1px solid #000; padding:14px; border-radius:6px; font-weight:bold; flex:2;">変更する</button>';
-    html += '<button onclick="suggestionId=null; document.getElementById(\'suggestion-box\').style.display=\'none\'; render();" style="background:transparent; color:#111; border:none; flex:1; font-weight:bold;">今はしない</button>';
-    html += '</div>';
-    
-    document.getElementById('suggestion-box').innerHTML = html; 
-    document.getElementById('suggestion-box').style.display = 'block';
-}
-
-function applyOptimalSet() {
-    suggestionReplaceItems.forEach(function(itemId) { var idx = selected.indexOf(itemId); if (idx !== -1) selected.splice(idx, 1); });
-    selected.push(suggestionId); suggestionId = null; document.getElementById('suggestion-box').style.display = 'none'; render();
-}
-
-function toggleConcierge() {
-    isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
-    icon.className = isConciergeON ? 'concierge-icon on' : 'concierge-icon off';
-    if (isConciergeON) { checkSuggestion(true); showConciergeBubble("AIコンシェルジュをONにしました！<br>最適なプランをご提案します。"); } 
-    else { showConciergeBubble("必要な際はいつでもお呼びください♪"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); }
-}
-
-function showConciergeBubble(msg) {
-    var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerHTML = msg;
-    b.style.display = 'block'; setTimeout(function() { b.style.opacity = '1'; }, 10);
-    if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 4000);
-}
-
-function copyResult() {
-    if (selected.length === 0) return alert("選択してください");
-    var best = analyzeSuggestions(true);
-    if (best && (best.type === 'cheaper' || best.type === 'samePrice')) {
-        suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
-        var currentT = getOriginalTotal(selected);
-        var newT = currentT - best.oldPrice + getItemPrice(best.sid);
-        var msg = "<strong>【最後にご確認です】</strong><br><br>";
-        if (best.type === 'cheaper') msg += "「<strong>" + menuData[best.sid].label + "</strong>」に変更すると、さらに <span style='color:var(--gold);'>¥" + (currentT - newT).toLocaleString() + "</span> お安くなります！";
-        else msg += "同じ金額でさらに部位が多い「<strong>" + menuData[best.sid].label + "</strong>」に変更できます！";
-        document.getElementById('final-confirm-text').innerHTML = msg;
-        document.getElementById('final-confirm-modal').style.display = 'flex';
-        return;
-    }
-    doActualCopy();
-}
-
-function acceptFinalConfirm() { document.getElementById('final-confirm-modal').style.display = 'none'; applyOptimalSet(); setTimeout(doActualCopy, 200); }
-function rejectFinalConfirm() { document.getElementById('final-confirm-modal').style.display = 'none'; doActualCopy(); }
-
-function doActualCopy() {
-    var slot = document.getElementById('total-time-slot').innerText, priceStr = document.getElementById('total-price').innerText;
-    var txt = "【NARX予約】\n区分：" + (userType === 'new' ? '新規' : '会員') + "\nメニュー：\n";
-    selected.forEach(function(id) { txt += "・" + menuData[id].label + "\n"; });
-    txt += "──────────\n合計金額：" + priceStr + "\n予約枠目安：" + slot;
-    navigator.clipboard.writeText(txt).then(function() { 
-        document.getElementById('total-time-slot').innerText = slot;
-        document.getElementById('copy-complete-modal').style.display = 'flex';
-    });
-}
-
-function goToReserve() { window.open("https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1772815585", "_blank"); }
-function closeCopyModal() { document.getElementById('copy-complete-modal').style.display = 'none'; }
-</script>
-</body>
-</html>
