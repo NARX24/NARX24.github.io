@@ -3,15 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 運用特化版 Ver.42.1</title>
+<title>NARX 運用管理版 Ver.43.0</title>
 <style>
+/* デザイン継承 */
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;}
-body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
+body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:120px;overflow-x:hidden;}
 .header-logo-container { text-align: center; padding: 20px 0; border-bottom: 1px solid var(--gold); }
 #gate-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.98);z-index:99999;display:flex;justify-content:center;align-items:center;}
 .modal-content{border:1px solid var(--gold);padding:30px 20px;width:85%;max-width:420px;background:var(--black);text-align:center;border-radius:12px;}
 .container{max-width:600px;margin:0 auto;padding:0 20px;}
-.view-panel{flex:1;position:relative;display:flex;justify-content:center;align-items:center;background-color:#fdfdfd;border:1px solid var(--gold);border-radius:8px;height:180px;}
+.dual-visual-container{display:flex;gap:4px;height:160px;margin-bottom:10px;}
+.view-panel{flex:1;position:relative;display:flex;justify-content:center;align-items:center;background-color:#fdfdfd;border:1px solid var(--gold);border-radius:8px;}
 .view-panel img{position:absolute;height:90%;transition:opacity 0.3s;pointer-events:none;}
 .base-img{opacity:0.3;}.layer-part{opacity:0;z-index:2;}.layer-part.active{opacity:1;}
 .tabs{display:flex;gap:5px;margin:15px 0;}.tab{flex:1;padding:12px 5px;text-align:center;color:#777;cursor:pointer;font-size:0.8rem;}.tab.active{color:var(--gold);border-bottom:2px solid var(--gold);}
@@ -19,71 +21,73 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
 .btn-reserve{background:var(--gold);color:#000;width:100%;padding:15px;border-radius:6px;font-weight:bold;border:none;margin-top:10px;cursor:pointer;}
 
-/* カレンダー・フォーム */
-#calendar-modal, #info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow-y: auto; }
-.cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; position: sticky; top: 0; z-index: 10;}
-.cal-wrapper { overflow-x: auto; background: #fff; margin-top: 10px; }
-.cal-table { width: 100%; border-collapse: collapse; text-align: center; color: #333; }
-.cal-table th, .cal-table td { border: 1px solid #e0e0e0; padding: 10px 5px; min-width: 65px; font-size: 0.7rem; }
-.cal-status-o { color: #c09015; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
-.cal-status-x { color: #ccc; font-size: 0.9rem; }
-.cal-status-off { color: #ddd; background: #f9f9f9; }
+/* 🚀 カレンダー：縦横固定（Sticky）プロ仕様 */
+#calendar-modal, #info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
+.cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
+.cal-outer-wrapper { height: calc(100% - 120px); overflow: auto; background: #fff; } /* スクロール領域 */
+.cal-table { width: 100%; border-collapse: collapse; text-align: center; color: #333; table-layout: fixed; }
+.cal-table th, .cal-table td { border: 1px solid #e0e0e0; padding: 8px 2px; font-size: 0.65rem; height: 40px; }
 
-.form-group { text-align: left; margin-bottom: 20px; }
-.form-group label { display: block; font-size: 0.8rem; color: var(--gold); margin-bottom: 5px; }
+/* 日付ヘッダーを固定 */
+.cal-table thead th { position: sticky; top: 0; background: #f7f7f7; z-index: 10; font-weight: bold; border-bottom: 2px solid var(--gold); }
+/* 時間列を固定 */
+.cal-table td:first-child, .cal-table th:first-child { position: sticky; left: 0; background: #f4f4f4; z-index: 9; width: 50px; font-weight: bold; border-right: 2px solid var(--gold); }
+
+.cal-status-o { color: #c09015; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+.cal-status-x { color: #ccc; font-size: 0.8rem; }
+.cal-status-off { color: #ddd; background: #fafafa; }
+
+.form-group { text-align: left; margin-bottom: 15px; }
+.form-group label { display: block; font-size: 0.75rem; color: var(--gold); margin-bottom: 5px; }
 .form-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box; }
 </style>
 </head>
 <body>
 
-<div id="gate-modal"><div class="modal-content"><img src="logo_white.png" style="width:150px;"><h2 style="color:var(--gold); font-size:1rem;">NARX RESERVATION</h2><button class="btn-reserve" onclick="forceStart('new')">初めて来店する</button><button class="btn-reserve" style="background:#222;color:#fff;margin-top:10px;" onclick="forceStart('repeat')">既に会員である</button><div id="cancel-area" style="margin-top:20px;"></div></div></div>
+<div id="gate-modal"><div class="modal-content"><img src="logo_white.png" style="width:150px;"><h2 style="color:var(--gold); font-size:0.9rem;">NARX 予約システム</h2><button class="btn-reserve" onclick="forceStart('new')">新規様（初回50%OFF）</button><button class="btn-reserve" style="background:#222;color:#fff;margin-top:10px;" onclick="forceStart('repeat')">会員様（通常価格）</button><div id="cancel-area" style="margin-top:20px;"></div></div></div>
 
 <div class="container">
-    <div class="header-logo-container"><img src="logo_white.png" style="width:130px;"></div>
-    <div style="text-align:center; padding:10px;"><div id="mode-display" style="font-size:0.75rem; color:var(--gold); font-weight:bold;"></div></div>
-    <div style="display:flex; gap:10px;">
-        <div class="view-panel" id="body-panel"><span>BODY</span><img src="base_body.png" class="base-img"></div>
-        <div class="view-panel" id="face-panel"><span>FACE</span><img src="base_face.png" class="base-img"></div>
-    </div>
+    <div class="header-logo-container"><img src="logo_white.png" style="width:120px;"></div>
+    <div style="text-align:center; padding:10px;"><div id="mode-display" style="font-size:0.7rem; color:var(--gold);"></div></div>
+    <div style="display:flex; gap:10px; height: 160px;"><div class="view-panel" id="body-panel"><span>BODY</span><img src="base_body.png"></div><div class="view-panel" id="face-panel"><span>FACE</span><img src="base_face.png"></div></div>
     <div class="tabs"><div id="tab-set" class="tab active" onclick="changeTab('set')">セット</div><div id="tab-part" class="tab" onclick="changeTab('part')">パーツ</div></div>
     <div id="menu-area"></div>
 </div>
 
 <div class="bottom-bar">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span id="total-price" style="font-size:1.3rem; color:var(--gold); font-weight:bold;">¥0</span>
-        <span id="total-time-slot" style="font-size:0.85rem;">0.0 時間枠</span>
+        <span id="total-price" style="font-size:1.2rem; color:var(--gold); font-weight:bold;">¥0</span>
+        <span id="total-time-slot" style="font-size:0.8rem;">0.0 時間枠</span>
     </div>
     <div id="action-btn-container"></div>
 </div>
 
 <div id="calendar-modal">
     <div class="cal-header">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <button onclick="moveWeek(-7)" style="color:var(--gold); background:none; border:none; font-size:1.2rem;">◀</button>
-            <span id="cal-current-range" style="color:var(--gold); font-size:0.9rem; font-weight:bold;"></span>
-            <button onclick="moveWeek(7)" style="color:var(--gold); background:none; border:none; font-size:1.2rem;">▶</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <button onclick="moveWeek(-7)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:2px 10px; border-radius:4px;">◀ 前週</button>
+            <span id="cal-current-range" style="color:var(--gold); font-size:0.8rem; font-weight:bold;"></span>
+            <button onclick="moveWeek(7)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:2px 10px; border-radius:4px;">次週 ▶</button>
         </div>
-        <button onclick="closeCalendarModal()" style="margin-top:10px; background:none; border:1px solid #444; color:#777; font-size:0.7rem; padding:5px 15px; border-radius:20px;">メニュー選択に戻る</button>
+        <button onclick="closeCalendarModal()" style="background:none; border:none; color:#777; font-size:0.7rem; text-decoration:underline;">メニュー選び直す</button>
     </div>
-    <div id="cal-loading" style="text-align:center;padding:50px;color:var(--gold);">カレンダー同期中...</div>
-    <div class="cal-wrapper" id="calendar-container"></div>
+    <div id="cal-loading" style="text-align:center;padding:50px;color:var(--gold);">空き状況を確認中...</div>
+    <div class="cal-outer-wrapper" id="cal-outer"><div id="calendar-container"></div></div>
 </div>
 
 <div id="info-modal">
     <div class="cal-header"><span style="color:var(--gold); font-weight:bold;">お客様情報の入力</span></div>
-    <div class="container" style="padding-top:30px;">
-        <div id="selected-summary" style="font-size:0.8rem; background:#111; padding:15px; border-radius:8px; margin-bottom:25px; border:1px solid var(--gold); line-height:1.6;"></div>
-        <div class="form-group"><label>お名前</label><input type="text" id="cust-name" placeholder="脱毛 太郎"></div>
-        <div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel" placeholder="09000000000"></div>
+    <div class="container" style="padding-top:20px;">
+        <div id="selected-summary" style="font-size:0.75rem; background:#111; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid var(--gold); line-height:1.5;"></div>
+        <div class="form-group"><label>お名前（フルネーム）</label><input type="text" id="cust-name" placeholder="脱毛 太郎"></div>
+        <div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel" placeholder="090-0000-0000"></div>
         <div class="form-group"><label>メールアドレス</label><input type="email" id="cust-email" placeholder="example@mail.com"></div>
-        <button class="btn-reserve" id="final-reserve-btn" onclick="submitReservation()">予約を確定する</button>
-        <button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:20px; font-size:0.8rem;">日時を選び直す</button>
+        <button class="btn-reserve" id="final-reserve-btn" onclick="submitReservation()">この内容で予約を確定する</button>
+        <button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.8rem;">日時を選び直す</button>
     </div>
 </div>
 
 <script>
-// 【重要】中島様のウェブアプリ URL
 var GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], currentOffset = 0;
 var tDate = "", tTime = "";
@@ -95,29 +99,17 @@ var menuData = {
 
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
-    document.getElementById('mode-display').innerText = t==='new'?"【新規限定・初回50%OFF適用中】":"【会員様・通常価格モード】";
+    document.getElementById('mode-display').innerText = t==='new'?"【新規価格モード】":"【会員様通常モード】";
     document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="proceedToCalendar()">空き状況を確認する</button>';
-    checkLastReservation(); initApp(); render();
-}
-
-function checkLastReservation() {
-    var lastId = localStorage.getItem('last_narx_event_id');
-    if(lastId) document.getElementById('cancel-area').innerHTML = '<button onclick="cancelReservation(\''+lastId+'\')" style="background:#333; color:#aaa; font-size:0.7rem; border:none; padding:8px; width:100%; border-radius:4px;">前回のテスト予約を消去</button>';
-}
-
-function cancelReservation(id) {
-    if(!confirm("カレンダーから削除しますか？")) return;
-    var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_WEBAPP_URL, true);
-    xhr.onreadystatechange=function(){ if(xhr.readyState===4){ alert("削除完了しました。"); localStorage.removeItem('last_narx_event_id'); location.reload(); } };
-    xhr.send(JSON.stringify({type:'cancel', eventId:id}));
+    initApp(); render();
 }
 
 function initApp() {
     var b=document.getElementById('body-panel'), f=document.getElementById('face-panel');
     Object.keys(menuData).forEach(k => {
         var it=menuData[k]; if(it.imgs){
-            if(it.imgs.body) { var img=document.createElement('img'); img.src=it.imgs.body+".png"; img.id="img-"+it.imgs.body; img.className='layer-part'; b.appendChild(img); }
-            if(it.imgs.face) { var img=document.createElement('img'); img.src=it.imgs.face+".png"; img.id="img-"+it.imgs.face; img.className='layer-part'; f.appendChild(img); }
+            if(it.imgs.body && !document.getElementById("img-"+it.imgs.body)) { var img=document.createElement('img'); img.src=it.imgs.body+".png"; img.id="img-"+it.imgs.body; img.className='layer-part'; b.appendChild(img); }
+            if(it.imgs.face && !document.getElementById("img-"+it.imgs.face)) { var img=document.createElement('img'); img.src=it.imgs.face+".png"; img.id="img-"+it.imgs.face; img.className='layer-part'; f.appendChild(img); }
         }
     });
 }
@@ -150,6 +142,7 @@ function moveWeek(n){ currentOffset += n; if(currentOffset < 0) currentOffset = 
 function proceedToCalendar() {
     if(selected.length===0) return alert("メニューを選んでください");
     document.getElementById('calendar-modal').style.display='block';
+    document.getElementById('cal-loading').style.display = 'block';
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_WEBAPP_URL, true);
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){ busySlots = JSON.parse(xhr.responseText); document.getElementById('cal-loading').style.display = 'none'; renderCalendar(); } };
     xhr.send(JSON.stringify({type:'getBusySlots'}));
@@ -160,40 +153,49 @@ function renderCalendar() {
     var reqMs = parseFloat(document.getElementById('total-time-slot').innerText) * 60 * 60 * 1000;
     var startDate = new Date(today.getTime() + currentOffset*24*60*60*1000);
     document.getElementById('cal-current-range').innerText = (startDate.getMonth()+1)+"/"+startDate.getDate() + " 〜";
-    var html='<table class="cal-table"><tr><th style="background:#eee;">時間</th>';
-    for(var i=0;i<7;i++){ var d=new Date(startDate.getTime()+i*24*60*60*1000); html+='<th>'+(d.getMonth()+1)+'/'+d.getDate()+'</th>'; }
-    html+='</tr>';
+
+    var dayNames = ['日','月','火','水','木','金','土'];
+    var html='<table class="cal-table"><thead><tr><th>時間</th>';
+    for(var i=0;i<7;i++){ 
+        var d=new Date(startDate.getTime()+i*24*60*60*1000); 
+        html+='<th>'+(d.getMonth()+1)+'/'+d.getDate()+'<br>('+dayNames[d.getDay()]+')</th>'; 
+    }
+    html+='</tr></thead><tbody>';
+
     var times=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00'];
     times.forEach(t => {
-        html+='<tr><td style="background:#f4f4f4; font-weight:bold;">'+t+'</td>';
+        html+='<tr><td>'+t+'</td>';
         for(var d=0; d<7; d++){
             var slotStart = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()+d, t.split(':')[0], t.split(':')[1]);
             var s = slotStart.getTime(); var e = s + reqMs;
-            var day = slotStart.getDay(); var totalMin = slotStart.getHours() * 60 + slotStart.getMinutes();
+            var day = slotStart.getDay(); 
             var limitHr = (day===0||day===6) ? 21 : 22;
             var limitTime = new Date(slotStart.getFullYear(), slotStart.getMonth(), slotStart.getDate(), limitHr, 0).getTime();
             
             var isWork = false;
-            if(day===0||day===6){ if(totalMin>=540 && e<=limitTime) isWork=true; } else { if(totalMin>=720 && e<=limitTime) isWork=true; }
+            var hr = slotStart.getHours(); var mn = slotStart.getMinutes(); var totalM = hr*60+mn;
+            if(day===0||day===6){ if(totalM>=540 && e<=limitTime) isWork=true; } else { if(totalM>=720 && e<=limitTime) isWork=true; }
+            
             var isBusy = false;
             busySlots.forEach(b => { 
-                var bStart = b.start - (30 * 60 * 1000); 
-                var bEnd = b.end + (30 * 60 * 1000);
+                var bStart = b.start - (30 * 60 * 1000); // 前30分
+                var bEnd = b.end + (30 * 60 * 1000);     // 後30分
                 if(s < bEnd && e > bStart) isBusy = true; 
             });
             if(s < new Date().getTime()) isBusy = true;
+
             if(!isWork) html+='<td class="cal-status-off">-</td>';
             else if(isBusy) html+='<td class="cal-status-x">×</td>';
             else html+='<td class="cal-status-o" onclick="openInfoModal(\''+(slotStart.getMonth()+1)+'/'+slotStart.getDate()+'\', \''+t+'\')">◎</td>';
         }
         html+='</tr>';
     });
-    wrapper.innerHTML = html+'</table>';
+    wrapper.innerHTML = html+'</tbody></table>';
 }
 
 function openInfoModal(d, t) {
     tDate = d; tTime = t;
-    document.getElementById('selected-summary').innerHTML = "【予約内容の確認】<br>日時: " + d + " " + t + "〜<br>メニュー: " + selected.join(', ') + "<br>合計金額: " + document.getElementById('total-price').innerText;
+    document.getElementById('selected-summary').innerHTML = "【ご予約内容】<br>日時: " + d + " " + t + "～<br>メニュー: " + selected.join(', ') + "<br>合計: " + document.getElementById('total-price').innerText;
     document.getElementById('info-modal').style.display = 'block';
 }
 
@@ -201,16 +203,16 @@ function submitReservation() {
     var name = document.getElementById('cust-name').value;
     var tel = document.getElementById('cust-tel').value;
     var email = document.getElementById('cust-email').value;
-    if(!name || !tel || !email) return alert("お名前、お電話、メールをすべて入力してください");
-    document.getElementById('final-reserve-btn').innerText = "処理中...";
+    if(!name || !tel || !email) return alert("すべて入力してください");
+    
+    document.getElementById('final-reserve-btn').innerText = "予約を確定中...";
     document.getElementById('final-reserve-btn').disabled = true;
+
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_WEBAPP_URL, true);
     var data={type:'reserve', userType:userType, date:tDate, time:tTime, slot:document.getElementById('total-time-slot').innerText, price:document.getElementById('total-price').innerText, menus:selected.join(','), name:name, tel:tel, email:email};
     xhr.onreadystatechange=function(){ 
         if(xhr.readyState===4){ 
-            var res = JSON.parse(xhr.responseText);
-            localStorage.setItem('last_narx_event_id', res.eventId);
-            alert("ご予約が確定しました！メールをご確認ください。"); location.reload();
+            alert("ご予約が完了いたしました。"); location.reload();
         } 
     };
     xhr.send(JSON.stringify(data));
