@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆時間シミュレーター Ver.37.1</title>
+<title>NARX 料金＆時間シミュレーター Ver.37.2</title>
 <script>
-// 【超強力エラー検知】
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line + "\n※この画面をスクショしてお知らせください");
 };
@@ -14,7 +13,6 @@ window.onerror = function(msg, url, line) {
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
 
-/* ロゴデザイン */
 .gate-logo-container { text-align: center; margin-bottom: 30px; }
 .gate-logo-img { width: 220px; height: auto; }
 .header-logo-container { text-align: center; padding: 20px 0 15px; border-bottom: 1px solid var(--gold); margin-bottom: 20px; }
@@ -63,18 +61,29 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
-#suggestion-box{position:fixed;bottom:190px;left:50%;transform:translateX(-50%);width:92%;max-width:420px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:20px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
-.sug-title{font-weight:bold;font-size:0.85rem;color:#555;margin-bottom:12px;text-align:center;}
-.sug-benefit-msg{text-align:center;font-size:0.75rem;color:var(--gold);background:#111;padding:10px;border-radius:4px;font-weight:bold;margin-bottom:15px;letter-spacing:0.5px;}
-.sug-menu-name{font-size:1.15rem;font-weight:bold;color:#111;margin-bottom:4px;text-align:center;}
-.sug-menu-sub{font-size:0.75rem;color:#333;text-align:center;margin-bottom:15px;}
-.sug-upsell-panel{background:rgba(255,255,255,0.85);padding:15px 5px;border-radius:8px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:flex-start;}
+/* AIコンシェルジュ 提案モーダル（70%縮小調整版） */
+#suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:82%;max-width:360px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:12px 15px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
+.sug-title{font-weight:bold;font-size:0.75rem;color:#555;margin-bottom:8px;text-align:center;}
+.sug-benefit-msg{text-align:center;font-size:0.7rem;color:var(--gold);background:#111;padding:6px;border-radius:4px;font-weight:bold;margin-bottom:10px;letter-spacing:0.5px;}
+.sug-menu-name{font-size:1.0rem;font-weight:bold;color:#111;margin-bottom:2px;text-align:center;}
+.sug-menu-sub{font-size:0.65rem;color:#333;text-align:center;margin-bottom:10px;line-height:1.2;}
+.sug-upsell-panel{background:rgba(255,255,255,0.85);padding:10px 5px;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;}
 .sug-upsell-col{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;}
-.sug-upsell-label{font-size:0.65rem;color:#333;margin-bottom:8px;}
-.sug-upsell-price{font-size:1.05rem;color:#111;font-weight:bold;}
-.sug-upsell-price.red{color:#c00;font-size:1.15rem;}
-.sug-upsell-price.large-red{color:#c00;font-size:1.35rem;}
-.sug-note{font-size:0.65rem;color:#333;text-align:left;line-height:1.5;margin-top:15px;border-top:1px dashed rgba(0,0,0,0.2);padding-top:12px;}
+.sug-upsell-label{font-size:0.6rem;color:#333;margin-bottom:4px;}
+.sug-upsell-price{font-size:0.9rem;color:#111;font-weight:bold;}
+.sug-upsell-price.red{color:#c00;font-size:1.0rem;}
+.sug-upsell-price.large-red{color:#c00;font-size:1.15rem;}
+
+.sug-discount-box{background:#111;color:var(--gold);font-size:0.7rem;padding:8px;border-radius:4px;text-align:center;font-weight:bold;margin-bottom:10px;width:100%;box-sizing:border-box;}
+.sug-note{font-size:0.6rem;color:#333;text-align:left;line-height:1.4;margin-top:10px;border-top:1px dashed rgba(0,0,0,0.2);padding-top:8px;}
+
+.sug-compare-panel{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.75);padding:8px;border-radius:8px;margin-bottom:8px;border:1px solid rgba(0,0,0,0.1);}
+.sug-col{flex:1;text-align:center;}
+.sug-col-label{font-size:0.6rem;color:#555;display:block;margin-bottom:2px;font-weight:bold;}
+.sug-col-price{font-size:0.9rem;color:#111;font-weight:bold;}
+.sug-col-price.old{text-decoration:line-through;color:#888;font-size:0.8rem;}
+.sug-col-price.new{font-size:1.1rem;color:#c00;}
+.sug-arrow{padding:0 5px;color:#c00;font-weight:bold;text-align:center;font-size:1.0rem;}
 
 #concierge-wrapper{display:flex;position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:1000;align-items:center;flex-direction:column;pointer-events:none;}
 #concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.3s ease;position:relative;text-align:center;pointer-events:auto;}
@@ -221,8 +230,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 【重要】中島様が取得した「ウェブアプリ URL」
-var GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxTPJdXZoK0SyIeojJ_KPSRhGHIpXfgSsz6cttRHmpns7fWa2GB0NPLPveRk5ZkSqER/exec";
+var GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxTPJdXZoK0SyleojJ_KPSRhGHIpXfgSsz6cttRHmpns7fWa2GB0NPLPveRk5ZkqER/exec";
 
 var userType = 'new';
 var currentTab = 'set';
@@ -382,7 +390,6 @@ function createImg(parent, name) {
     var layerId = "img-" + name;
     if (document.getElementById(layerId)) return;
     var img = document.createElement('img');
-    // 【重要修正】画像パスから "images/" を削除し、ベース画像と同じ場所（ルート）を探すように修正
     img.src = name + ".png"; 
     img.id = layerId; img.className = 'layer-part';
     img.onerror = function() { this.style.display = 'none'; };
@@ -390,7 +397,7 @@ function createImg(parent, name) {
 }
 
 function changeTab(tab) { currentTab = tab; render(); }
-function resetSelection() { selected =[]; lastToggledItem = null; suggestionId = null; document.getElementById('suggestion-box').style.display = 'none'; render(); }
+function resetSelection() { selected =[]; suggestionId = null; document.getElementById('suggestion-box').style.display = 'none'; render(); }
 function toggleItem(id) {
     var idx = selected.indexOf(id);
     if (idx !== -1) { selected.splice(idx, 1); } 
@@ -500,7 +507,7 @@ function updateTotal() {
 }
 
 function callAiConcierge(prompt, callback) {
-    if (!GAS_WEBAPP_URL) return callback("お得なプランをご提案しますね。");
+    if (!GAS_WEBAPP_URL) return callback("最適なプランをご提案しますね。");
     var xhr = new XMLHttpRequest();
     xhr.open("POST", GAS_WEBAPP_URL, true);
     xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
@@ -624,38 +631,9 @@ function doActualCopy() {
 function goToReserve() { window.open("https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100", "_blank"); }
 function closeCopyModal() { document.getElementById('copy-complete-modal').style.display = 'none'; }
 
-function acceptFinalConfirm(actionType) { 
-    document.getElementById('final-confirm-modal').style.display = 'none'; 
-    applyOptimalSet(); setTimeout(function() { if(actionType === 'copy') doActualCopy(); else showCalendarModal(); }, 200); 
-}
-function rejectFinalConfirm(actionType) { 
-    document.getElementById('final-confirm-modal').style.display = 'none'; if(actionType === 'copy') doActualCopy(); else showCalendarModal();
-}
-
 function renderCalendar() {
     var wrapper = document.getElementById('calendar-container'), html = '<table class="cal-table">', days =['日','月','火','水','木','金','土'], today = new Date(), dates =[];
     html += '<tr><th class="time-col">時間</th>';
     for(var i=0; i<7; i++) {
         var d = new Date(today.getTime() + i*24*60*60*1000), m = d.getMonth() + 1, dateNum = d.getDate(), dayStr = days[d.getDay()];
-        dates.push({ full: d.getFullYear() + '年' + m + '月' + dateNum + '日(' + dayStr + ')', short: m + '/' + dateNum + '<br>(' + dayStr + ')' });
-        html += '<th>' + dates[i].short + '</th>';
-    }
-    html += '</tr>';
-    var times =[]; for(var h=9; h<=21; h++) { times.push(h + ':00'); if(h !== 21) { times.push(h + ':30'); } }
-    for(var t=0; t<times.length; t++) {
-        html += '<tr><th class="time-col">' + times[t] + '</th>';
-        for(var d=0; d<7; d++) {
-            var rand = Math.random(), status = rand > 0.4 ? 'o' : (rand > 0.15 ? 'x' : 'hyphen'), mark = status === 'o' ? '◎' : (status === 'x' ? '×' : '－');
-            html += '<td class="cal-status-' + status + '" onclick="selectTimeSlot(\'' + dates[d].full + '\', \'' + times[t] + '\')">' + mark + '</td>';
-        }
-        html += '</tr>';
-    }
-    html += '</table>'; wrapper.innerHTML = html;
-}
-
-function selectTimeSlot(dateStr, timeStr) {
-    alert("【予約機能は準備中です】\n選択日時：" + dateStr + " " + timeStr);
-}
-</script>
-</body>
-</html>
+        dates.push({ full: d.getFullYear() + '年' + m + '月' + dateNum + '日
