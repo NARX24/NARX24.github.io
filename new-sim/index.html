@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 料金＆自動バッファ予約システム Ver.48.0</title>
+<title>NARX 料金＆自動バッファ予約システム Ver.48.1</title>
 <script>
+// 【エラー検知】
 window.onerror = function(msg, url, line) {
-    alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line + "\n※この画面をスクショしてお知らせください");
+    alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
 };
 </script>
 <style>
@@ -24,7 +25,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .container{max-width:600px;margin:0 auto;padding:0 20px;}
 #mode-display{font-size:0.75rem;color:var(--black);background:var(--gold);padding:4px 15px;border-radius:20px;margin-top:8px;display:inline-block;font-weight:bold;}
 
-/* ビジュアル・タブ */
+/* ビジュアルパネル */
 .dual-visual-container{display:flex;gap:4px;height:240px;position:sticky;top:10px;z-index:50;background:var(--light-gray);border:2px solid var(--gold);margin-bottom:20px;border-radius:8px;overflow:hidden;}
 .view-panel{flex:1;position:relative;display:flex;justify-content:center;align-items:center;background-color:var(--panel-bg);}
 .view-panel:first-child{border-right:1px solid #ddd;}
@@ -88,14 +89,14 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon.off{background:#111;}
 .concierge-icon.off svg path, .concierge-icon.off svg circle { fill: var(--gold); }
 
-/* 🚀 カレンダーUI (Ver.44.0 準拠) */
+/* 🚀 週刊カレンダーUI */
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
 .cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
 .cal-outer-wrapper { height: calc(100% - 110px); overflow: auto; background: #333; }
 .cal-table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; background: #fff; }
 .cal-table thead th { position: sticky; top: 0; background: #eee; color: #333; z-index: 10; font-size: 0.65rem; padding: 12px 2px; border: 1px solid #ccc; font-weight: bold; }
-.cal-table thead th.sun { color: #dc3545; } /* 日曜：赤 */
-.cal-table thead th.sat { color: #007bff; } /* 土曜：青 */
+.cal-table thead th.sun { color: #dc3545; }
+.cal-table thead th.sat { color: #007bff; }
 .cal-table td:first-child { position: sticky; left: 0; background: #222; color: var(--gold); z-index: 9; width: 50px; font-weight: bold; font-size: 0.7rem; border-right: 1px solid var(--gold); }
 .cal-status-o { background: #fff; color: #c09015; font-size: 1.2rem; font-weight: bold; border: 1px solid #ddd; cursor: pointer; }
 .cal-status-x { background: #bbb; color: #888; font-size: 1.0rem; border: 1px solid #aaa; pointer-events: none; }
@@ -199,7 +200,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <script>
 // ==========================================
-// 基本設定 (GAS Ver.47.7 URL)
+// 基本設定 (GAS URL)
 // ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
@@ -267,12 +268,11 @@ function getOriginalTotal(idList) {
 }
 
 // ==========================================
-// アプリ制御 & UI描画
+// 制御ロジック
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
-    document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回限定価格モード":"【会員様】通常価格モード";
-    document.getElementById('mode-display').style.color = t==='new'?"var(--gold)":"#888";
+    document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回限定価格モード適用中":"【会員様】通常価格モード適用中";
     document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="proceedToCalendar()">空き状況を確認して予約へ</button>';
     initApp(); render();
 }
@@ -321,7 +321,7 @@ function render() {
     for (var t = 0; t < tabs.length; t++) { tabs[t].classList.remove('active'); }
     document.getElementById("tab-" + currentTab).classList.add('active');
 
-    // チップ表示
+    // チップス表示
     var chipsArea = document.getElementById('selected-chips-area'), container = document.getElementById('chips-container');
     if (selected.length === 0) { chipsArea.style.display = 'none'; }
     else {
@@ -342,7 +342,7 @@ function render() {
         if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
     }
 
-    // メニュー表示
+    // リスト描画
     var keys = Object.keys(menuData);
     for (var m = 0; m < keys.length; m++) {
         var id = keys[m], item = menuData[id];
@@ -379,12 +379,13 @@ function updateTotal() {
         else { if(f) t += 20; document.getElementById('counseling-badge-area').innerHTML = ''; }
     }
     var rounded = Math.ceil(t / 30) * 30;
-    var slotVal = (rounded/60).toFixed(1);
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
-    document.getElementById('total-time-slot').innerText = slotVal + " 枠";
+    document.getElementById('total-time-slot').innerText = (rounded/60).toFixed(1) + " 枠";
 }
 
-// AIコンシェルジュ (Ver.37.5 ロジック)
+// ==========================================
+// AIコンシェルジュ
+// ==========================================
 function analyzeSuggestions(isManual) {
     var cheaperCandidates =[], samePriceCandidates = [], upsellCandidates =[];
     var upsellLimit = (userType === 'new') ? 5000 : 10000;
@@ -440,13 +441,13 @@ function toggleConcierge() {
 }
 
 function showConciergeBubble(msg) {
-    var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerHTML = msg;
+    var b = document.getElementById('concierge-bubble'); document.getElementById('cust-name').placeholder = msg;
     b.style.display = 'block'; setTimeout(function() { b.style.opacity = '1'; }, 10);
     if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 4000);
 }
 
 // ==========================================
-// 🚀 週刊予約カレンダー (Ver.44.0 完全融合)
+// 🚀 週刊予約カレンダー (Ver.44.0 ロジック)
 // ==========================================
 function changeWeek(n) { weekOffset += n; renderCalendar(); }
 
@@ -467,7 +468,7 @@ function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
     var reqMs = parseFloat(document.getElementById('total-time-slot').innerText) * 60 * 60 * 1000;
     
-    // 💡 ロジック：常に「月曜日」から始まるように計算
+    // 💡 月曜日始まりの計算
     var firstDay = new Date();
     var day = firstDay.getDay();
     var diffToMon = (day === 0 ? -6 : 1) - day; 
@@ -498,7 +499,7 @@ function renderCalendar() {
             var isWork = false;
             if(wDay===0||wDay===6){ if(totalM>=540 && e<=limitT) isWork=true; } else { if(totalM>=720 && e<=limitT) isWork=true; }
             
-            // 💡 ロジック：30分サンドイッチ判定 (前後30分の余白がないと×)
+            // 💡 30分サンドイッチロジック
             var isBusy = false;
             for(var b=0; b<busySlots.length; b++){
                 var bStartWithBuffer = busySlots[b].start - (30*60*1000);
@@ -509,7 +510,11 @@ function renderCalendar() {
 
             if(!isWork) html+='<td class="cal-status-off">-</td>';
             else if(isBusy) html+='<td class="cal-status-x">×</td>';
-            else html+='<td class="cal-status-o" onclick="openInfoModal(\''+(slotS.getFullYear()+'/'+(slotS.getMonth()+1)+'/'+slotS.getDate())+'\', \''+t+'\')">◎</td>';
+            else {
+                // 送信バグを防ぐため YYYY/MM/DD 形式で渡す
+                var dateStr = slotS.getFullYear()+'/'+(slotS.getMonth()+1)+'/'+slotS.getDate();
+                html+='<td class="cal-status-o" onclick="openInfoModal(\''+dateStr+'\', \''+t+'\')">◎</td>';
+            }
         }
         html+='</tr>';
     });
@@ -519,7 +524,7 @@ function renderCalendar() {
 function openInfoModal(d, t) {
     tDate=d; tTime=t;
     var menuLabels = []; for(var i=0; i<selected.length; i++){ menuLabels.push(menuData[selected[i]].label); }
-    document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+"〜<br>【メニュー】 "+menuLabels.join(', ')+"<br>【合計金額】 "+document.getElementById('total-price').innerText;
+    document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+"〜<br>【内容】 "+menuLabels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText;
     document.getElementById('info-modal').style.display='block';
 }
 
