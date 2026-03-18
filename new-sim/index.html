@@ -1,192 +1,185 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX 週刊予約 Ver.44.0</title>
-<style>
-:root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;}
-body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:120px;overflow-x:hidden;}
-.header-logo-container { text-align: center; padding: 15px 0; border-bottom: 1px solid var(--gold); }
-.container{max-width:600px;margin:0 auto;padding:0 15px;}
-.tabs{display:flex;gap:5px;margin:15px 0;}.tab{flex:1;padding:12px 5px;text-align:center;color:#777;cursor:pointer;font-size:0.8rem;}.tab.active{color:var(--gold);border-bottom:2px solid var(--gold);}
-.item{background:var(--dark-gray);margin-bottom:8px;padding:16px;border-radius:6px;display:flex;justify-content:space-between;cursor:pointer;}.item.selected{border:1px solid var(--gold);}
-.bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
-.btn-reserve{background:var(--gold);color:#000;width:100%;padding:15px;border-radius:6px;font-weight:bold;border:none;cursor:pointer;}
-
-/* 🚀 カレンダー視認性極限版 */
-#calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; }
-.cal-header { background: #080808; padding: 10px; border-bottom: 1px solid var(--gold); }
-.cal-outer-wrapper { height: calc(100% - 100px); overflow: auto; background: #333; }
-.cal-table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; }
-
-/* 日付ヘッダー固定 */
-.cal-table thead th { position: sticky; top: 0; background: #eee; color: #333; z-index: 10; font-size: 0.6rem; padding: 10px 2px; border: 1px solid #ccc; }
-.cal-table thead th.sun { color: #d32f2f; } /* 日曜：赤 */
-.cal-table thead th.sat { color: #1976d2; } /* 土曜：青 */
-
-/* 時間列固定 */
-.cal-table td:first-child { position: sticky; left: 0; background: #222; color: var(--gold); z-index: 9; width: 45px; font-weight: bold; font-size: 0.65rem; border-right: 1px solid var(--gold); }
-
-/* マス目の色設定 */
-.cal-status-o { background: #fff; color: #c09015; font-size: 1.1rem; font-weight: bold; border: 1px solid #ddd; } /* ◎：白 */
-.cal-status-x { background: #bbb; color: #888; font-size: 0.9rem; border: 1px solid #aaa; } /* ×：グレー */
-.cal-status-off { background: #444; color: #666; border: 1px solid #555; } /* -：ダークグレー */
-
-#info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100001; display: none; padding-top: 20px; }
-.form-group { text-align: left; margin-bottom: 15px; padding: 0 20px;}
-.form-group label { display: block; font-size: 0.75rem; color: var(--gold); margin-bottom: 5px; }
-.form-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NARX | 中島式メンズ脱毛予約</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8f9fa; color: #333; padding-bottom: 50px; }
+        .hero { background: linear-gradient(135deg, #1a1a1a 0%, #333 100%); color: white; padding: 40px 0; text-align: center; margin-bottom: 30px; }
+        .hero h1 { font-weight: 700; letter-spacing: 2px; }
+        .hero p { font-size: 0.9rem; opacity: 0.8; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card-title { font-weight: 700; color: #1a1a1a; border-left: 5px solid #1a1a1a; padding-left: 15px; margin-bottom: 20px; }
+        .btn-primary { background-color: #1a1a1a; border: none; padding: 12px; font-weight: 700; border-radius: 8px; }
+        .btn-primary:hover { background-color: #333; }
+        .slot-btn { margin: 5px; width: 80px; font-weight: bold; }
+        .selected-slot { background-color: #1a1a1a !important; color: white !important; }
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .price-display { font-size: 1.5rem; font-weight: 700; color: #d9534f; }
+    </style>
 </head>
 <body>
 
-<div id="gate-modal"><div class="modal-content"><img src="logo_white.png" style="width:140px;"><h2 style="color:var(--gold); font-size:0.9rem;">NARX 18th ANNIVERSARY</h2><button class="btn-reserve" onclick="forceStart('new')">新規様（初回50%OFF）</button><button class="btn-reserve" style="background:#222;color:#fff;margin-top:10px;" onclick="forceStart('repeat')">会員様（通常価格）</button></div></div>
+<div id="loadingOverlay"><div class="spinner-border text-dark"></div><span class="ms-3">処理中...</span></div>
+
+<div class="hero">
+    <h1>NARX</h1>
+    <p>業界18年の実績・中島式メンズ脱毛</p>
+</div>
 
 <div class="container">
-    <div class="header-logo-container"><img src="logo_white.png" style="width:110px;"></div>
-    <div id="mode-display" style="text-align:center; padding:10px; font-size:0.7rem; color:var(--gold);"></div>
-    <div class="tabs"><div id="tab-set" class="tab active" onclick="changeTab('set')">セットメニュー</div><div id="tab-part" class="tab" onclick="changeTab('part')">パーツメニュー</div></div>
-    <div id="menu-area"></div>
-</div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
 
-<div class="bottom-bar">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span id="total-price" style="font-size:1.3rem; color:var(--gold); font-weight:bold;">¥0</span>
-        <span id="total-time-slot" style="font-size:0.8rem;">0.0 枠</span>
-    </div>
-    <div id="action-btn-container"></div>
-</div>
+            <div class="card p-4">
+                <h5 class="card-title">1. メニュー選択</h5>
+                <div class="mb-3">
+                    <label class="form-label">セットメニュー</label>
+                    <select id="menuSelect" class="form-select">
+                        <option value="" data-price="0" data-slot="0">選択してください</option>
+                        <option value="全身脱毛（顔・VIO込）" data-price="33000" data-slot="2.0">全身脱毛（顔・VIO込） - 33,000円</option>
+                        <option value="顔全体脱毛" data-price="11000" data-slot="0.5">顔全体脱毛 - 11,000円</option>
+                        <option value="VIOセット" data-price="13200" data-slot="1.0">VIOセット - 13,200円</option>
+                        <option value="脚全体セット" data-price="15000" data-slot="1.0">脚全体セット - 15,000円</option>
+                    </select>
+                </div>
+                <div class="text-end">
+                    <span>合計金額: </span><span id="totalPrice" class="price-display">0</span><span> 円</span>
+                </div>
+            </div>
 
-<div id="calendar-modal">
-    <div class="cal-header">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <button onclick="changeWeek(-1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:5px 15px; border-radius:4px;">◀ 前週</button>
-            <span id="cal-title" style="color:var(--gold); font-size:0.85rem; font-weight:bold;"></span>
-            <button onclick="changeWeek(1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:5px 15px; border-radius:4px;">次週 ▶</button>
+            <div class="card p-4">
+                <h5 class="card-title">2. 日時選択</h5>
+                <input type="date" id="dateInput" class="form-control mb-3">
+                <div id="slotContainer" class="d-flex flex-wrap justify-content-center">
+                    <p class="text-muted">日付を選択すると空き時間が表示されます</p>
+                </div>
+            </div>
+
+            <div class="card p-4">
+                <h5 class="card-title">3. お客様情報</h5>
+                <div class="mb-3">
+                    <label class="form-label">お名前</label>
+                    <input type="text" id="userName" class="form-control" placeholder="例：中島 太郎">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">電話番号</label>
+                    <input type="tel" id="userTel" class="form-control" placeholder="例：09012345678">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">メールアドレス</label>
+                    <input type="email" id="userEmail" class="form-control" placeholder="例：nakajima@example.com">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ご要望・事前相談（任意）</label>
+                    <textarea id="userMessage" class="form-control" rows="3" placeholder="お悩みや場所の確認など、お気軽にご記入ください"></textarea>
+                </div>
+                <button id="reserveBtn" class="btn btn-primary w-100 mt-3" disabled>予約を確定する</button>
+            </div>
+
         </div>
-        <button onclick="closeCalendarModal()" style="color:#777; background:none; border:none; width:100%; margin-top:5px; font-size:0.7rem;">メニュー選択へ戻る</button>
-    </div>
-    <div id="cal-loading" style="text-align:center;padding:50px;color:var(--gold);">同期中...</div>
-    <div class="cal-outer-wrapper"><div id="calendar-container"></div></div>
-</div>
-
-<div id="info-modal">
-    <div class="container">
-        <h3 style="color:var(--gold); text-align:center;">お客様情報の入力</h3>
-        <div id="selected-summary" style="font-size:0.75rem; background:#222; padding:15px; border-radius:8px; margin-bottom:20px; border-left:4px solid var(--gold); line-height:1.6;"></div>
-        <div class="form-group"><label>お名前（フルネーム）</label><input type="text" id="cust-name"></div>
-        <div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel"></div>
-        <div class="form-group"><label>メールアドレス</label><input type="email" id="cust-email"></div>
-        <button class="btn-reserve" id="final-reserve-btn" onclick="submitReservation()">予約を確定する</button>
-        <button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.8rem;">修正する</button>
     </div>
 </div>
 
 <script>
-var GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
-var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
-var tDate = "", tTime = "";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
+    let selectedSlot = null;
 
-var menuData = {
-    set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set'},
-    set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set'}
-};
-
-function forceStart(t) {
-    document.getElementById('gate-modal').style.display='none'; userType=t;
-    document.getElementById('mode-display').innerText = t==='new'?"新規価格モード適用中":"会員価格モード適用中";
-    document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="proceedToCalendar()">空き状況を確認する</button>';
-    render();
-}
-
-function changeTab(t){ currentTab=t; render(); }
-function toggleItem(id){ var idx=selected.indexOf(id); if(idx!==-1)selected.splice(idx,1); else selected.push(id); render(); }
-
-function render() {
-    var area=document.getElementById('menu-area'); area.innerHTML='';
-    var cp = 0, ct = 0;
-    Object.keys(menuData).forEach(k => {
-        var mi=menuData[k]; if(mi.cat!==currentTab) return;
-        var isS=selected.indexOf(k)!==-1;
-        var div=document.createElement('div'); div.className="item "+(isS?'selected':'');
-        div.onclick=function(){toggleItem(k);};
-        var price = userType==='new'?mi.price*0.5:mi.price;
-        div.innerHTML='<span>'+mi.label+'</span><span style="color:var(--gold);">¥'+price.toLocaleString()+'</span>';
-        area.appendChild(div);
+    // メニュー選択時の価格・時間計算
+    document.getElementById('menuSelect').addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        document.getElementById('totalPrice').innerText = Number(selected.getAttribute('data-price')).toLocaleString();
+        updateSlots();
     });
-    selected.forEach(k => { var mi=menuData[k]; cp += (userType==='new'?mi.price*0.5:mi.price); ct += mi.time; });
-    document.getElementById('total-price').innerText="¥"+cp.toLocaleString();
-    document.getElementById('total-time-slot').innerText=(Math.ceil(ct/30)*30/60).toFixed(1)+" 枠";
-}
 
-function changeWeek(n) { weekOffset += n; renderCalendar(); }
-function proceedToCalendar() {
-    if(selected.length===0) return alert("メニューを選んでください");
-    document.getElementById('calendar-modal').style.display='block';
-    var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
-    xhr.onreadystatechange=function(){ if(xhr.readyState===4){ busySlots = JSON.parse(xhr.responseText); document.getElementById('cal-loading').style.display = 'none'; renderCalendar(); } };
-    xhr.send(JSON.stringify({type:'getBusySlots'}));
-}
+    // 日付選択時の空き枠取得
+    document.getElementById('dateInput').addEventListener('change', updateSlots);
 
-function renderCalendar() {
-    var wrapper=document.getElementById('calendar-container'), now=new Date();
-    var reqMs = parseFloat(document.getElementById('total-time-slot').innerText) * 60 * 60 * 1000;
-    
-    // 月曜日始まりの計算
-    var firstDay = new Date();
-    var day = firstDay.getDay();
-    var diffToMon = (day === 0 ? -6 : 1) - day; 
-    firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
-    
-    document.getElementById('cal-title').innerText = (firstDay.getMonth()+1)+"/"+firstDay.getDate() + "の週";
+    async function updateSlots() {
+        const date = document.getElementById('dateInput').value;
+        const menu = document.getElementById('menuSelect').value;
+        if (!date || !menu) return;
 
-    var dayNames = ['日','月','火','水','木','金','土'];
-    var html='<table class="cal-table"><thead><tr><th>時間</th>';
-    for(var i=0; i<7; i++){
-        var d = new Date(firstDay.getTime() + i*24*60*60*1000);
-        var cls = d.getDay()===0?'sun':(d.getDay()===6?'sat':'');
-        html+='<th class="'+cls+'">'+(d.getMonth()+1)+'/'+d.getDate()+'<br>('+dayNames[d.getDay()]+')</th>';
-    }
-    html+='</tr></thead><tbody>';
-
-    var times=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00'];
-    times.forEach(t => {
-        html+='<tr><td>'+t+'</td>';
-        for(var d=0; d<7; d++){
-            var slotS = new Date(firstDay.getFullYear(), firstDay.getMonth(), firstDay.getDate()+d, t.split(':')[0], t.split(':')[1]);
-            var s = slotS.getTime(); var e = s + reqMs;
-            var wDay = slotS.getDay(); var totalM = slotS.getHours()*60 + slotS.getMinutes();
-            var limitHr = (wDay===0||wDay===6)?21:22;
-            var limitT = new Date(slotS.getFullYear(), slotS.getMonth(), slotS.getDate(), limitHr, 0).getTime();
-            
-            var isWork = false;
-            if(wDay===0||wDay===6){ if(totalM>=540 && e<=limitT) isWork=true; } else { if(totalM>=720 && e<=limitT) isWork=true; }
-            
-            var isBusy = false;
-            busySlots.forEach(b => { if(s < (b.end + 30*60*1000) && e > (b.start - 30*60*1000)) isBusy = true; });
-            if(s < now.getTime()) isBusy = true;
-
-            if(!isWork) html+='<td class="cal-status-off">-</td>';
-            else if(isBusy) html+='<td class="cal-status-x">×</td>';
-            else html+='<td class="cal-status-o" onclick="openInfoModal(\''+(slotS.getMonth()+1)+'/'+slotS.getDate()+'('+dayNames[wDay]+')\', \''+t+'\')">◎</td>';
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        try {
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({ type: 'getBusySlots' })
+            });
+            const busySlots = await res.json();
+            renderSlots(date, busySlots);
+        } catch (e) {
+            alert("空き枠の取得に失敗しました");
         }
-        html+='</tr>';
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    function renderSlots(date, busySlots) {
+        const container = document.getElementById('slotContainer');
+        container.innerHTML = "";
+        const startTime = 10; // 10:00
+        const endTime = 20;   // 20:00
+        
+        for (let h = startTime; h < endTime; h++) {
+            for (let m of ["00", "30"]) {
+                const timeStr = `${h}:${m}`;
+                const btn = document.createElement('button');
+                btn.className = "btn btn-outline-dark slot-btn";
+                btn.innerText = timeStr;
+                
+                // 簡易的な重複チェック（実際はGAS側で詳しく判定するのが理想）
+                btn.onclick = () => {
+                    document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected-slot'));
+                    btn.classList.add('selected-slot');
+                    selectedSlot = timeStr;
+                    document.getElementById('reserveBtn').disabled = false;
+                };
+                container.appendChild(btn);
+            }
+        }
+    }
+
+    // 予約実行
+    document.getElementById('reserveBtn').addEventListener('click', async () => {
+        const name = document.getElementById('userName').value;
+        const tel = document.getElementById('userTel').value;
+        const email = document.getElementById('userEmail').value;
+        const msg = document.getElementById('userMessage').value; // ✅ ご要望欄
+        const menu = document.getElementById('menuSelect').value;
+        const price = document.getElementById('totalPrice').innerText;
+        const date = document.getElementById('dateInput').value;
+        const slot = document.getElementById('menuSelect').options[document.getElementById('menuSelect').selectedIndex].getAttribute('data-slot');
+
+        if (!name || !tel || !email) {
+            alert("お名前、電話番号、メールアドレスを入力してください");
+            return;
+        }
+
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        try {
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    type: 'reserve',
+                    name: name, tel: tel, email: email, message: msg,
+                    menus: menu, price: price, date: date, time: selectedSlot, slot: slot,
+                    userType: "新規"
+                })
+            });
+            const result = await res.json();
+            if (result.status === "success") {
+                alert("予約が完了しました！確定メールをご確認ください。");
+                location.reload();
+            }
+        } catch (e) {
+            alert("予約処理中にエラーが発生しました");
+        }
+        document.getElementById('loadingOverlay').style.display = 'none';
     });
-    wrapper.innerHTML = html+'</tbody></table>';
-}
-
-function openInfoModal(d, t) { tDate=d; tTime=t; document.getElementById('selected-summary').innerHTML="日時: "+d+" "+t+"～<br>メニュー: "+selected.join(',')+"<br>合計金額: "+document.getElementById('total-price').innerText; document.getElementById('info-modal').style.display='block'; }
-
-function submitReservation() {
-    var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value;
-    if(!n||!tel||!em) return alert("すべて入力してください");
-    document.getElementById('final-reserve-btn').innerText="予約確定中...";
-    var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
-    xhr.onreadystatechange=function(){ if(xhr.readyState===4){ alert("予約が完了しました！"); location.reload(); } };
-    xhr.send(JSON.stringify({type:'reserve', userType:userType, date:tDate, time:tTime, slot:document.getElementById('total-time-slot').innerText, price:document.getElementById('total-price').innerText, menus:selected.join(','), name:n, tel:tel, email:em}));
-}
-function closeCalendarModal(){ document.getElementById('calendar-modal').style.display='none'; weekOffset=0; }
 </script>
+
 </body>
 </html>
