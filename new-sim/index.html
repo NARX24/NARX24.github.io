@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.48.2</title>
+<title>NARX プレミアム予約システム Ver.48.3</title>
 <script>
+// 【エラー検知】
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
 };
@@ -36,7 +37,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 @keyframes blink-gold {
     0% { opacity: 0.1; filter: drop-shadow(0 0 2px var(--gold)); }
-    50% { opacity: 1; filter: drop-shadow(0 0 12px var(--gold)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 15px var(--gold)); }
     100% { opacity: 0.1; filter: drop-shadow(0 0 2px var(--gold)); }
 }
 .layer-part.suggest-blink { animation: blink-gold 0.8s infinite ease-in-out; z-index: 3; opacity: 1 !important; }
@@ -46,13 +47,13 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .tab{flex:1;padding:12px 5px;text-align:center;color:#777;cursor:pointer;font-size:0.85rem;}
 .tab.active{color:var(--gold);border-bottom:2px solid var(--gold);font-weight:bold;}
 
-/* パーツメニュー小見出し（高級感） */
+/* プレミアム小見出し */
 .menu-sub-header {
     color: var(--gold);
     font-size: 0.85rem;
     text-align: center;
-    padding: 20px 0 10px;
-    letter-spacing: 4px;
+    padding: 25px 0 15px;
+    letter-spacing: 5px;
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -80,7 +81,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item input{transform:scale(1.4);margin-right:18px;accent-color:var(--gold);}
 .item-info{flex:1;}
 .item-name{display:block;font-size:0.95rem;}
-.special-label { font-size: 0.65rem; color: #aaa; margin-left: 4px; vertical-align: middle; }
+.special-label { font-size: 0.65rem; color: #999; margin-left: 6px; font-style: italic; }
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
@@ -100,15 +101,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .sug-col-price{font-size:0.9rem;color:#111;font-weight:bold;}
 .sug-col-price.old{text-decoration:line-through;color:#888;}
 .sug-col-price.new{font-size:1.1rem;color:#c00;}
-
-#concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
-#concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.3s ease;position:relative;text-align:center;pointer-events:auto;}
-.bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
-.concierge-icon{width:56px;height:56px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;transition:0.3s;border:2px solid var(--gold);}
-.concierge-icon.on{background:var(--gold);}
-.concierge-icon.on svg path, .concierge-icon.on svg circle { fill: #111; }
-.concierge-icon.off{background:#111;}
-.concierge-icon.off svg path, .concierge-icon.off svg circle { fill: var(--gold); }
 
 /* カレンダー */
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
@@ -221,14 +213,15 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <script>
 // ==========================================
-// 1. 基本設定 (GAS URL)
+// 1. 基本設定 (宣言漏れ修正済み)
 // ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", isConciergeON = true, bubbleTimer = null, itemLeaves = {};
+var suggestionId = null, suggestionReplaceItems = []; // ✅ ここを修正しました
 
 // ==========================================
-// 2. メニューデータ (subCatとisSpecialを追加)
+// 2. メニューデータ (subCatとisSpecial)
 // ==========================================
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット（顔VIO込）',cat:'set',sub:'全顔＋上半身＋下半身＋VIO',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'},hasFace:true},
@@ -243,14 +236,14 @@ var menuData = {
     set_arms:{price:15400,time:65,label:'両腕セット',cat:'set',sub:'肘上・下・手の甲指',imgs:{body:'set_arms'},hasFace:false},
     set_legs:{price:17600,time:65,label:'両足セット',cat:'set',sub:'膝上・下・足の甲指',imgs:{body:'set_legs'},hasFace:false},
     
-    // パーツメニュー（subCatで分類）
+    // パーツメニュー
     part_nose_under:{price:4400,time:10,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},hasFace:true},
     part_mouth_under:{price:4400,time:10,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},hasFace:true},
     part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},hasFace:true},
     part_face_line:{price:4400,time:10,label:'フェイスライン',cat:'part',subCat:'face',imgs:{face:'part_face_line'},hasFace:true},
     part_neck:{price:4400,time:10,label:'首',cat:'part',subCat:'face',imgs:{face:'part_neck'},hasFace:true},
     part_eyebrow_upper:{price:4400,time:13,label:'眉上',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_upper'},hasFace:true},
-    part_eyebrow_middle:{price:4400,time:10,label:'眉間',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},hasFace:true},
+    part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},hasFace:true},
     part_eyebrow_lower:{price:6600,time:13,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'},hasFace:true},
     part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_tragus'},hasFace:true},
     part_nose_hair:{price:4400,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'}},
@@ -305,7 +298,7 @@ function getOriginalTotal(idList) {
 }
 
 // ==========================================
-// 3. アプリ制御
+// 3. 制御ロジック
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
@@ -353,7 +346,7 @@ function toggleItem(id){
 }
 
 // ==========================================
-// 4. メイン描画（小見出しと特殊部位ラベル対応）
+// 4. メイン描画 (プレミアムUI)
 // ==========================================
 function render() {
     var area = document.getElementById('menu-area'); area.innerHTML='';
@@ -373,11 +366,10 @@ function render() {
         }
     }
 
-    // ビジュアル点灯（点滅ロジック強化）
+    // ビジュアル点灯 (新機能: 追加分だけ点滅)
     var parts = document.querySelectorAll('.layer-part');
     for (var p = 0; p < parts.length; p++) { parts[p].classList.remove('active', 'suggest-blink'); }
     
-    // 現在選択中の葉ノードを取得
     var currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var lNodes = itemLeaves[selected[s]];
@@ -386,19 +378,17 @@ function render() {
         }
     }
 
-    // 選択中の部位を静止点灯
     for (var cl = 0; cl < currentLeaves.length; cl++) {
         var item = menuData[currentLeaves[cl]];
         if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); }
         if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
     }
 
-    // 提案部位のうち、まだ選ばれていない部位だけを点滅
     if (suggestionId) {
         var sugLeaves = itemLeaves[suggestionId];
         for (var sl = 0; sl < sugLeaves.length; sl++) {
             var leafId = sugLeaves[sl];
-            if (currentLeaves.indexOf(leafId) === -1) { // まだ選ばれていない＝新しく増える部位
+            if (currentLeaves.indexOf(leafId) === -1) { 
                 var sItem = menuData[leafId];
                 if (sItem.imgs.body) { var siBody = document.getElementById("img-" + sItem.imgs.body); if(siBody) siBody.classList.add('suggest-blink'); }
                 if (sItem.imgs.face) { var siFace = document.getElementById("img-" + sItem.imgs.face); if(siFace) siFace.classList.add('suggest-blink'); }
@@ -416,9 +406,6 @@ function render() {
 
     for (var sc = 0; sc < subCats.length; sc++) {
         var sub = subCats[sc];
-        var foundInSub = false;
-
-        // 小見出しが必要な場合（パーツタブかつ小見出し名がある）
         if (currentTab === 'part') {
             var header = document.createElement('div');
             header.className = 'menu-sub-header';
@@ -470,7 +457,9 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = (rounded/60).toFixed(1) + " 枠";
 }
 
-// AIコンシェルジュ
+// ==========================================
+// 5. AIコンシェルジュ
+// ==========================================
 function analyzeSuggestions(isManual) {
     var cheaperCandidates =[], samePriceCandidates = [], upsellCandidates =[];
     var upsellLimit = (userType === 'new') ? 5000 : 10000;
@@ -512,7 +501,7 @@ function checkSuggestion(isManual) {
     }
     html += '<div style="display:flex; gap:10px; margin-top:15px;"><button onclick="applyOptimalSet()" style="background:#000; color:#fff; padding:12px; border-radius:6px; font-weight:bold; flex:2;">変更する</button><button onclick="suggestionId=null; document.getElementById(\'suggestion-box\').style.display=\'none\'; render();" style="background:transparent; color:#111; border:none; flex:1; font-weight:bold;">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block';
-    render(); // 点滅を反映させるため再描画
+    render(); 
 }
 
 function applyOptimalSet() {
