@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.48.8</title>
+<title>NARX プレミアム予約システム Ver.48.9</title>
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -72,7 +72,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
-/* 🤖 AIコンシェルジュ パネル 縮小版(60%) */
+/* 🤖 AIコンシェルジュ パネル 縮小版 */
 #suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:70%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 12px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
 .sug-benefit-msg{text-align:center;font-size:0.65rem;color:var(--gold);background:#111;padding:5px;border-radius:4px;font-weight:bold;margin-bottom:8px;letter-spacing:0.5px;}
@@ -216,7 +216,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <script>
 // ==========================================
-// 1. 変数定義 & 祝日データ (2026年)
+// 1. 変数定義 & 祝日データ
 // ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
@@ -234,12 +234,17 @@ var menuData = {
     set_fullbody_novio:{price:41800,time:220,label:'VIOなし全身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕・脚',imgs:{body:'set_fullbody_novio_body',face:'set_fullbody_novio_face'},hasFace:true},
     set_upperbody:{price:30800,time:140,label:'上半身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕全体',imgs:{body:'set_upperbody_body',face:'set_upperbody_face'},hasFace:true},
     set_lowerbody:{price:30800,time:150,label:'下半身セット',cat:'set',sub:'VIO・臀部・脚全体',imgs:{body:'set_lowerbody_body',vio:'set_vio'},hasFace:false},
+    set_fullface_vio:{price:27500,time:100,label:'全顔+VIOセット',cat:'set',sub:'全顔セット＋VIOセット',imgs:{body:'set_fullface_vio_body',face:'set_fullface_vio_face'},hasFace:true},
+    set_fullface_eyebrow:{price:22000,time:105,label:'全顔+眉毛セット',cat:'set',sub:'全顔セット＋眉毛セット',imgs:{face:'set_fullface_eyebrow_face'},hasFace:true},
+    set_eyebrow:{price:11000,time:40,label:'眉毛セット',cat:'set',sub:'眉上・眉下・眉間・デザイン込',imgs:{face:'set_eyebrow_face'},hasFace:true},
     set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set',sub:'鼻下・口下・頬・フェイスライン・首',imgs:{face:'set_fullface'},hasFace:true},
     set_vio:{price:16500,time:50,label:'VIOセット',cat:'set',sub:'Vライン・Iライン・Oライン',imgs:{body:'set_vio'},hasFace:false},
+    set_vio_buttocks:{price:20900,time:65,label:'VIO+臀部セット',cat:'set',sub:'VIOセット＋臀部（おしり）',imgs:{body:'set_vio'},hasFace:false},
     set_chest_abdomen:{price:9900,time:35,label:'胸＋腹部セット',cat:'set',sub:'胸（乳輪込）＋腹部（ヘソ込）',imgs:{body:'set_chest_abdomen'},hasFace:false},
     set_arms_legs:{price:28600,time:125,label:'両腕+両足セット',cat:'set',sub:'両腕全体＋両脚全体',imgs:{body:'set_arms_legs'},hasFace:false},
     set_arms:{price:15400,time:65,label:'両腕セット',cat:'set',sub:'肘上・下・手の甲指',imgs:{body:'set_arms'},hasFace:false},
     set_legs:{price:17600,time:65,label:'両足セット',cat:'set',sub:'膝上・下・足の甲指',imgs:{body:'set_legs'},hasFace:false},
+    
     part_nose_under:{price:4400,time:10,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},hasFace:true},
     part_mouth_under:{price:4400,time:10,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},hasFace:true},
     part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},hasFace:true},
@@ -282,7 +287,9 @@ var setIncludes = {
     set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio'],
     set_fullbody_noface:['set_lowerbody','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
     set_lowerbody:['set_vio','set_legs','part_buttocks'],
+    set_fullface_eyebrow:['set_fullface','set_eyebrow'],
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
+    set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
     set_vio:['part_v_line','part_i_line','part_o_line']
 };
 
@@ -304,7 +311,7 @@ function getOriginalTotal(idList) {
 }
 
 // ==========================================
-// 3. 制御ロジック
+// 3. アプリ制御 & UI描画
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
@@ -348,6 +355,8 @@ function createImg(parent, name) {
 function changeTab(t){ currentTab=t; render(); }
 function resetSelection(){ selected = []; suggestionId = null; dismissedSuggestions = []; document.getElementById('suggestion-box').style.display='none'; render(); }
 function toggleItem(id){ 
+    // 💡 部位を追加・削除した瞬間、AIパネルを一旦リセット
+    document.getElementById('suggestion-box').style.display='none'; 
     var idx=selected.indexOf(id); if(idx!==-1)selected.splice(idx,1); else selected.push(id); 
     checkSuggestion(false); render(); 
 }
@@ -447,17 +456,19 @@ function analyzeSuggestions(isManual) {
     var upsellLimit = (userType === 'new') ? 5000 : 10000;
     var currentTotal = getOriginalTotal(selected);
 
-    // アップセル判定
+    // 💡 アップセル特別判定：脚全体 -> 下半身セット
     if (selected.indexOf('set_legs') !== -1 && selected.indexOf('set_vio') === -1 && dismissedSuggestions.indexOf('set_lowerbody') === -1) {
         return { sid: 'set_lowerbody', type: 'upsell', diff: getItemPrice('set_lowerbody') - getItemPrice('set_legs'), oldPrice: getItemPrice('set_legs'), intersectingItems: ['set_legs'] };
     }
+
+    // 汎用提案
     for (var i = 0; i < keys.length; i++) {
         var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1 || dismissedSuggestions.indexOf(sid) !== -1) continue;
-        var candLeaves = itemLeaves[sid], intersectingItems =[], isCovered = true;
+        var candLeaves = itemLeaves[sid], intersectingItems =[], isCovered = true, currentIntersectingCount = 0;
         for (var j = 0; j < selected.length; j++) {
             var selId = selected[j], selLeaves = itemLeaves[selId], hasInt = false;
             for (var k = 0; k < selLeaves.length; k++) { if (candLeaves.indexOf(selLeaves[k]) !== -1) { hasInt = true; } else { isCovered = false; } }
-            if (hasInt) intersectingItems.push(selId);
+            if (hasInt) { intersectingItems.push(selId); currentIntersectingCount++; }
         }
         if (intersectingItems.length >= 1 && isCovered) {
             var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
@@ -566,7 +577,6 @@ function openInfoModal(d, t, et) {
 }
 
 function submitReservation() {
-    // 最後の一押し判定
     var best = analyzeSuggestions(true);
     if (best && (best.type === 'cheaper' || best.type === 'upsell')) {
         var conf = confirm("【最後にNARX中島からご確認です】\nさらに部位の多い「" + menuData[best.sid].label + "」の方がお得にご案内可能ですが、セット価格に変更して予約を確定しますか？");
