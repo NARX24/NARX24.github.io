@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.48.7</title>
+<title>NARX プレミアム予約システム Ver.48.8</title>
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -72,29 +72,31 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
-/* AIコンシェルジュ */
-#suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:92%;max-width:420px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:20px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
-.sug-title{font-weight:bold;font-size:0.85rem;color:#555;margin-bottom:12px;text-align:center;}
-.sug-benefit-msg{text-align:center;font-size:0.75rem;color:var(--gold);background:#111;padding:10px;border-radius:4px;font-weight:bold;margin-bottom:15px;letter-spacing:0.5px;}
-.sug-menu-name{font-size:1.15rem;font-weight:bold;color:#111;margin-bottom:4px;text-align:center;}
-.sug-upsell-panel{background:rgba(255,255,255,0.85);padding:15px 5px;border-radius:8px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:flex-start;}
-.sug-upsell-col{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;}
-.sug-upsell-label{font-size:0.65rem;color:#333;}
-.sug-upsell-price{font-size:1.05rem;color:#111;font-weight:bold;}
+/* 🤖 AIコンシェルジュ パネル 縮小版(60%) */
+#suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:70%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 12px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
+.sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
+.sug-benefit-msg{text-align:center;font-size:0.65rem;color:var(--gold);background:#111;padding:5px;border-radius:4px;font-weight:bold;margin-bottom:8px;letter-spacing:0.5px;}
+.sug-menu-name{font-size:0.9rem;font-weight:bold;color:#111;margin-bottom:4px;text-align:center;}
+.sug-upsell-panel{background:rgba(255,255,255,0.85);padding:8px 5px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.sug-upsell-col{flex:1;text-align:center;}
+.sug-upsell-label{font-size:0.55rem;color:#333;margin-bottom:2px;}
+.sug-upsell-price{font-size:0.85rem;color:#111;font-weight:bold;}
 .sug-upsell-price.red{color:#c00;}
-.sug-upsell-price.large-red{color:#c00;font-size:1.3rem;}
-.sug-compare-panel{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.75);padding:12px 10px;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.1);}
+.sug-upsell-price.large-red{color:#c00;font-size:1.1rem;}
+
+.sug-compare-panel{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.75);padding:8px 10px;border-radius:8px;margin-bottom:8px;border:1px solid rgba(0,0,0,0.1);}
 .sug-col{flex:1;text-align:center;}
-.sug-col-label{font-size:0.65rem;color:#555;display:block;font-weight:bold;}
-.sug-col-price{font-size:1rem;color:#111;font-weight:bold;}
+.sug-col-label{font-size:0.55rem;color:#555;display:block;font-weight:bold;}
+.sug-col-price{font-size:0.85rem;color:#111;font-weight:bold;}
 .sug-col-price.old{text-decoration:line-through;color:#888;}
-.sug-col-price.new{font-size:1.2rem;color:#c00;}
-.sug-btn-group{display:flex; gap:10px; margin-top:15px;}
-.btn-sug-apply{background:#000; color:#fff; border:1px solid #000; padding:14px; border-radius:6px; font-weight:bold; flex:2; cursor:pointer;}
-.btn-sug-skip{background:transparent; color:#111; border:none; flex:1; font-weight:bold; cursor:pointer;}
+.sug-col-price.new{font-size:1.1rem;color:#c00;}
+.sug-arrow{color:#c00;font-weight:bold;font-size:1rem;}
+.sug-btn-group{display:flex; gap:8px; margin-top:10px;}
+.btn-sug-apply{background:#000; color:#fff; border:1px solid #000; padding:10px; border-radius:6px; font-weight:bold; flex:1.5; cursor:pointer; font-size: 0.8rem;}
+.btn-sug-skip{background:transparent; color:#111; border:none; flex:1; font-weight:bold; cursor:pointer; font-size: 0.75rem;}
 
 #concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
-#concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.3s ease;position:relative;text-align:center;pointer-events:auto;}
+#concierge-bubble{display:none;background:#fff;color:#111;padding:10px 14px;border-radius:12px;font-size:0.7rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.3s ease;position:relative;text-align:center;pointer-events:auto;}
 .bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
 .concierge-icon{width:56px;height:56px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;transition:0.3s;border:2px solid var(--gold);}
 .concierge-icon.on{background:var(--gold);}
@@ -205,7 +207,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <span id="total-price" style="font-size:1.4rem; color:var(--gold); font-weight:bold;">¥0</span>
         <div style="text-align:right;">
-            <span id="total-time-slot" style="font-size:0.9rem;">0.0 枠</span>
+            <span id="total-time-slot" style="font-size:0.9rem;">0.0 時間</span>
             <div id="counseling-badge-area"></div>
         </div>
     </div>
@@ -214,7 +216,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <script>
 // ==========================================
-// 1. 変数定義 & 祝日データ
+// 1. 変数定義 & 祝日データ (2026年)
 // ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
@@ -231,14 +233,13 @@ var menuData = {
     set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット',cat:'set',sub:'脇・うなじ・背中・胸・腹・腕・VIO・脚',imgs:{body:'set_fullbody_noface_body'},hasFace:false},
     set_fullbody_novio:{price:41800,time:220,label:'VIOなし全身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕・脚',imgs:{body:'set_fullbody_novio_body',face:'set_fullbody_novio_face'},hasFace:true},
     set_upperbody:{price:30800,time:140,label:'上半身セット',cat:'set',sub:'全顔・脇・胸・腹・うなじ・背中・腕全体',imgs:{body:'set_upperbody_body',face:'set_upperbody_face'},hasFace:true},
-    set_lowerbody:{price:30800,time:150,label:'下半身セット',cat:'set',sub:'VIO・臀部・脚全体',imgs:{body:'set_lowerbody_body'},hasFace:false},
+    set_lowerbody:{price:30800,time:150,label:'下半身セット',cat:'set',sub:'VIO・臀部・脚全体',imgs:{body:'set_lowerbody_body',vio:'set_vio'},hasFace:false},
     set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set',sub:'鼻下・口下・頬・フェイスライン・首',imgs:{face:'set_fullface'},hasFace:true},
     set_vio:{price:16500,time:50,label:'VIOセット',cat:'set',sub:'Vライン・Iライン・Oライン',imgs:{body:'set_vio'},hasFace:false},
     set_chest_abdomen:{price:9900,time:35,label:'胸＋腹部セット',cat:'set',sub:'胸（乳輪込）＋腹部（ヘソ込）',imgs:{body:'set_chest_abdomen'},hasFace:false},
     set_arms_legs:{price:28600,time:125,label:'両腕+両足セット',cat:'set',sub:'両腕全体＋両脚全体',imgs:{body:'set_arms_legs'},hasFace:false},
     set_arms:{price:15400,time:65,label:'両腕セット',cat:'set',sub:'肘上・下・手の甲指',imgs:{body:'set_arms'},hasFace:false},
     set_legs:{price:17600,time:65,label:'両足セット',cat:'set',sub:'膝上・下・足の甲指',imgs:{body:'set_legs'},hasFace:false},
-    
     part_nose_under:{price:4400,time:10,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},hasFace:true},
     part_mouth_under:{price:4400,time:10,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},hasFace:true},
     part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},hasFace:true},
@@ -303,7 +304,7 @@ function getOriginalTotal(idList) {
 }
 
 // ==========================================
-// 3. アプリ制御 & UI描画
+// 3. 制御ロジック
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
@@ -330,6 +331,7 @@ function initApp() {
         if (item.imgs) {
             if (item.imgs.body) createImg(bPanel, item.imgs.body);
             if (item.imgs.face) createImg(fPanel, item.imgs.face);
+            if (item.imgs.vio) createImg(bPanel, item.imgs.vio);
         }
     }
 }
@@ -344,7 +346,7 @@ function createImg(parent, name) {
 }
 
 function changeTab(t){ currentTab=t; render(); }
-function resetSelection(){ selected = []; suggestionId = null; document.getElementById('suggestion-box').style.display='none'; render(); }
+function resetSelection(){ selected = []; suggestionId = null; dismissedSuggestions = []; document.getElementById('suggestion-box').style.display='none'; render(); }
 function toggleItem(id){ 
     var idx=selected.indexOf(id); if(idx!==-1)selected.splice(idx,1); else selected.push(id); 
     checkSuggestion(false); render(); 
@@ -378,6 +380,7 @@ function render() {
         var item = menuData[currentLeaves[cl]];
         if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); }
         if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
+        if (item.imgs.vio) { var v = document.getElementById("img-" + item.imgs.vio); if(v) v.classList.add('active'); }
     }
     if (suggestionId) {
         var sugLeaves = itemLeaves[suggestionId];
@@ -387,6 +390,7 @@ function render() {
                 var sItem = menuData[leafId];
                 if (sItem.imgs.body) { var siBody = document.getElementById("img-" + sItem.imgs.body); if(siBody) siBody.classList.add('suggest-blink'); }
                 if (sItem.imgs.face) { var siFace = document.getElementById("img-" + sItem.imgs.face); if(siFace) siFace.classList.add('suggest-blink'); }
+                if (sItem.imgs.vio) { var siVio = document.getElementById("img-" + sItem.imgs.vio); if(siVio) siVio.classList.add('suggest-blink'); }
             }
         }
     }
@@ -433,42 +437,31 @@ function updateTotal() {
     }
     var rounded = Math.ceil(t / 30) * 30;
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
-    document.getElementById('total-time-slot').innerText = (rounded/60).toFixed(1) + " 枠";
+    document.getElementById('total-time-slot').innerText = (rounded/60).toFixed(1) + " 時間";
 }
 
-// ==========================================
-// 4. AIコンシェルジュ 2.0 (営業ロジック)
-// ==========================================
+// AIコンシェルジュ 2.0
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var keys = Object.keys(menuData);
     var upsellLimit = (userType === 'new') ? 5000 : 10000;
     var currentTotal = getOriginalTotal(selected);
 
-    // 1. アップセル（単価アップ）判定
-    // 脚全体のみ -> 下半身セット(VIO込) への誘導
+    // アップセル判定
     if (selected.indexOf('set_legs') !== -1 && selected.indexOf('set_vio') === -1 && dismissedSuggestions.indexOf('set_lowerbody') === -1) {
         return { sid: 'set_lowerbody', type: 'upsell', diff: getItemPrice('set_lowerbody') - getItemPrice('set_legs'), oldPrice: getItemPrice('set_legs'), intersectingItems: ['set_legs'] };
     }
-    // 全顔のみ -> 全身オールセット への誘導
-    if (selected.indexOf('set_fullface') !== -1 && selected.indexOf('set_fullbody_all') === -1 && dismissedSuggestions.indexOf('set_fullbody_all') === -1) {
-       // 全顔から全身への差額が一定以下なら提案
-    }
-
-    // 汎用的なセット提案
     for (var i = 0; i < keys.length; i++) {
         var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1 || dismissedSuggestions.indexOf(sid) !== -1) continue;
-        var candLeaves = itemLeaves[sid], intersectingItems =[], intersectingLeaves =[], isCovered = true;
+        var candLeaves = itemLeaves[sid], intersectingItems =[], isCovered = true;
         for (var j = 0; j < selected.length; j++) {
             var selId = selected[j], selLeaves = itemLeaves[selId], hasInt = false;
             for (var k = 0; k < selLeaves.length; k++) { if (candLeaves.indexOf(selLeaves[k]) !== -1) { hasInt = true; } else { isCovered = false; } }
-            if (hasInt) { intersectingItems.push(selId); for (var l = 0; l < selLeaves.length; l++) { if(intersectingLeaves.indexOf(selLeaves[l]) === -1) intersectingLeaves.push(selLeaves[l]); } }
+            if (hasInt) intersectingItems.push(selId);
         }
         if (intersectingItems.length >= 1 && isCovered) {
             var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
-            if (diff <= upsellLimit && intersectingItems.length >= 2) {
-                return {sid:sid, type: (diff <= 0 ? 'cheaper' : 'upsell'), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
-            }
+            if (diff <= upsellLimit && intersectingItems.length >= 2) return {sid:sid, type: (diff <= 0 ? 'cheaper' : 'upsell'), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
         }
     }
     return null;
@@ -482,10 +475,10 @@ function checkSuggestion(isManual) {
     var currentTotal = getOriginalTotal(selected), setItem = menuData[best.sid], newTotal = currentTotal - best.oldPrice + getItemPrice(best.sid);
     var html = '<div class="sug-title">🎉 AIコンシェルジュからのご提案</div>';
     if (best.type === 'upsell') {
-        html += '<div class="sug-benefit-msg">✨ プロの目から見て、こちらの方が断然お得ですよ！ ✨</div><div class="sug-menu-name">' + setItem.label + '</div>';
+        html += '<div class="sug-benefit-msg">✨ こちらの方が断然お得ですよ！ ✨</div><div class="sug-menu-name">' + setItem.label + '</div>';
         html += '<div class="sug-upsell-panel"><div class="sug-upsell-col"><span class="sug-upsell-label">現在</span><span class="sug-upsell-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-upsell-col"><span class="sug-upsell-label">追加</span><span class="sug-upsell-price red">+¥' + best.diff.toLocaleString() + '</span></div><div class="sug-upsell-col"><span class="sug-upsell-label">合計</span><span class="sug-upsell-price large-red">¥' + newTotal.toLocaleString() + '</span></div></div>';
     } else {
-        html += '<div class="sug-benefit-msg">✨ セットプランの方がお安くなります！ ✨</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price old">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-arrow">▶▶</div><div class="sug-col"><span class="sug-col-label">変更後</span><span class="sug-col-price new">¥' + newTotal.toLocaleString() + '</span></div></div>';
+        html += '<div class="sug-benefit-msg">✨ さらにお得なプランがあります！ ✨</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price old">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-arrow">▶▶</div><div class="sug-col"><span class="sug-col-label">変更後</span><span class="sug-col-price new">¥' + newTotal.toLocaleString() + '</span></div></div>';
     }
     html += '<div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block';
@@ -493,27 +486,22 @@ function checkSuggestion(isManual) {
 }
 
 function skipSuggestion(id) { dismissedSuggestions.push(id); document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
-
 function applyOptimalSet() {
     for (var i = 0; i < suggestionReplaceItems.length; i++) { var idx = selected.indexOf(suggestionReplaceItems[i]); if (idx !== -1) selected.splice(idx, 1); }
     selected.push(suggestionId); suggestionId = null; document.getElementById('suggestion-box').style.display = 'none'; render();
 }
-
 function toggleConcierge() {
     isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
-    if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); showConciergeBubble("18年の実績に基づき、最適なプランをご提案します！"); } 
+    if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); showConciergeBubble("最適なプランをご提案します！"); } 
     else { icon.className = 'concierge-icon off'; showConciergeBubble("またお呼びください！"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); }
 }
-
 function showConciergeBubble(msg) {
     var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg;
     b.style.display = 'block'; setTimeout(function() { b.style.opacity = '1'; }, 10);
     if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 4000);
 }
 
-// ==========================================
-// 5. 週刊予約カレンダー
-// ==========================================
+// 🚀 週刊予約カレンダー
 function changeWeek(n) { weekOffset += n; renderCalendar(); }
 function proceedToCalendar() {
     if (selected.length === 0) return alert("メニューを選んでください");
@@ -561,7 +549,7 @@ function renderCalendar() {
             if(!isInsideHours) html+='<td class="cal-status-off">-</td>';
             else if(!canFit || isBusy) html+='<td class="cal-status-x">×</td>';
             else {
-                var endObj = new Date(e); var endStr = endObj.getHours() + ":" + (endObj.getMinutes() === 0 ? "00" : endObj.getMinutes());
+                var endObj = new Date(e); var endStr = endObj.getHours() + ":" + (endObj.getMinutes() === 0 ? "00" : (endObj.getMinutes() < 10 ? "0" : "") + endObj.getMinutes());
                 html+='<td class="cal-status-o" onclick="openInfoModal(\''+dateStrKey+'\', \''+t+'\', \''+endStr+'\')">◎</td>';
             }
         }
@@ -578,19 +566,19 @@ function openInfoModal(d, t, et) {
 }
 
 function submitReservation() {
-    // 💡 最後の一押し（クロージング・ロジック）
-    if (selected.indexOf('set_legs') !== -1 && selected.indexOf('set_vio') === -1) {
-        var conf = confirm("【最後にNARX中島からご確認です】\n現在『脚全体』のご予約ですが、実は『VIO』をセットにしても所要時間はほぼ変わりません。セット価格でお得に変更して予約を確定しますか？");
-        if(conf) { toggleItem('set_lowerbody'); toggleItem('set_legs'); alert("セットに変更しました。再度「確定」を押してください。"); return; }
+    // 最後の一押し判定
+    var best = analyzeSuggestions(true);
+    if (best && (best.type === 'cheaper' || best.type === 'upsell')) {
+        var conf = confirm("【最後にNARX中島からご確認です】\nさらに部位の多い「" + menuData[best.sid].label + "」の方がお得にご案内可能ですが、セット価格に変更して予約を確定しますか？");
+        if(conf) { applyOptimalSet(); alert("セットに変更しました。再度「予約確定」を押してください。"); return; }
     }
-
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
     if(!n||!tel||!em) return alert("必須項目をすべて入力してください");
     showLoading(true);
     var menuLabels = []; for(var i=0; i<selected.length; i++){ menuLabels.push(menuData[selected[i]].label); }
     var payload = {
         type:'reserve', userType:userType, date:tDate, time:tTime, endTime:tEndTime,
-        slot:document.getElementById('total-time-slot').innerText.replace(" 枠",""),
+        slot:document.getElementById('total-time-slot').innerText.replace(" 時間",""),
         price:document.getElementById('total-price').innerText,
         menus:menuLabels.join(', '), name:n, tel:tel, email:em, memo:memo
     };
