@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.48.11</title>
+<title>NARX プレミアム予約システム Ver.48.12</title>
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -72,14 +72,14 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
-/* 🤖 AIコンシェルジュ パネル 縮小版 */
+/* AIコンシェルジュ パネル */
 #suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:70%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 12px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
 .sug-benefit-msg{text-align:center;font-size:0.65rem;color:var(--gold);background:#111;padding:5px;border-radius:4px;font-weight:bold;margin-bottom:8px;letter-spacing:0.5px;}
 .sug-menu-name{font-size:0.9rem;font-weight:bold;color:#111;margin-bottom:4px;text-align:center;}
 .sug-upsell-panel{background:rgba(255,255,255,0.85);padding:8px 5px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
 .sug-upsell-col{flex:1;text-align:center;}
-.sug-upsell-label{font-size:0.55rem;color:#333;margin-bottom:2px;}
+.sug-upsell-label{font-size:0.55rem;color:#333;}
 .sug-upsell-price{font-size:0.85rem;color:#111;font-weight:bold;}
 .sug-upsell-price.red{color:#c00;}
 .sug-upsell-price.large-red{color:#c00;font-size:1.1rem;}
@@ -285,17 +285,17 @@ var menuData = {
     other_s_planning:{price:11000,time:60,label:'エスプランニング',cat:'other',imgs:{body:'other_s_planning'}}
 };
 
-// 💡 包含関係を徹底網羅 (グレーアウト判定用)
+// 💡 包含関係を徹底網羅 (グレーアウト判定用：ここが不十分だと膝上が消えない等の原因になります)
 var setIncludes = {
-    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_arms','set_legs'],
+    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
     set_fullbody_noface:['set_lowerbody','set_vio','set_legs','set_arms','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
     set_fullbody_novio:['set_upperbody','set_fullface','set_arms','set_legs','part_nape','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
     set_upperbody:['set_fullface','set_arms','part_armpit','part_chest_nipple','part_abdomen_navel','part_nape','part_back_upper','part_back_lower'],
     set_lowerbody:['set_vio','set_legs','part_buttocks'],
     set_fullface_vio:['set_fullface','set_vio'],
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
-    set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
+    set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
     set_vio_buttocks:['set_vio','part_buttocks'],
     set_arms_legs:['set_arms','set_legs'],
@@ -391,26 +391,36 @@ function render() {
 
     var parts = document.querySelectorAll('.layer-part');
     for (var p = 0; p < parts.length; p++) { parts[p].classList.remove('active', 'suggest-blink'); }
+    
+    // 💡 選択中の全葉ノードを取得
     var currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var lNodes = itemLeaves[selected[s]];
         for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
     }
+    
+    // 💡 選択中（セット含む）の全部位を点灯させる
     for (var cl = 0; cl < currentLeaves.length; cl++) {
         var item = menuData[currentLeaves[cl]];
-        if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); }
-        if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
-        if (item.imgs.vio) { var v = document.getElementById("img-" + item.imgs.vio); if(v) v.classList.add('active'); }
+        if (item.imgs) {
+            if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); }
+            if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
+            if (item.imgs.vio) { var v = document.getElementById("img-" + item.imgs.vio); if(v) v.classList.add('active'); }
+        }
     }
+    
+    // 💡 提案中の部位だけを点滅
     if (suggestionId) {
         var sugLeaves = itemLeaves[suggestionId];
         for (var sl = 0; sl < sugLeaves.length; sl++) {
             var leafId = sugLeaves[sl];
             if (currentLeaves.indexOf(leafId) === -1) { 
                 var sItem = menuData[leafId];
-                if (sItem.imgs.body) { var siBody = document.getElementById("img-" + sItem.imgs.body); if(siBody) siBody.classList.add('suggest-blink'); }
-                if (sItem.imgs.face) { var siFace = document.getElementById("img-" + sItem.imgs.face); if(siFace) siFace.classList.add('suggest-blink'); }
-                if (sItem.imgs.vio) { var siVio = document.getElementById("img-" + sItem.imgs.vio); if(siVio) siVio.classList.add('suggest-blink'); }
+                if (sItem.imgs) {
+                    if (sItem.imgs.body) { var siBody = document.getElementById("img-" + sItem.imgs.body); if(siBody) siBody.classList.add('suggest-blink'); }
+                    if (sItem.imgs.face) { var siFace = document.getElementById("img-" + sItem.imgs.face); if(siFace) siFace.classList.add('suggest-blink'); }
+                    if (sItem.imgs.vio) { var siVio = document.getElementById("img-" + sItem.imgs.vio); if(siVio) siVio.classList.add('suggest-blink'); }
+                }
             }
         }
     }
@@ -427,7 +437,7 @@ function render() {
             if (item.cat !== currentTab) continue;
             if (currentTab === 'part' && item.subCat !== sub.id) continue;
             
-            // 💡 誠実な包含判定: 現在選択中の葉ノード(currentLeaves)のいずれかが、このアイテムの葉に含まれていたら無効化
+            // 💡 包含判定：このアイテムの全葉ノードが既に選ばれていたら無効
             var isSel = selected.indexOf(id) !== -1, isDis = false;
             if (!isSel) {
                 var itemL = itemLeaves[id];
@@ -465,28 +475,42 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = (rounded/60).toFixed(1) + " 時間";
 }
 
-// AIコンシェルジュ 2.0 (セット組み合わせ対応)
+// AIコンシェルジュ 2.0
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var keys = Object.keys(menuData);
     var upsellLimit = (userType === 'new') ? 5000 : 10000;
-    var currentTotal = getOriginalTotal(selected);
+    
+    // 💡 現在の全葉ノードを取得
+    var currentLeaves = [];
+    for (var s = 0; s < selected.length; s++) {
+        var lNodes = itemLeaves[selected[s]];
+        for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
+    }
 
     for (var i = 0; i < keys.length; i++) {
         var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
         
         var candLeaves = itemLeaves[sid], intersectingItems =[], isCovered = true;
-        for (var j = 0; j < selected.length; j++) {
-            var selId = selected[j], selLeaves = itemLeaves[selId], hasInt = false;
-            for (var k = 0; k < selLeaves.length; k++) { if (candLeaves.indexOf(selLeaves[k]) !== -1) { hasInt = true; } else { isCovered = false; } }
-            if (hasInt) { intersectingItems.push(selId); }
+        var foundLeafCount = 0;
+        for (var l = 0; l < candLeaves.length; l++) {
+            if (currentLeaves.indexOf(candLeaves[l]) !== -1) { foundLeafCount++; }
         }
         
-        if (intersectingItems.length >= 1 && isCovered) {
+        // 💡 ルール：そのセットの構成部位が2つ以上選ばれていたら提案対象
+        if (foundLeafCount >= 2) {
+            // そのセットに含まれる現在選択中のアイテムを特定
+            for(var j=0; j<selected.length; j++) {
+                var selId = selected[j];
+                var selLeaves = itemLeaves[selId];
+                var isIncluded = true;
+                for(var k=0; k<selLeaves.length; k++){ if(candLeaves.indexOf(selLeaves[k]) === -1) isIncluded=false; }
+                if(isIncluded) intersectingItems.push(selId);
+            }
+
             var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
-            // 💡 誠実ロジック：セットの方が安い、または同額なら拒否履歴を無視して再提案
             var wasDismissed = (dismissedSuggestions.indexOf(sid) !== -1);
-            if (diff <= upsellLimit && intersectingItems.length >= 2) {
+            if (diff <= upsellLimit) {
                 if (diff <= 0 || !wasDismissed) return {sid:sid, type: (diff <= 0 ? 'cheaper' : 'upsell'), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
             }
         }
@@ -593,6 +617,7 @@ function openInfoModal(d, t, et) {
 }
 
 function submitReservation() {
+    // 💡 最後の一押し
     var best = analyzeSuggestions(true);
     if (best && (best.type === 'cheaper' || best.type === 'upsell')) {
         var conf = confirm("【最後にNARX中島からご確認です】\nさらに部位の多い「" + menuData[best.sid].label + "」の方がお得にご案内可能ですが、セット価格に変更して予約を確定しますか？");
