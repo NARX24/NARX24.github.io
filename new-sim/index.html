@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.48.10</title>
+<title>NARX プレミアム予約システム Ver.48.11</title>
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -64,7 +64,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 .item{background:var(--dark-gray);margin-bottom:8px;padding:16px;border-radius:6px;display:flex;align-items:center;cursor:pointer;border:1px solid transparent;transition:0.2s;}
 .item.selected{border-color:var(--gold);background:#080808;}
-.item.disabled{opacity:0.15;cursor:default;filter:grayscale(1);}
+.item.disabled{opacity:0.15;cursor:default;filter:grayscale(1);pointer-events: none;}
 .item input{transform:scale(1.4);margin-right:18px;accent-color:var(--gold);}
 .item-info{flex:1;}
 .item-name{display:block;font-size:0.95rem;}
@@ -285,14 +285,24 @@ var menuData = {
     other_s_planning:{price:11000,time:60,label:'エスプランニング',cat:'other',imgs:{body:'other_s_planning'}}
 };
 
+// 💡 包含関係を徹底網羅 (グレーアウト判定用)
 var setIncludes = {
-    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio'],
-    set_fullbody_noface:['set_lowerbody','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
+    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_arms','set_legs'],
+    set_fullbody_noface:['set_lowerbody','set_vio','set_legs','set_arms','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
+    set_fullbody_novio:['set_upperbody','set_fullface','set_arms','set_legs','part_nape','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
+    set_upperbody:['set_fullface','set_arms','part_armpit','part_chest_nipple','part_abdomen_navel','part_nape','part_back_upper','part_back_lower'],
     set_lowerbody:['set_vio','set_legs','part_buttocks'],
+    set_fullface_vio:['set_fullface','set_vio'],
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
-    set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
-    set_vio:['part_v_line','part_i_line','part_o_line']
+    set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
+    set_vio:['part_v_line','part_i_line','part_o_line'],
+    set_vio_buttocks:['set_vio','part_buttocks'],
+    set_arms_legs:['set_arms','set_legs'],
+    set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
+    set_legs:['part_knee_upper','part_knee_lower','part_foot_toe'],
+    part_chest_nipple:['part_nipple_around'],
+    part_abdomen_navel:['part_navel_under']
 };
 
 function getItemPrice(id) {
@@ -313,7 +323,7 @@ function getOriginalTotal(idList) {
 }
 
 // ==========================================
-// 3. アプリ制御 & UI描画
+// 3. アプリ制御
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
@@ -416,11 +426,16 @@ function render() {
             var id = keys[m], item = menuData[id];
             if (item.cat !== currentTab) continue;
             if (currentTab === 'part' && item.subCat !== sub.id) continue;
+            
+            // 💡 誠実な包含判定: 現在選択中の葉ノード(currentLeaves)のいずれかが、このアイテムの葉に含まれていたら無効化
             var isSel = selected.indexOf(id) !== -1, isDis = false;
             if (!isSel) {
-                var leaves = itemLeaves[id];
-                for (var l = 0; l < leaves.length; l++) { if (currentLeaves.indexOf(leaves[l]) !== -1) { isDis = true; break; } }
+                var itemL = itemLeaves[id];
+                for (var l = 0; l < itemL.length; l++) { 
+                    if (currentLeaves.indexOf(itemL[l]) !== -1) { isDis = true; break; } 
+                }
             }
+            
             var div = document.createElement('div');
             div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
             (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
@@ -450,16 +465,12 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = (rounded/60).toFixed(1) + " 時間";
 }
 
-// AIコンシェルジュ 2.0
+// AIコンシェルジュ 2.0 (セット組み合わせ対応)
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var keys = Object.keys(menuData);
     var upsellLimit = (userType === 'new') ? 5000 : 10000;
     var currentTotal = getOriginalTotal(selected);
-
-    if (selected.indexOf('set_legs') !== -1 && selected.indexOf('set_vio') === -1 && dismissedSuggestions.indexOf('set_lowerbody') === -1) {
-        return { sid: 'set_lowerbody', type: 'upsell', diff: getItemPrice('set_lowerbody') - getItemPrice('set_legs'), oldPrice: getItemPrice('set_legs'), intersectingItems: ['set_legs'] };
-    }
 
     for (var i = 0; i < keys.length; i++) {
         var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
@@ -473,13 +484,10 @@ function analyzeSuggestions(isManual) {
         
         if (intersectingItems.length >= 1 && isCovered) {
             var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
-            
-            // 💡 誠実ロジック：セットの方が安い(diff <= 0)なら、拒否履歴を無視して必ず提案する
+            // 💡 誠実ロジック：セットの方が安い、または同額なら拒否履歴を無視して再提案
             var wasDismissed = (dismissedSuggestions.indexOf(sid) !== -1);
             if (diff <= upsellLimit && intersectingItems.length >= 2) {
-                if (diff <= 0 || !wasDismissed) {
-                    return {sid:sid, type: (diff <= 0 ? 'cheaper' : 'upsell'), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
-                }
+                if (diff <= 0 || !wasDismissed) return {sid:sid, type: (diff <= 0 ? 'cheaper' : 'upsell'), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
             }
         }
     }
@@ -585,7 +593,6 @@ function openInfoModal(d, t, et) {
 }
 
 function submitReservation() {
-    // 💡 最後の一押し判定 (安くなるプランがある場合)
     var best = analyzeSuggestions(true);
     if (best && (best.type === 'cheaper' || best.type === 'upsell')) {
         var conf = confirm("【最後にNARX中島からご確認です】\nさらに部位の多い「" + menuData[best.sid].label + "」の方がお得にご案内可能ですが、セット価格に変更して予約を確定しますか？");
