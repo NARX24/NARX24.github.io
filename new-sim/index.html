@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.49.0</title>
+<title>NARX プレミアム予約システム Ver.49.2</title>
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -73,7 +72,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
-/* AIコンシェルジュ */
+/* 🤖 AIコンシェルジュ パネル */
 #suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:70%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 12px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
 .sug-benefit-msg{text-align:center;font-size:0.65rem;color:var(--gold);background:#111;padding:5px;border-radius:4px;font-weight:bold;margin-bottom:8px;letter-spacing:0.5px;}
@@ -105,7 +104,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon.off{background:#111;}
 .concierge-icon.off svg path, .concierge-icon.off svg circle { fill: var(--gold); }
 
-/* カレンダー */
+/* カレンダーUI */
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
 .cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
 .cal-outer-wrapper { height: calc(100% - 110px); overflow: auto; background: #333; }
@@ -227,10 +226,11 @@ var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var holidays2026 = ["2026/1/1", "2026/1/12", "2026/2/11", "2026/2/23", "2026/3/20", "2026/3/21", "2026/4/29", "2026/5/3", "2026/5/4", "2026/5/5", "2026/5/6", "2026/7/20", "2026/8/11", "2026/9/21", "2026/9/22", "2026/9/23", "2026/10/12", "2026/11/3", "2026/11/23"];
 
 // ==========================================
-// 2. 2026.04.01 改定メニューデータ 
+// 2. 2026.04.01 改定メニューデータ (統合版)
 // ==========================================
 var menuData = {
-    set_fullface_eyebrow:{price:22000,time:105,label:'全顔+眉毛セット',cat:'set'},
+    // セットメニュー
+    set_fullface_eyebrow:{price:24200,time:105,label:'全顔+眉毛セット',cat:'set'},
     set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set'},
     set_eyebrow:{price:13200,time:40,label:'眉毛セット',cat:'set'},
     set_upperbody:{price:30800,time:140,label:'上半身セット(顔含む)',cat:'set'},
@@ -277,7 +277,8 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'}},
     part_i_line:{price:7700,time:15,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'}},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'}},
-
+    
+    // その他・オプション
     other_lala_peel:{price:12100,time:90,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'}},
     other_face_correction:{price:22000,time:90,label:'小顔矯正術',cat:'other',imgs:{face:'other_face_correction'}},
     other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other'},
@@ -290,7 +291,7 @@ var menuData = {
     opt_new_5:{price:1100,time:10,label:'ＳＶ（10分につき）',cat:'other'}
 };
 
-// 💡 包含関係を再定義（孫パーツまで徹底網羅）
+// 💡 包含関係を再定義（孫パーツまで網羅）
 var setIncludes = {
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
@@ -311,8 +312,25 @@ var setIncludes = {
     part_abdomen_navel:['part_navel_under']
 };
 
+function getItemPrice(id) {
+    var item = menuData[id];
+    if (userType === 'new') {
+        var face5 = ['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'];
+        if (face5.indexOf(id) !== -1) return 1000;
+        if (id === 'set_fullface') return 5000;
+        return item.price * 0.5;
+    }
+    return item.price;
+}
+
+function getOriginalTotal(idList) {
+    var total = 0;
+    for (var i = 0; i < idList.length; i++) { total += getItemPrice(idList[i]); }
+    return total;
+}
+
 // ==========================================
-// 3. アプリ制御
+// 3. アプリ制御 & UI描画
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
@@ -380,14 +398,12 @@ function render() {
     var parts = document.querySelectorAll('.layer-part');
     for (var p = 0; p < parts.length; p++) { parts[p].classList.remove('active', 'suggest-blink'); }
     
-    // 💡 全葉ノード取得
     var currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var lNodes = itemLeaves[selected[s]];
         for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
     }
     
-    // 💡 ビジュアル反映
     for (var cl = 0; cl < currentLeaves.length; cl++) {
         var item = menuData[currentLeaves[cl]];
         if (item.imgs) {
@@ -443,25 +459,48 @@ function render() {
 }
 
 function updateTotal() {
-    var p = 0, t = 0, f = false;
+    var p = 0, t = 0, hasFaceCooling = false;
+    
+    // 特殊部位以外の顔パーツリスト
+    var faceNormalParts = ['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'];
+    var faceNormalSets = ['set_fullface','set_fullface_eyebrow','set_fullface_vio','set_upperbody','set_fullbody_all','set_fullbody_novio'];
+
     for (var i = 0; i < selected.length; i++) {
-        p += getItemPrice(selected[i]); t += menuData[selected[i]].time;
-        if(menuData[selected[i]].hasFace) f = true;
+        var sid = selected[i];
+        p += getItemPrice(sid);
+        t += menuData[sid].time;
+        
+        // お冷やし判定：特殊部位以外の顔が含まれているか
+        if (faceNormalParts.indexOf(sid) !== -1 || faceNormalSets.indexOf(sid) !== -1) {
+            hasFaceCooling = true;
+        }
     }
+    
     if (selected.length > 0) {
-        if (userType === 'new') { t += 90; if(f) t += 20; document.getElementById('counseling-badge-area').innerHTML = '<span class="counseling-note">※無料カウンセリング込</span>'; }
-        else { if(f) t += 20; document.getElementById('counseling-badge-area').innerHTML = ''; }
+        // 基本カウンセリング・会計（10分）
+        t += 10;
+        // お冷やし（20分）
+        if (hasFaceCooling) t += 20;
+        // ご新規様用カウンセリング（90分）
+        if (userType === 'new') {
+            t += 90;
+            document.getElementById('counseling-badge-area').innerHTML = '<span class="counseling-note">※無料カウンセリング込</span>';
+        } else {
+            document.getElementById('counseling-badge-area').innerHTML = '';
+        }
     }
-    var rounded = Math.ceil(t / 30) * 30;
+    
+    var roundedHours = Math.ceil(t / 30) * 0.5; // 30分単位で切り上げ
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
-    document.getElementById('total-time-slot').innerText = (rounded/60).toFixed(1) + " 時間";
+    document.getElementById('total-time-slot').innerText = roundedHours.toFixed(1) + " 時間";
 }
 
-// AIコンシェルジュ 2.0 (セット＋セット対応)
+// AIコンシェルジュ
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var keys = Object.keys(menuData);
     var upsellLimit = (userType === 'new') ? 5000 : 10000;
+    
     var currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var lNodes = itemLeaves[selected[s]];
@@ -480,6 +519,8 @@ function analyzeSuggestions(isManual) {
                 for(var k=0; k<selLeaves.length; k++){ if(candLeaves.indexOf(selLeaves[k]) === -1) isInc=false; }
                 if(isInc) intersectingItems.push(selId);
             }
+            if (intersectingItems.length < 2) continue;
+
             var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
             var wasDismissed = (dismissedSuggestions.indexOf(sid) !== -1);
             if (diff <= upsellLimit && (diff <= 0 || !wasDismissed)) return {sid:sid, type: (diff <= 0 ? 'cheaper' : 'upsell'), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
@@ -536,8 +577,8 @@ function proceedToCalendar() {
 
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
-    var reqSlot = parseFloat(document.getElementById('total-time-slot').innerText);
-    var reqMs = reqSlot * 60 * 60 * 1000;
+    var reqSlotHours = parseFloat(document.getElementById('total-time-slot').innerText);
+    var reqMs = reqSlotHours * 60 * 60 * 1000;
     var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; 
     firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
     document.getElementById('cal-title').innerText = (firstDay.getMonth()+1)+"/"+firstDay.getDate() + "の週";
