@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.49.4</title>
+<title>NARX プレミアム予約システム Ver.49.3</title>
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -40,6 +40,13 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     100% { opacity: 0.1; filter: drop-shadow(0 0 2px var(--gold)); }
 }
 .layer-part.suggest-blink { animation: blink-gold 1.0s infinite ease-in-out; z-index: 3; display: block !important; }
+
+/* 既存客用案内ポップアップ */
+#repeat-guidance-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100002; display: none; justify-content: center; align-items: center; }
+.guidance-box { width: 85%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; text-align: left; }
+.guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 20px; }
+.guidance-step { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid var(--gold); }
+.guidance-step b { color: var(--gold); font-size: 1rem; }
 
 /* メニューUI */
 .tabs{display:flex;gap:5px;margin-bottom:15px;border-bottom:1px solid var(--light-gray);}
@@ -104,7 +111,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon.off{background:#111;}
 .concierge-icon.off svg path, .concierge-icon.off svg circle { fill: var(--gold); }
 
-/* カレンダー */
+/* カレンダーUI */
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
 .cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
 .cal-outer-wrapper { height: calc(100% - 110px); overflow: auto; background: #333; }
@@ -130,6 +137,22 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <body>
 
 <div id="loading-overlay">同期中...</div>
+
+<div id="repeat-guidance-modal">
+    <div class="guidance-box">
+        <div class="guidance-title">ご予約内容をコピーしました</div>
+        <div class="guidance-step">
+            <b>❶. LINE予約メニューへ</b><br>
+            公式LINEの予約メニュー〔複数メニュー【時間枠】〕より、<span id="guide-hours" style="color:var(--gold); font-weight:bold;">●</span> 時間枠に予約をお取りください。
+        </div>
+        <div class="guidance-step">
+            <b>❷. 備考欄に貼り付け</b><br>
+            日時を選んだら、予約画面の【備考欄】に先ほどコピーされた内容を貼り付けてください。
+        </div>
+        <button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
+        <button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.8rem;">閉じる</button>
+    </div>
+</div>
 
 <div id="gate-modal">
     <div class="modal-content">
@@ -226,7 +249,7 @@ var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var holidays2026 = ["2026/1/1", "2026/1/12", "2026/2/11", "2026/2/23", "2026/3/20", "2026/3/21", "2026/4/29", "2026/5/3", "2026/5/4", "2026/5/5", "2026/5/6", "2026/7/20", "2026/8/11", "2026/9/21", "2026/9/22", "2026/9/23", "2026/10/12", "2026/11/3", "2026/11/23"];
 
 // ==========================================
-// 2. 2026.04.01 改定メニューデータ (耳たぶ復活 & ビジュアル統合)
+// 2. 2026.04.01 改定メニューデータ
 // ==========================================
 var menuData = {
     set_fullface_eyebrow:{price:24200,time:105,label:'全顔+眉毛セット',cat:'set',imgs:{face:'set_fullface_eyebrow_face'}},
@@ -244,8 +267,6 @@ var menuData = {
     set_arms_legs:{price:28600,time:125,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'}},
     set_arms:{price:15400,time:60,label:'両腕セット',cat:'set',imgs:{body:'set_arms'}},
     set_legs:{price:17600,time:60,label:'両足セット',cat:'set',imgs:{body:'set_legs'}},
-    
-    // パーツ
     part_nose_under:{price:4400,time:10,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'}},
     part_mouth_under:{price:4400,time:10,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'}},
     part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'}},
@@ -277,8 +298,6 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'}},
     part_i_line:{price:7700,time:15,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'}},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'}},
-    
-    // その他・オプション
     other_lala_peel:{price:12100,time:90,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'}},
     other_face_correction:{price:22000,time:90,label:'小顔矯正術',cat:'other',imgs:{face:'other_face_correction'}},
     other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other'},
@@ -295,15 +314,15 @@ var setIncludes = {
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
-    set_upperbody:['set_fullface','set_arms','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
+    set_upperbody:['set_fullface','set_arms','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower'],
     set_lowerbody:['set_vio','set_legs','part_buttocks'],
-    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
-    set_fullbody_noface:['set_lowerbody','set_vio','set_legs','set_arms','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
-    set_fullbody_novio:['set_upperbody','set_fullface','set_arms','set_legs','part_nape','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
+    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
+    set_fullbody_noface:['set_lowerbody','set_vio','set_legs','set_arms','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
+    set_fullbody_novio:['set_upperbody','set_fullface','set_arms','set_legs','part_nape','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower'],
     set_fullface_vio:['set_fullface','set_vio'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
     set_vio_buttocks:['set_vio','part_buttocks'],
-    set_chest_abdomen:['part_chest_nipple','part_abdomen_navel'],
+    set_chest_abdomen:['part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel'],
     set_arms_legs:['set_arms','set_legs'],
     set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
     set_legs:['part_knee_upper','part_knee_lower','part_foot_toe'],
@@ -334,7 +353,7 @@ function getOriginalTotal(idList) {
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
     document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回限定価格モード適用中":"【会員様】通常価格モード適用中";
-    document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="proceedToCalendar()">空き状況を確認して予約へ</button>';
+    document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="handleReserveAction()">空き状況を確認して予約へ</button>';
     initApp(); render();
 }
 
@@ -400,7 +419,6 @@ function render() {
     var currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var sid = selected[s], item = menuData[sid];
-        // 💡 セット自体の画像があれば最優先で点灯
         if (item.imgs) {
             if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); }
             if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
@@ -409,7 +427,6 @@ function render() {
         for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
     }
     
-    // 葉ノード（細かいパーツ）の点灯
     for (var cl = 0; cl < currentLeaves.length; cl++) {
         var leaf = menuData[currentLeaves[cl]];
         if (leaf.imgs) {
@@ -490,7 +507,7 @@ function updateTotal() {
     document.getElementById('total-time-slot').innerText = roundedHours.toFixed(1) + " 時間";
 }
 
-// AIコンシェルジュ 2.0
+// AIコンシェルジュ
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var keys = Object.keys(menuData);
@@ -557,10 +574,49 @@ function showConciergeBubble(msg) {
     if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 4000);
 }
 
-// 🚀 週刊予約カレンダー
+// 💡 予約ボタン押下時の制御（新規・既存分岐）
+function handleReserveAction() {
+    if (selected.length === 0) return alert("メニューを選んでください");
+
+    // 最後の一押し判定
+    var best = analyzeSuggestions(true);
+    if (best && (best.type === 'cheaper' || best.type === 'upsell')) {
+        var conf = confirm("【最後にNARX中島からご確認です】\nさらに部位の多い「" + menuData[best.sid].label + "」の方がお得にご案内可能ですが、セット価格に変更して予約を確定しますか？");
+        if(conf) { applyOptimalSet(); alert("セットに変更しました。再度「予約確定」を押してください。"); return; }
+    }
+
+    if (userType === 'new') {
+        proceedToCalendar();
+    } else {
+        handleRepeatBooking();
+    }
+}
+
+// 💡 既存客用フロー（コピー ＆ ポップアップ案内）
+function handleRepeatBooking() {
+    var priceText = document.getElementById('total-price').innerText;
+    var timeHours = document.getElementById('total-time-slot').innerText;
+    var menuLabels = [];
+    for(var i=0; i<selected.length; i++){ menuLabels.push(menuData[selected[i]].label); }
+    
+    var copyText = "【NARX 予約内容】\nメニュー: " + menuLabels.join(', ') + "\n合計金額: " + priceText + "\n目安時間: " + timeHours + "\n※公式LINEにてこの内容を貼り付けてください。";
+
+    // クリップボードにコピー
+    var tempArea = document.createElement("textarea");
+    tempArea.value = copyText;
+    document.body.appendChild(tempArea);
+    tempArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempArea);
+
+    // 案内ポップアップ表示
+    document.getElementById('guide-hours').innerText = timeHours;
+    document.getElementById('repeat-guidance-modal').style.display = 'flex';
+}
+
+// 🚀 週刊予約カレンダー (新規客用)
 function changeWeek(n) { weekOffset += n; renderCalendar(); }
 function proceedToCalendar() {
-    if (selected.length === 0) return alert("メニューを選んでください");
     showLoading(true);
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){ 
@@ -622,11 +678,6 @@ function openInfoModal(d, t, et) {
 }
 
 function submitReservation() {
-    var best = analyzeSuggestions(true);
-    if (best && (best.type === 'cheaper' || best.type === 'upsell')) {
-        var conf = confirm("【最後にNARX中島からご確認です】\nさらに部位の多い「" + menuData[best.sid].label + "」の方がお得にご案内可能ですが、セット価格に変更して予約を確定しますか？");
-        if(conf) { applyOptimalSet(); alert("セットに変更しました。再度「予約確定」を押してください。"); return; }
-    }
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
     if(!n||!tel||!em) return alert("必須項目をすべて入力してください");
     showLoading(true);
