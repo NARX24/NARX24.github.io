@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.49.3</title>
+<title>NARX プレミアム予約システム Ver.49.4</title>
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -72,7 +72,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
-/* AIコンシェルジュ */
+/* AIコンシェルジュ パネル */
 #suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:70%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 12px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
 .sug-benefit-msg{text-align:center;font-size:0.65rem;color:var(--gold);background:#111;padding:5px;border-radius:4px;font-weight:bold;margin-bottom:8px;letter-spacing:0.5px;}
@@ -104,7 +104,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon.off{background:#111;}
 .concierge-icon.off svg path, .concierge-icon.off svg circle { fill: var(--gold); }
 
-/* カレンダーUI */
+/* カレンダー */
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
 .cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
 .cal-outer-wrapper { height: calc(100% - 110px); overflow: auto; background: #333; }
@@ -226,18 +226,18 @@ var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var holidays2026 = ["2026/1/1", "2026/1/12", "2026/2/11", "2026/2/23", "2026/3/20", "2026/3/21", "2026/4/29", "2026/5/3", "2026/5/4", "2026/5/5", "2026/5/6", "2026/7/20", "2026/8/11", "2026/9/21", "2026/9/22", "2026/9/23", "2026/10/12", "2026/11/3", "2026/11/23"];
 
 // ==========================================
-// 2. 2026.04.01 改定メニューデータ (ビジュアル画像紐付け強化)
+// 2. 2026.04.01 改定メニューデータ (耳たぶ復活 & ビジュアル統合)
 // ==========================================
 var menuData = {
-    set_fullbody_all:{price:52800,time:240,label:'全身オールセット(全顔、VIO含む)',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'}},
-    set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット(顔なし、VIO含む)',cat:'set',imgs:{body:'set_fullbody_noface_body'}},
-    set_fullbody_novio:{price:41800,time:220,label:'VIOなし全身セット(VIOなし、顔含む)',cat:'set',imgs:{body:'set_fullbody_novio_body',face:'set_fullbody_novio_face'}},
-    set_upperbody:{price:30800,time:140,label:'上半身セット(顔含む)',cat:'set',imgs:{body:'set_upperbody_body',face:'set_upperbody_face'}},
-    set_lowerbody:{price:30800,time:150,label:'下半身セット(VIO含む)',cat:'set',imgs:{body:'set_lowerbody_body'}},
-    set_fullface_vio:{price:27500,time:105,label:'全顔+VIOセット',cat:'set',imgs:{body:'set_vio',face:'set_fullface'}},
     set_fullface_eyebrow:{price:24200,time:105,label:'全顔+眉毛セット',cat:'set',imgs:{face:'set_fullface_eyebrow_face'}},
     set_fullface:{price:13200,time:65,label:'全顔セット',cat:'set',imgs:{face:'set_fullface'}},
     set_eyebrow:{price:13200,time:40,label:'眉毛セット',cat:'set',imgs:{face:'set_eyebrow_face'}},
+    set_upperbody:{price:30800,time:140,label:'上半身セット(顔含む)',cat:'set',imgs:{body:'set_upperbody_body',face:'set_upperbody_face'}},
+    set_lowerbody:{price:30800,time:150,label:'下半身セット(VIO含む)',cat:'set',imgs:{body:'set_lowerbody_body'}},
+    set_fullbody_all:{price:52800,time:240,label:'全身オールセット(全顔、VIO含む)',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullbody_all_face'}},
+    set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット(顔なし、VIO含む)',cat:'set',imgs:{body:'set_fullbody_noface_body'}},
+    set_fullbody_novio:{price:41800,time:220,label:'VIOなし全身セット(VIOなし、顔含む)',cat:'set',imgs:{body:'set_fullbody_novio_body',face:'set_fullbody_novio_face'}},
+    set_fullface_vio:{price:27500,time:105,label:'全顔+VIOセット',cat:'set',imgs:{body:'set_vio',face:'set_fullface'}},
     set_vio:{price:16500,time:50,label:'VIOセット',cat:'set',imgs:{body:'set_vio'}},
     set_vio_buttocks:{price:20900,time:65,label:'VIO+臀部セット',cat:'set',imgs:{body:'set_vio'}},
     set_chest_abdomen:{price:11000,time:35,label:'胸＋腹部セット',cat:'set',imgs:{body:'set_chest_abdomen'}},
@@ -256,6 +256,7 @@ var menuData = {
     part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'}},
     part_eyebrow_lower:{price:6600,time:13,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'}},
     part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_tragus'}},
+    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'}},
     part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'}},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_wing'}},
     part_nape:{price:4400,time:10,label:'うなじ',cat:'part',subCat:'upper',imgs:{body:'part_nape'}},
@@ -290,20 +291,19 @@ var menuData = {
     opt_new_5:{price:1100,time:10,label:'ＳＶ（10分につき）',cat:'other'}
 };
 
-// 💡 包含関係（グレーアウト判定：Ver.49.3で全網羅）
 var setIncludes = {
+    set_fullface_eyebrow:['set_fullface','set_eyebrow'],
+    set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
+    set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
+    set_upperbody:['set_fullface','set_arms','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
+    set_lowerbody:['set_vio','set_legs','part_buttocks'],
     set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
     set_fullbody_noface:['set_lowerbody','set_vio','set_legs','set_arms','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
     set_fullbody_novio:['set_upperbody','set_fullface','set_arms','set_legs','part_nape','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
-    set_upperbody:['set_fullface','set_arms','part_armpit','part_chest_nipple','part_abdomen_navel','part_nape','part_back_upper','part_back_lower'],
-    set_lowerbody:['set_vio','set_legs','part_buttocks'],
     set_fullface_vio:['set_fullface','set_vio'],
-    set_fullface_eyebrow:['set_fullface','set_eyebrow'],
-    set_chest_abdomen:['part_chest_nipple','part_abdomen_navel'],
-    set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
-    set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
     set_vio_buttocks:['set_vio','part_buttocks'],
+    set_chest_abdomen:['part_chest_nipple','part_abdomen_navel'],
     set_arms_legs:['set_arms','set_legs'],
     set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
     set_legs:['part_knee_upper','part_knee_lower','part_foot_toe'],
@@ -397,11 +397,10 @@ function render() {
     var parts = document.querySelectorAll('.layer-part');
     for (var p = 0; p < parts.length; p++) { parts[p].classList.remove('active', 'suggest-blink'); }
     
-    // 💡 ビジュアル描画 (直接選択したアイテムの画像 + 葉ノードの画像)
     var currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var sid = selected[s], item = menuData[sid];
-        // セット自体の画像があれば点灯
+        // 💡 セット自体の画像があれば最優先で点灯
         if (item.imgs) {
             if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); }
             if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
@@ -410,7 +409,7 @@ function render() {
         for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
     }
     
-    // 葉ノード画像も念のため点灯
+    // 葉ノード（細かいパーツ）の点灯
     for (var cl = 0; cl < currentLeaves.length; cl++) {
         var leaf = menuData[currentLeaves[cl]];
         if (leaf.imgs) {
@@ -420,11 +419,6 @@ function render() {
     }
     
     if (suggestionId) {
-        var sugItem = menuData[suggestionId];
-        if (sugItem.imgs) {
-             if (sugItem.imgs.body) { var sb = document.getElementById("img-" + sugItem.imgs.body); if(sb && !sb.classList.contains('active')) sb.classList.add('suggest-blink'); }
-             if (sugItem.imgs.face) { var sf = document.getElementById("img-" + sugItem.imgs.face); if(sf && !sf.classList.contains('active')) sf.classList.add('suggest-blink'); }
-        }
         var sugLeaves = itemLeaves[suggestionId];
         for (var sl = 0; sl < sugLeaves.length; sl++) {
             var leafId = sugLeaves[sl];
@@ -482,16 +476,15 @@ function updateTotal() {
     }
     
     if (selected.length > 0) {
-        t += 10; // 前カウンセリング・会計
-        if (hasFaceCooling) t += 20; // お冷やし
+        t += 10;
+        if (hasFaceCooling) t += 20;
         if (userType === 'new') {
-            t += 90; // 無料カウンセリング
+            t += 90;
             document.getElementById('counseling-badge-area').innerHTML = '<span class="counseling-note">※無料カウンセリング込</span>';
         } else {
             document.getElementById('counseling-badge-area').innerHTML = '';
         }
     }
-    
     var roundedHours = Math.ceil(t / 30) * 0.5;
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
     document.getElementById('total-time-slot').innerText = roundedHours.toFixed(1) + " 時間";
@@ -523,7 +516,6 @@ function analyzeSuggestions(isManual) {
             if (intersectingItems.length < 2) continue;
             var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
             var wasDismissed = (dismissedSuggestions.indexOf(sid) !== -1);
-            // 💡 誠実ロジック：セットの方が安い、または同額なら拒否履歴を無視して再提案
             if (diff <= upsellLimit && (diff <= 0 || !wasDismissed)) return {sid:sid, type: (diff <= 0 ? 'cheaper' : 'upsell'), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
         }
     }
