@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.49.3</title>
+<title>NARX プレミアム予約システム Ver.49.4</title>
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -41,10 +41,10 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 }
 .layer-part.suggest-blink { animation: blink-gold 1.0s infinite ease-in-out; z-index: 3; display: block !important; }
 
-/* 既存客用案内ポップアップ */
+/* リピーター様案内ポップアップ */
 #repeat-guidance-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100002; display: none; justify-content: center; align-items: center; }
 .guidance-box { width: 85%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; text-align: left; }
-.guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 20px; }
+.guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
 .guidance-step { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid var(--gold); }
 .guidance-step b { color: var(--gold); font-size: 1rem; }
 
@@ -79,7 +79,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;margin-top:2px;}
 .price-tag-new { font-size: 0.65rem; background: #c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 
-/* AIコンシェルジュ パネル */
+/* AI提案パネル */
 #suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:70%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 12px;border-radius:12px;display:none;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
 .sug-benefit-msg{text-align:center;font-size:0.65rem;color:var(--gold);background:#111;padding:5px;border-radius:4px;font-weight:bold;margin-bottom:8px;letter-spacing:0.5px;}
@@ -267,6 +267,8 @@ var menuData = {
     set_arms_legs:{price:28600,time:125,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'}},
     set_arms:{price:15400,time:60,label:'両腕セット',cat:'set',imgs:{body:'set_arms'}},
     set_legs:{price:17600,time:60,label:'両足セット',cat:'set',imgs:{body:'set_legs'}},
+    
+    // パーツ
     part_nose_under:{price:4400,time:10,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'}},
     part_mouth_under:{price:4400,time:10,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'}},
     part_cheek:{price:4400,time:10,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'}},
@@ -298,6 +300,8 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'}},
     part_i_line:{price:7700,time:15,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'}},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'}},
+    
+    // その他・オプション
     other_lala_peel:{price:12100,time:90,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'}},
     other_face_correction:{price:22000,time:90,label:'小顔矯正術',cat:'other',imgs:{face:'other_face_correction'}},
     other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other'},
@@ -310,6 +314,7 @@ var menuData = {
     opt_new_5:{price:1100,time:10,label:'ＳＶ（10分につき）',cat:'other'}
 };
 
+// 💡 包含関係を再定義（Ver.49.4：重複選択防止のため全網羅）
 var setIncludes = {
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
@@ -330,30 +335,13 @@ var setIncludes = {
     part_abdomen_navel:['part_navel_under']
 };
 
-function getItemPrice(id) {
-    var item = menuData[id];
-    if (userType === 'new') {
-        var face5 = ['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'];
-        if (face5.indexOf(id) !== -1) return 1000;
-        if (id === 'set_fullface') return 5000;
-        return item.price * 0.5;
-    }
-    return item.price;
-}
-
-function getOriginalTotal(idList) {
-    var total = 0;
-    for (var i = 0; i < idList.length; i++) { total += getItemPrice(idList[i]); }
-    return total;
-}
-
 // ==========================================
 // 3. アプリ制御
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
     document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回限定価格モード適用中":"【会員様】通常価格モード適用中";
-    document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="handleReserveAction()">空き状況を確認して予約へ</button>';
+    document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="handleReserveAction()">予約を確認して次へ</button>';
     initApp(); render();
 }
 
@@ -461,6 +449,7 @@ function render() {
             if (item.cat !== currentTab) continue;
             if (currentTab === 'part' && item.subCat !== sub.id) continue;
             
+            // 💡 重複選択防止ロジック：葉ノードが1つでも重なっていたら無効化
             var isSel = selected.indexOf(id) !== -1, isDis = false;
             if (!isSel) {
                 var itemL = itemLeaves[id];
@@ -582,7 +571,7 @@ function handleReserveAction() {
     var best = analyzeSuggestions(true);
     if (best && (best.type === 'cheaper' || best.type === 'upsell')) {
         var conf = confirm("【最後にNARX中島からご確認です】\nさらに部位の多い「" + menuData[best.sid].label + "」の方がお得にご案内可能ですが、セット価格に変更して予約を確定しますか？");
-        if(conf) { applyOptimalSet(); alert("セットに変更しました。再度「予約確定」を押してください。"); return; }
+        if(conf) { applyOptimalSet(); alert("セットに変更しました。再度「次へ」を押してください。"); return; }
     }
 
     if (userType === 'new') {
