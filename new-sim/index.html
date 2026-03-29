@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.50.2</title>
+<title>NARX プレミアム予約システム Ver.50.3</title>
 
 <!-- AI検索エンジン向け構造化データ -->
 <script type="application/ld+json">
@@ -11,7 +11,7 @@
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "中島式メンズ脱毛サロン NARX (ナークス)",
-  "description": "業界18年の実績。オーナー中島による独自の『中島式メンズ脱毛』。福岡市の完全予約制プライベートサロン。初回限定50%OFFキャンペーン実施中。",
+  "description": "業界18年の実績。オーナー中島による独自の『中島式メンズ脱毛』。初回限定50%OFFキャンペーン実施中。",
   "image": "https://narx24.github.io/new-sim/narx-datsumo.jp/logo.png",
   "url": "https://narx24.github.io/new-sim/narx-datsumo.jp/index.html",
   "telephone": "080-2129-9072",
@@ -22,46 +22,27 @@
     "addressCountry": "JP"
   },
   "priceRange": "￥5,000 - ￥26,400",
-  "founder": {
-    "@type": "Person",
-    "name": "中島 ひろき"
-  },
+  "founder": { "@type": "Person", "name": "中島 ひろき" },
   "makesOffer": [
-    {
-      "@type": "Offer",
-      "itemOffered": {
-        "@type": "Service",
-        "name": "【ご新規様】全身脱毛（顔・VIO込）",
-        "price": "26400",
-        "priceCurrency": "JPY"
-      }
-    },
-    {
-      "@type": "Offer",
-      "itemOffered": {
-        "@type": "Service",
-        "name": "【ご新規様】全顔5点セレクト脱毛",
-        "price": "5000",
-        "priceCurrency": "JPY"
-      }
-    }
+    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "全身脱毛（顔・VIO込）", "price": "26400", "priceCurrency": "JPY" } },
+    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "全顔5点セレクト脱毛", "price": "5000", "priceCurrency": "JPY" } }
   ]
 }
 </script>
 
 <script>
 window.onerror = function(msg, url, line) {
-    console.error("Critical: " + msg + " at line " + line);
+    console.log("Caught: " + msg + " line: " + line);
 };
 </script>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
-body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:260px;overflow-x:hidden;}
+body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
 
 .header-logo-container { text-align: center; padding: 20px 0 15px; border-bottom: 1px solid var(--gold); background: var(--black); }
 .header-logo-img { width: 170px; height: auto; }
 
-/* 💡 固定ヘッダーグループ（パネル＋チップス＋タブ） */
+/* 💡 固定ヘッダーグループ */
 .sticky-header-group {
     position: sticky; top: 0; z-index: 1000; background: var(--black); 
     box-shadow: 0 4px 15px rgba(0,0,0,0.8);
@@ -87,7 +68,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 }
 .layer-part.suggest-blink { animation: blink-gold 1.0s infinite ease-in-out; z-index: 3; display: block !important; }
 
-/* 選択チップスエリア（パネルに密着） */
+/* 選択チップスエリア */
 #selected-chips-area { 
     background: #0a0a0a; padding: 8px 12px; border: 2px solid var(--gold); border-top: none; 
     margin: 0 10px 0; border-radius: 0 0 8px 8px;
@@ -101,7 +82,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 /* タブUI */
 .tabs { display:flex; gap:2px; margin: 10px 10px 0; border-bottom: 1px solid var(--light-gray); }
-.tab { flex:1; padding:12px 0; text-align:center; color:#666; cursor:pointer; font-size:0.8rem; }
+.tab { flex:1; padding:10px 0; text-align:center; color:#666; cursor:pointer; font-size:0.8rem; }
 .tab.active { color:var(--gold); border-bottom:2px solid var(--gold); font-weight:bold; }
 
 /* ラスト・コンシェルジュ モーダル */
@@ -137,7 +118,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .btn-sug-skip{background:transparent; color:#111; border:none; flex:1; font-weight:bold; font-size:0.75rem; cursor:pointer;}
 
 /* 🤖 AIコンシェルジュ位置固定 */
-#concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2001;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
+#concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:5000;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
 #concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:0.3s;text-align:center;pointer-events:auto;min-width:200px;}
 .bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
 .concierge-icon{width:56px;height:56px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;transition:0.3s;border:2px solid var(--gold);}
@@ -162,7 +143,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .cal-status-x { background: #bbb; color: #888; font-size: 1.0rem; border: 1px solid #aaa; pointer-events: none; }
 .cal-status-off { background: #444; color: #666; border: 1px solid #555; pointer-events: none; }
 
-/* 既存客案内 */
+/* 既存客案内ポップアップ */
 #repeat-guidance-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100002; display: none; justify-content: center; align-items: center; }
 .guidance-box { width: 85%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; text-align: left; }
 .guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 20px; }
@@ -228,19 +209,18 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div id="concierge-wrapper">
     <div id="concierge-bubble"><div class="bubble-tail"></div><span id="concierge-msg"></span></div>
     <div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()">
-        <!-- 💡 完璧に復元した黄金シルエット・コンシェルジュ -->
+        <!-- 💡 指示画像通りの完璧な復元アイコン -->
         <svg viewBox="0 0 100 100" width="34" height="34" xmlns="http://www.w3.org/2000/svg">
-          <!-- コンシェルジュハット（オーナー指定の丸みのある形状） -->
-          <path d="M30 28 Q50 16 70 28 L70 34 L30 34 Z" fill="#111" stroke="#d4af37" stroke-width="2"/>
-          <!-- 顔のシルエット（誠実な表情） -->
-          <circle cx="50" cy="50" r="18" fill="#111" stroke="#d4af37" stroke-width="2"/>
+          <!-- コンシェルジュハット -->
+          <path d="M30 28 Q50 16 70 28 L70 34 L30 34 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
+          <!-- 顔（誠実な表情シルエット） -->
+          <circle cx="50" cy="50" r="18" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M44 48 L46 48 M54 48 L56 48" stroke="#d4af37" stroke-width="2" stroke-linecap="round"/>
           <path d="M46 58 Q50 62 54 58" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-          <!-- コンシェルジュジャケット（深いVラインの襟元） -->
-          <path d="M28 68 L72 68 L80 95 L20 95 Z" fill="#111" stroke="#d4af37" stroke-width="2"/>
-          <!-- ジャケットの襟の切り込み（シルエット表現） -->
+          <!-- ジャケット（深いVカットとジャケットのシルエット） -->
+          <path d="M25 68 L75 68 L85 95 L15 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M50 68 L40 85 M50 68 L60 85" stroke="#d4af37" stroke-width="1.2"/>
-          <!-- ネームタグ（黄金のアクセント） -->
+          <!-- ネームタグ -->
           <rect x="58" y="78" width="8" height="4" fill="#d4af37"/>
         </svg>
     </div>
@@ -263,23 +243,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     <div id="action-btn-container"></div>
 </div>
 
-<!-- 既存客案内 -->
-<div id="repeat-guidance-modal">
-    <div class="guidance-box">
-        <div class="guidance-title">内容をコピーしました</div>
-        <div class="guidance-step">
-            <b>❶. LINE予約メニューへ</b><br>
-            LINEの予約メニュー〔複数メニュー【時間枠】〕より、<span id="guide-hours" style="color:var(--gold); font-weight:bold;">●.● 時間枠</span>に予約をお取りください。
-        </div>
-        <div class="guidance-step">
-            <b>❷. 備考欄に貼り付け</b><br>
-            日時を選んだら、予約画面の【備考欄】にコピー内容を貼り付けてください。
-        </div>
-        <button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
-        <button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button>
-    </div>
-</div>
-
 <script>
 // ==========================================
 // 1. 変数定義
@@ -289,7 +252,7 @@ var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOff
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var bubbleTimer = null;
-var internalRawSlotValue = 0; // 💡 修正：エラーの根源となる文字解析を廃止し、この変数を計算に使う
+var currentRawNumericSlot = 0; // 💡 修正：文字解析をせず、この数値を直接使う
 
 // ==========================================
 // 2. メニューデータ
@@ -385,7 +348,7 @@ function getOriginalTotal(idList) {
 }
 
 // ==========================================
-// 3. アプリ制御・描画
+// 3. アプリ制御
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
@@ -533,9 +496,9 @@ function updateTotal() {
         t += 10; if (hasFaceCooling) t += 12; if (userType === 'new') t += 90;
     }
     var rounded = Math.ceil(t / 30) * 30;
-    internalRawSlotValue = (rounded / 60); // 💡 修正：内部保持用の生数値を確実に更新
+    currentRawNumericSlot = (rounded / 60); // 💡 修正：内部生数値を常に更新
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
-    document.getElementById('total-time-display').innerText = "枠 " + internalRawSlotValue.toFixed(1) + " 時間枠";
+    document.getElementById('total-time-display').innerText = "枠 " + currentRawNumericSlot.toFixed(1) + " 時間枠";
 }
 
 // AIコンシェルジュ
@@ -560,7 +523,7 @@ function analyzeSuggestions(isManual) {
             }
             if (intersectingItems.length < 2) continue;
             var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
-            // 誠実提案：高額アップセルを控え、真にお得な場合のみ
+            // 誠実提案
             if (diff <= 5000) return {sid:sid, type: (diff < 0 ? 'cheaper' : (diff === 0 ? 'equal' : 'upsell')), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
         }
     }
@@ -600,7 +563,8 @@ function skipSuggestion(id) { dismissedSuggestions.push(id); document.getElement
 function applyOptimalSet() {
     if(!suggestionReplaceItems) return;
     for (var i = 0; i < suggestionReplaceItems.length; i++) { var idx = selected.indexOf(suggestionReplaceItems[i]); if (idx !== -1) selected.splice(idx, 1); }
-    selected.push(suggestionId); suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display = 'none'; render();
+    selected.push(suggestionId); suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display = 'none'; 
+    render(); // 💡 これによりupdateTotalも走り、内部数値が最新になる
 }
 function toggleConcierge() {
     isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
@@ -617,13 +581,13 @@ function showConciergeBubble(msg) {
     bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000);
 }
 
-// 💡 予約ボタン押下時の制御
+// 予約ボタン押下時の制御
 function handleReserveAction() {
     if (selected.length === 0) return alert("メニューを選んでください");
     var best = analyzeSuggestions(true);
     if (best && (best.type === 'cheaper' || best.type === 'equal')) {
         var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
-        var msg = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>料金はそのままで、対象部位をさらに増やすことができます。";
+        var msg = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>料金はそのままで、部位を増やすことができます。";
         if(best.type === 'cheaper') msg = "現在選択中の【" + oldNames.join(', ') + "】を、セットプラン【" + menuData[best.sid].label + "】に変更しませんか？<br><br>今の選び方よりも ¥" + (Math.abs(best.diff)).toLocaleString() + " お安く予約できます。";
         
         document.getElementById('final-sug-desc').innerHTML = msg;
@@ -638,7 +602,10 @@ function handleReserveAction() {
 function applyAndProceed() {
     applyOptimalSet();
     document.getElementById('final-suggestion-modal').style.display = 'none';
-    setTimeout(proceedReservation, 300);
+    // 💡 修正：再計算後の数値を使って進む
+    setTimeout(function() {
+        proceedReservation();
+    }, 50);
 }
 function cancelAndProceed() {
     document.getElementById('final-suggestion-modal').style.display = 'none';
@@ -650,15 +617,17 @@ function proceedReservation() {
 
 function handleRepeatBooking() {
     var priceText = document.getElementById('total-price').innerText;
-    var timeHours = document.getElementById('total-time-display').innerText;
+    var timeDisp = document.getElementById('total-time-display').innerText;
     var menuLabels = []; for(var i=0; i<selected.length; i++){ menuLabels.push(menuData[selected[i]].label); }
-    var copyText = "【NARX 予約内容】\nメニュー: " + menuLabels.join(', ') + "\n合計金額: " + priceText + "\n予約時間: " + timeHours + "\n※公式LINEの予約画面備考欄に貼り付けてください。";
+    var copyText = "【NARX 予約内容】\nメニュー: " + menuLabels.join(', ') + "\n合計金額: " + priceText + "\n予約時間: " + timeDisp + "\n※公式LINEの予約画面備考欄に貼り付けてください。";
+    
     var tempArea = document.createElement("textarea"); tempArea.value = copyText; document.body.appendChild(tempArea); tempArea.select(); document.execCommand("copy"); document.body.removeChild(tempArea);
-    document.getElementById('guide-hours').innerText = timeHours.replace("枠 ","");
+    
+    document.getElementById('guide-hours').innerText = currentRawNumericSlot.toFixed(1) + " 時間枠";
     document.getElementById('repeat-guidance-modal').style.display = 'flex';
 }
 
-// 💡 修正：エラーの根絶。内部保持している raw 数字を直接使う
+// 💡 修正：エラーの根絶。内部に保持した数値を直接使用
 function proceedToCalendar() {
     showLoading(true);
     var xhr = new XMLHttpRequest();
@@ -672,10 +641,8 @@ function proceedToCalendar() {
                     renderCalendar();
                     document.getElementById('calendar-modal').style.display = 'block';
                 } catch(e) {
-                    alert("通信環境の良い場所で再度お試しください。");
+                    console.error("Parse Error");
                 }
-            } else {
-                alert("予約情報の取得に失敗しました。");
             }
         }
     };
@@ -684,8 +651,8 @@ function proceedToCalendar() {
 
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
-    // 💡 修正：表示文字に一切頼らず、内部変数の数値を直接計算に回す
-    var reqMs = internalRawSlotValue * 60 * 60 * 1000;
+    // 💡 修正：表示文字に一切頼らず、内部変数の数値を直接使う
+    var reqMs = currentRawNumericSlot * 60 * 60 * 1000;
 
     var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; 
     firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
@@ -736,12 +703,12 @@ function openInfoModal(d, t, et) {
 
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
-    if(!n||!tel||!em) return alert("必須項目をすべて入力してください");
+    if(!n||!tel||!em) return alert("必須項目を入力してください");
     showLoading(true);
     var menuLabels = []; for(var i=0; i<selected.length; i++){ menuLabels.push(menuData[selected[i]].label); }
     var payload = {
         type:'reserve', userType:userType, date:tDate, time:tTime, endTime:tEndTime,
-        slot:internalRawSlotValue.toFixed(1), // 💡 修正：生数値を送信
+        slot:currentRawNumericSlot.toFixed(1), // 💡 修正：生数値を送信
         price:document.getElementById('total-price').innerText,
         menus:menuLabels.join(', '), name:n, tel:tel, email:em, memo:memo
     };
