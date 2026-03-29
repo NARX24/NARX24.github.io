@@ -227,7 +227,7 @@ var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOff
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var bubbleTimer = null;
-var internalSlotNum = 0; // 💡 これが「生きた数字」。表示文字を読まずにこれを計算に使う。
+var internalNumericSlot = 0; // 💡 修正の要：計算用の「生数字」を保持する
 
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
@@ -287,11 +287,11 @@ var setIncludes = {
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
-    set_upperbody:['set_fullface','set_arms','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
+    set_upperbody:['set_fullface','set_arms','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower'],
     set_lowerbody:['set_vio','set_legs','part_buttocks'],
-    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
-    set_fullbody_noface:['set_lowerbody','set_vio','set_legs','set_arms','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
-    set_fullbody_novio:['set_upperbody','set_fullface','set_arms','set_legs','part_nape','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
+    set_fullbody_all:['set_fullbody_noface','set_fullbody_novio','set_upperbody','set_lowerbody','set_fullface','set_vio','set_arms','set_legs','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
+    set_fullbody_noface:['set_lowerbody','set_vio','set_legs','set_arms','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower','part_buttocks'],
+    set_fullbody_novio:['set_upperbody','set_fullface','set_arms','set_legs','part_nape','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower'],
     set_fullface_vio:['set_fullface','set_vio'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
     set_vio_buttocks:['set_vio','part_buttocks'],
@@ -464,9 +464,9 @@ function updateTotal() {
         t += 10; if (hasFaceCooling) t += 12; if (userType === 'new') t += 90;
     }
     var rounded = Math.ceil(t / 30) * 30;
-    internalSlotNum = (rounded / 60); // 💡 これが計算用の生数値
+    internalNumericSlot = (rounded / 60); // 💡 これが計算用の生数値
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
-    document.getElementById('total-time-display').innerText = "枠 " + internalSlotNum.toFixed(1) + " 時間枠";
+    document.getElementById('total-time-display').innerText = "枠 " + internalNumericSlot.toFixed(1) + " 時間枠";
 }
 
 function analyzeSuggestions(isManual) {
@@ -518,7 +518,7 @@ function applyOptimalSet() {
     if(!suggestionReplaceItems) return;
     for (var i = 0; i < suggestionReplaceItems.length; i++) { var idx = selected.indexOf(suggestionReplaceItems[i]); if (idx !== -1) selected.splice(idx, 1); }
     selected.push(suggestionId); suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display = 'none';
-    render(); // 💡 再計算を確実に実行
+    render(); // updateを走らせる
 }
 function toggleConcierge() {
     isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
@@ -539,20 +539,19 @@ function handleReserveAction() {
         var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
         var msg = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>料金はそのままで、部位を増やすことができます。";
         if(best.type === 'cheaper') msg = "現在選択中の【" + oldNames.join(', ') + "】を、セットプラン【" + menuData[best.sid].label + "】に変更しませんか？<br><br>今の選び方よりも ¥" + (Math.abs(best.diff)).toLocaleString() + " お安く予約できます。";
+        document.getElementById('final-suggestion-modal').style.display = 'flex';
         document.getElementById('final-sug-desc').innerHTML = msg;
         document.getElementById('final-old-price').innerText = "¥" + getOriginalTotal(selected).toLocaleString();
         document.getElementById('final-new-price').innerText = "¥" + (getOriginalTotal(selected) + best.diff).toLocaleString();
-        document.getElementById('final-suggestion-modal').style.display = 'flex';
         return;
     }
     proceedReservation();
 }
 
 function applyAndProceed() {
-    applyOptimalSet(); // セットに変更して再計算
+    applyOptimalSet(); 
     document.getElementById('final-suggestion-modal').style.display = 'none';
-    // 💡 修正：再計算（updateTotal）が完了した直後のタイミングで進む
-    setTimeout(function(){ proceedReservation(); }, 50);
+    setTimeout(function(){ proceedReservation(); }, 100);
 }
 function cancelAndProceed() {
     document.getElementById('final-suggestion-modal').style.display = 'none';
@@ -568,24 +567,23 @@ function handleRepeatBooking() {
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + p + "\n予約時間: " + t + "\n※公式LINEの予約画面備考欄に貼り付けてください。";
     var tmp = document.createElement("textarea"); tmp.value = txt; document.body.appendChild(tmp); tmp.select(); document.execCommand("copy"); document.body.removeChild(tmp);
-    document.getElementById('guide-hours').innerText = internalSlotNum.toFixed(1) + " 時間枠";
+    document.getElementById('guide-hours').innerText = internalNumericSlot.toFixed(1) + " 時間枠";
     document.getElementById('repeat-guidance-modal').style.display = 'flex';
 }
 
-// 💡 修正：カレンダーエラーの永久根絶。表示文字は一切読まず「生数値」で計算
 function proceedToCalendar() {
-    showLoading(true);
+    document.getElementById('loading-overlay').style.display = 'flex';
     var xhr = new XMLHttpRequest();
     xhr.open("POST", GAS_URL, true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
-            showLoading(false);
+            document.getElementById('loading-overlay').style.display = 'none';
             if (xhr.status === 200) {
                 try {
                     busySlots = JSON.parse(xhr.responseText);
                     renderCalendar();
                     document.getElementById('calendar-modal').style.display = 'block';
-                } catch(e) { console.error("Parse error"); }
+                } catch(e) { console.log("error parse"); }
             }
         }
     };
@@ -594,9 +592,8 @@ function proceedToCalendar() {
 
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
-    // 💡 修正：UIテキストから抽出せず、内部変数を直接使用。これで絶対に狂いません。
-    var reqMs = internalSlotNum * 60 * 60 * 1000;
-
+    // 💡 修正：内部変数の数値を直接使う
+    var reqMs = internalNumericSlot * 60 * 60 * 1000;
     var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; 
     firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
     document.getElementById('cal-title').innerText = (firstDay.getMonth()+1)+"/"+firstDay.getDate() + "の週";
@@ -647,23 +644,23 @@ function openInfoModal(d, t, et) {
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
     if(!n||!tel||!em) return alert("必須項目を入力してください");
-    showLoading(true);
+    document.getElementById('loading-overlay').style.display = 'flex';
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = {
         type:'reserve', userType:userType, date:tDate, time:tTime, endTime:tEndTime,
-        slot:internalSlotNum.toFixed(1), // 💡 修正：生数値を送信
+        slot:internalNumericSlot.toFixed(1), 
         price:document.getElementById('total-price').innerText,
         menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo
     };
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){
-        showLoading(false); alert("ご予約ありがとうございます！\n確定メールを送信いたしました。"); location.reload();
+        document.getElementById('loading-overlay').style.display = 'none';
+        alert("ご予約ありがとうございます！\n確定メールを送信いたしました。"); location.reload();
     }};
     xhr.send(JSON.stringify(payload));
 }
 
 function changeWeek(n) { weekOffset += n; renderCalendar(); }
-function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
 function closeCalendarModal(){ document.getElementById('calendar-modal').style.display='none'; weekOffset=0; }
 </script>
 </body>
