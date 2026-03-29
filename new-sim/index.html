@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.51.1</title>
+<title>NARX プレミアム予約システム Ver.51.2</title>
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "中島式メンズ脱毛サロン NARX (ナークス)",
-  "description": "業界18年の実績。オーナー中島による独自の『中島式メンズ脱毛』。初回限定50%OFFキャンペーン実施中。",
+  "description": "業界18年の実績。オーナー中島による独自の『中島式メンズ脱毛』。福岡市の完全予約制プライベートサロン。初回限定50%OFFキャンペーン実施中。",
   "image": "https://narx24.github.io/new-sim/narx-datsumo.jp/logo.png",
   "url": "https://narx24.github.io/new-sim/narx-datsumo.jp/index.html",
   "telephone": "080-2129-9072",
@@ -168,7 +168,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
           <circle cx="50" cy="50" r="18" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M44 48 L46 48 M54 48 L56 48" stroke="#d4af37" stroke-width="2" stroke-linecap="round"/>
           <path d="M46 58 Q50 62 54 58" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-          <path d="M25 68 L72 68 L80 95 L20 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
+          <path d="M25 68 L75 68 L85 95 L15 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M50 68 L40 85 M50 68 L60 85" stroke="#d4af37" stroke-width="1.2"/>
           <rect x="58" y="78" width="8" height="4" fill="#d4af37"/>
         </svg>
@@ -209,13 +209,15 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 💡 全ての変数を確実に定義
+// ==========================================
+// 💡 全ての変数を冒頭に集約
+// ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbzEOzq81mhZCSy4zJyeQ6ObRMimRdNYLlnG7Jz-nAT9VrJ7vtcw7aQto0H-pmf92xMT/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var bubbleTimer = null;
-var internalNumericSlot = 0; // 生数字
+var internalNumericSlot = 0; // 💡 これを計算の柱とする（文字は一切読まない）
 
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
@@ -310,6 +312,15 @@ function initApp() {
             if (item.imgs.face) createImg(fPanel, item.imgs.face);
         }
     }
+}
+
+function createImg(parent, name) {
+    var layerId = "img-" + name;
+    if (document.getElementById(layerId)) return;
+    var img = document.createElement('img');
+    img.src = name + ".png"; img.id = layerId; img.className = 'layer-part';
+    img.onerror = function() { this.style.display = 'none'; };
+    parent.appendChild(img);
 }
 
 function changeTab(t){ currentTab=t; render(); }
@@ -457,10 +468,7 @@ function applyOptimalSet() {
 function toggleConcierge() {
     isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
     if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); } 
-    else { 
-        icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。お気軽にお呼びくださいね！");
-        document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); 
-    }
+    else { icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。お気軽にお呼びくださいね！"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); }
 }
 function showConciergeBubble(msg) {
     var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg;
@@ -488,7 +496,7 @@ function handleReserveAction() {
 function applyAndProceed() {
     applyOptimalSet(); 
     document.getElementById('final-suggestion-modal').style.display = 'none';
-    setTimeout(function(){ proceedReservation(); }, 100);
+    setTimeout(function(){ proceedReservation(); }, 150);
 }
 function cancelAndProceed() {
     document.getElementById('final-suggestion-modal').style.display = 'none';
@@ -529,7 +537,7 @@ function proceedToCalendar() {
 
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
-    // 💡 UIの文字を読まずに internalNumericSlot（生数値）を直接使う。これで絶対に壊れません。
+    // 💡 UIの文字を読まずに internalNumericSlot（生数値）を直接使う
     var reqMs = internalNumericSlot * 60 * 60 * 1000;
     var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; 
     firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
@@ -583,7 +591,7 @@ function submitReservation() {
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = {
         type:'reserve', userType:userType, date:tDate, time:tTime, endTime:tEndTime,
-        slot:internalNumericSlot.toFixed(1), 
+        slot:internalNumericSlot.toFixed(1), // 💡 修正：間違っていた名称を internalNumericSlot に統一
         price:document.getElementById('total-price').innerText,
         menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo
     };
