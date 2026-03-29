@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.51.3</title>
+<title>NARX プレミアム予約システム Ver.51.4</title>
 
 <script type="application/ld+json">
 {
@@ -46,7 +46,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .chip { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 3px 8px; border-radius: 20px; font-size: 0.65rem; display: inline-flex; align-items: center; gap: 4px; }
 .chip-close { background: var(--gold); color: #000; border-radius: 50%; width: 12px; height: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 0.5rem; font-weight: bold; cursor: pointer; }
 .tabs { display:flex; gap:2px; margin: 10px 10px 0; border-bottom: 1px solid var(--light-gray); }
-.tab { flex:1; padding:10px 0; text-align:center; color:#666; cursor:pointer; font-size:0.8rem; }
+.tab { flex:1; padding:10px 0; text-align:center; color:#666; cursor:pointer; font-size:0.85rem; }
 .tab.active { color:var(--gold); border-bottom:2px solid var(--gold); font-weight:bold; }
 #final-suggestion-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 100003; display: none; justify-content: center; align-items: center; }
 .final-sug-box { width: 90%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; color: #fff; box-shadow: 0 10px 50px rgba(0,0,0,1); }
@@ -158,7 +158,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
           <circle cx="50" cy="50" r="18" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M44 48 L46 48 M54 48 L56 48" stroke="#d4af37" stroke-width="2" stroke-linecap="round"/>
           <path d="M46 58 Q50 62 54 58" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-          <path d="M25 68 L72 68 L80 95 L20 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
+          <path d="M25 68 L75 68 L85 95 L15 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M50 68 L40 85 M50 68 L60 85" stroke="#d4af37" stroke-width="1.2"/>
           <rect x="58" y="78" width="8" height="4" fill="#d4af37"/>
         </svg>
@@ -183,13 +183,15 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
-// 💡 全ての変数をここへ確実に配置（エラー根絶の核心）
+// ==========================================
+// 💡 全ての変数を冒頭に集約
+// ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbzEOzq81mhZCSy4zJyeQ6ObRMimRdNYLlnG7Jz-nAT9VrJ7vtcw7aQto0H-pmf92xMT/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var bubbleTimer = null;
-var internalNumericSlot = 0; // 生数字
+var internalNumericSlot = 0;
 
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
@@ -265,110 +267,10 @@ var setIncludes = {
     part_abdomen_navel:['part_navel_under']
 };
 
-function initApp() {
-    function getLeafNodes(id) {
-        var leaves = [];
-        function traverse(nodeId) {
-            if (setIncludes[nodeId]) { for (var i = 0; i < setIncludes[nodeId].length; i++) { traverse(setIncludes[nodeId][i]); } } 
-            else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); }
-        }
-        traverse(id); return leaves;
-    }
-    var keys = Object.keys(menuData);
-    for (var i = 0; i < keys.length; i++) { itemLeaves[keys[i]] = getLeafNodes(keys[i]); }
-    var bPanel = document.getElementById('body-panel'), fPanel = document.getElementById('face-panel');
-    for (var j = 0; j < keys.length; j++) {
-        var item = menuData[keys[j]];
-        if (item.imgs) {
-            if (item.imgs.body) createImg(bPanel, item.imgs.body);
-            if (item.imgs.face) createImg(fPanel, item.imgs.face);
-        }
-    }
-}
-
-function createImg(parent, name) {
-    var layerId = "img-" + name;
-    if (document.getElementById(layerId)) return;
-    var img = document.createElement('img');
-    img.src = name + ".png"; img.id = layerId; img.className = 'layer-part';
-    img.onerror = function() { this.style.display = 'none'; };
-    parent.appendChild(img);
-}
-
-function changeTab(t){ currentTab=t; render(); }
-function resetSelection(){ selected = []; suggestionId = null; suggestionReplaceItems = []; dismissedSuggestions = []; document.getElementById('suggestion-box').style.display='none'; render(); }
-function toggleItem(id){ 
-    document.getElementById('suggestion-box').style.display='none'; 
-    var idx=selected.indexOf(id); if(idx!==-1)selected.splice(idx,1); else selected.push(id); 
-    checkSuggestion(false); render(); 
-}
-
-function render() {
-    var area = document.getElementById('menu-area'); area.innerHTML='';
-    var tabs = document.querySelectorAll('.tab');
-    for (var t = 0; t < tabs.length; t++) { tabs[t].classList.remove('active'); }
-    document.getElementById("tab-" + currentTab).classList.add('active');
-
-    var chipsArea = document.getElementById('selected-chips-area'), container = document.getElementById('chips-container');
-    if (selected.length === 0) { container.innerHTML = '<span style="color:#444; font-size:0.65rem;">部位を選択してください</span>'; } 
-    else {
-        container.innerHTML = '';
-        for (var i = 0; i < selected.length; i++) {
-            var chip = document.createElement('div'); chip.className = 'chip';
-            chip.innerHTML = '<span>' + menuData[selected[i]].label + '</span><span class="chip-close" onclick="event.stopPropagation(); toggleItem(\'' + selected[i] + '\')">×</span>';
-            container.appendChild(chip);
-        }
-    }
-
-    var parts = document.querySelectorAll('.layer-part');
-    for (var p = 0; p < parts.length; p++) { parts[p].classList.remove('active', 'suggest-blink'); }
-    
-    var currentLeaves = [];
-    for (var s = 0; s < selected.length; s++) {
-        var sid = selected[s], item = menuData[sid];
-        if (item.imgs) {
-            if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); }
-            if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); }
-        }
-        var lNodes = itemLeaves[sid];
-        for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
-    }
-    for (var cl = 0; cl < currentLeaves.length; cl++) {
-        var leaf = menuData[currentLeaves[cl]];
-        if (leaf.imgs) {
-            if (leaf.imgs.body) { var lb = document.getElementById("img-" + leaf.imgs.body); if(lb) lb.classList.add('active'); }
-            if (leaf.imgs.face) { var lf = document.getElementById("img-" + leaf.imgs.face); if(lf) lf.classList.add('active'); }
-        }
-    }
-    
-    if (suggestionId) {
-        var sugItem = menuData[suggestionId], sugLeaves = itemLeaves[suggestionId];
-        if (sugItem.imgs) {
-             if (sugItem.imgs.body) { var sb = document.getElementById("img-" + sugItem.imgs.body); if(sb) sb.classList.add('suggest-blink'); }
-             if (sugItem.imgs.face) { var sf = document.getElementById("img-" + sugItem.imgs.face); if(sf) sf.classList.add('suggest-blink'); }
-        }
-    }
-
-    var keys = Object.keys(menuData);
-    for (var m = 0; m < keys.length; m++) {
-        var id = keys[m], item = menuData[id];
-        if (item.cat !== currentTab) continue;
-        var isSel = selected.indexOf(id) !== -1, isDis = false;
-        if (!isSel) {
-            var itemL = itemLeaves[id];
-            for (var l = 0; l < itemL.length; l++) { if (currentLeaves.indexOf(itemL[l]) !== -1) { isDis = true; break; } }
-        }
-        var div = document.createElement('div');
-        div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
-        (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
-        var price = getItemPrice(id);
-        div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '>' +
-                        '<div class="item-info"><span class="item-name">' + item.label + '</span></div>' +
-                        '<div class="item-price">¥' + price.toLocaleString() + '</div>';
-        area.appendChild(div);
-    }
-    updateTotal();
-}
+// 💡 重要な全関数群
+function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
+function closeCalendarModal(){ document.getElementById('calendar-modal').style.display='none'; weekOffset=0; }
+function changeWeek(n) { weekOffset += n; renderCalendar(); }
 
 function updateTotal() {
     var p = 0, t = 0, hasFaceCooling = false;
@@ -386,81 +288,15 @@ function updateTotal() {
     document.getElementById('total-time-display').innerText = "枠 " + internalNumericSlot.toFixed(1) + " 時間枠";
 }
 
-function analyzeSuggestions(isManual) {
-    if (!isConciergeON && !isManual) return null;
-    var keys = Object.keys(menuData), currentTotal = getOriginalTotal(selected), currentLeaves = [];
-    for (var s = 0; s < selected.length; s++) {
-        var lNodes = itemLeaves[selected[s]];
-        for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
-    }
-    for (var i = 0; i < keys.length; i++) {
-        var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
-        var candLeaves = itemLeaves[sid], foundLeafCount = 0;
-        for (var l = 0; l < candLeaves.length; l++) { if (currentLeaves.indexOf(candLeaves[l]) !== -1) foundLeafCount++; }
-        if (foundLeafCount >= 2) {
-            var intersectingItems = [];
-            for(var j=0; j<selected.length; j++) {
-                var selId = selected[j], selLeaves = itemLeaves[selId], isInc = true;
-                for(var k=0; k<selLeaves.length; k++){ if(candLeaves.indexOf(selLeaves[k]) === -1) isInc=false; }
-                if(isInc) intersectingItems.push(selId);
-            }
-            if (intersectingItems.length < 2) continue;
-            var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
-            if (diff <= 5000) return {sid:sid, type: (diff < 0 ? 'cheaper' : (diff === 0 ? 'equal' : 'upsell')), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
-        }
-    }
-    return null;
-}
-
-function checkSuggestion(isManual) {
-    document.getElementById('suggestion-box').style.display = 'none';
-    var best = analyzeSuggestions(isManual);
-    if (!best) { suggestionId = null; return; }
-    suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
-    var currentTotal = getOriginalTotal(selected), setItem = menuData[best.sid], newTotal = currentTotal - best.oldPrice + getItemPrice(best.sid);
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div>';
-    if (best.type === 'equal') { html += '<div class="sug-benefit-msg">同じ金額で、さらに部位を増やせます！</div>'; showConciergeBubble("同額でもっとお得になる選び方があります！"); } 
-    else if (best.type === 'cheaper') { html += '<div class="sug-benefit-msg">セットの方がお安くなります！</div>'; showConciergeBubble("お安くなる組み合わせを見つけましたよ！"); } 
-    else { html += '<div class="sug-benefit-msg">最適なプランをご提案します！</div>'; showConciergeBubble("こちらのセットもおすすめですよ！"); }
-    html += '<div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">追加</span><span class="sug-add-price">' + (best.diff > 0 ? '+¥'+best.diff.toLocaleString() : '±¥0') + '</span></div><div class="sug-col"><span class="sug-col-label">合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div>';
-    html += '<div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
-    document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block';
-    render(); 
-}
-
-function skipSuggestion(id) { dismissedSuggestions.push(id); document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
 function applyOptimalSet() {
     if(!suggestionReplaceItems) return;
     for (var i = 0; i < suggestionReplaceItems.length; i++) { var idx = selected.indexOf(suggestionReplaceItems[i]); if (idx !== -1) selected.splice(idx, 1); }
     selected.push(suggestionId); suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display = 'none';
     render(); 
 }
-function toggleConcierge() {
-    isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
-    if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); } 
-    else { icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。お気軽にお呼びくださいね！"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); }
-}
-function showConciergeBubble(msg) {
-    var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg;
-    b.style.display = 'block'; b.style.opacity = '1';
-    if (bubbleTimer) clearTimeout(bubbleTimer);
-    bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000);
-}
 
-function handleReserveAction() {
-    if (selected.length === 0) return alert("メニューを選んでください");
-    var best = analyzeSuggestions(true);
-    if (best && (best.type === 'cheaper' || best.type === 'equal')) {
-        var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
-        var msg = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>料金はそのままで、部位を増やすことができます。";
-        if(best.type === 'cheaper') msg = "現在選択中の【" + oldNames.join(', ') + "】を、セットプラン【" + menuData[best.sid].label + "】に変更しませんか？<br><br>今の選び方よりも ¥" + (Math.abs(best.diff)).toLocaleString() + " お安く予約できます。";
-        document.getElementById('final-suggestion-modal').style.display = 'flex';
-        document.getElementById('final-sug-desc').innerHTML = msg;
-        document.getElementById('final-old-price').innerText = "¥" + getOriginalTotal(selected).toLocaleString();
-        document.getElementById('final-new-price').innerText = "¥" + (getOriginalTotal(selected) + best.diff).toLocaleString();
-        return;
-    }
-    proceedReservation();
+function proceedReservation() {
+    if (userType === 'new') { proceedToCalendar(); } else { handleRepeatBooking(); }
 }
 
 function applyAndProceed() {
@@ -468,37 +304,25 @@ function applyAndProceed() {
     document.getElementById('final-suggestion-modal').style.display = 'none';
     setTimeout(function(){ proceedReservation(); }, 150);
 }
+
 function cancelAndProceed() {
     document.getElementById('final-suggestion-modal').style.display = 'none';
     proceedReservation();
 }
-function proceedReservation() {
-    if (userType === 'new') { proceedToCalendar(); } else { handleRepeatBooking(); }
-}
-
-function handleRepeatBooking() {
-    var p = document.getElementById('total-price').innerText;
-    var t = document.getElementById('total-time-display').innerText;
-    var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
-    var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + p + "\n予約時間: " + t + "\n※公式LINEの予約画面備考欄に貼り付けてください。";
-    var tmp = document.createElement("textarea"); tmp.value = txt; document.body.appendChild(tmp); tmp.select(); document.execCommand("copy"); document.body.removeChild(tmp);
-    document.getElementById('guide-hours').innerText = internalNumericSlot.toFixed(1) + " 時間枠";
-    document.getElementById('repeat-guidance-modal').style.display = 'flex';
-}
 
 function proceedToCalendar() {
-    document.getElementById('loading-overlay').style.display = 'flex';
+    showLoading(true);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", GAS_URL, true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
-            document.getElementById('loading-overlay').style.display = 'none';
+            showLoading(false);
             if (xhr.status === 200) {
                 try {
                     busySlots = JSON.parse(xhr.responseText);
                     renderCalendar();
                     document.getElementById('calendar-modal').style.display = 'block';
-                } catch(e) { alert("予約情報の取得でエラーが発生しました。"); }
+                } catch(e) { alert("カレンダーの読み込みに失敗しました。"); }
             }
         }
     };
@@ -507,7 +331,7 @@ function proceedToCalendar() {
 
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
-    var reqMs = internalNumericSlot * 60 * 60 * 1000; // 💡 修正：内部生数値を直接使う
+    var reqMs = internalNumericSlot * 60 * 60 * 1000;
     var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; 
     firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
     document.getElementById('cal-title').innerText = (firstDay.getMonth()+1)+"/"+firstDay.getDate() + "の週";
@@ -556,24 +380,76 @@ function openInfoModal(d, t, et) {
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
     if(!n||!tel||!em) return alert("必須項目を入力してください");
-    document.getElementById('loading-overlay').style.display = 'flex';
+    showLoading(true);
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = {
         type:'reserve', userType:userType, date:tDate, time:tTime, endTime:tEndTime,
-        slot:internalNumericSlot.toFixed(1), // 💡 修正：名称を確実に統一
+        slot:internalNumericSlot.toFixed(1), 
         price:document.getElementById('total-price').innerText,
         menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo
     };
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){
-        document.getElementById('loading-overlay').style.display = 'none';
-        alert("ご予約ありがとうございます！\n確定メールを送信いたしました。"); location.reload();
+        showLoading(false); alert("ご予約ありがとうございます！\n確定メールを送信いたしました。"); location.reload();
     }};
     xhr.send(JSON.stringify(payload));
 }
 
-function changeWeek(n) { weekOffset += n; renderCalendar(); }
-function closeCalendarModal(){ document.getElementById('calendar-modal').style.display='none'; weekOffset=0; }
+function handleRepeatBooking() {
+    var p = document.getElementById('total-price').innerText;
+    var t = document.getElementById('total-time-display').innerText;
+    var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
+    var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + p + "\n予約時間: " + t + "\n※公式LINEの予約画面備考欄に貼り付けてください。";
+    var tmp = document.createElement("textarea"); tmp.value = txt; document.body.appendChild(tmp); tmp.select(); document.execCommand("copy"); document.body.removeChild(tmp);
+    document.getElementById('guide-hours').innerText = internalNumericSlot.toFixed(1) + " 時間枠";
+    document.getElementById('repeat-guidance-modal').style.display = 'flex';
+}
+
+function toggleConcierge() {
+    isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
+    if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); } 
+    else { icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。お気軽にお呼びくださいね！"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); }
+}
+
+function showConciergeBubble(msg) {
+    var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg;
+    b.style.display = 'block'; b.style.opacity = '1';
+    if (bubbleTimer) clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000);
+}
+
+function checkSuggestion(isManual) {
+    document.getElementById('suggestion-box').style.display = 'none';
+    var best = analyzeSuggestions(isManual);
+    if (!best) { suggestionId = null; return; }
+    suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
+    var currentTotal = getOriginalTotal(selected), setItem = menuData[best.sid], newTotal = currentTotal - best.oldPrice + getItemPrice(best.sid);
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div>';
+    if (best.type === 'equal') { html += '<div class="sug-benefit-msg">同じ金額で、さらに部位を増やせます！</div>'; showConciergeBubble("同額でもっとお得になる選び方があります！"); } 
+    else if (best.type === 'cheaper') { html += '<div class="sug-benefit-msg">セットの方がお安くなります！</div>'; showConciergeBubble("お安くなる組み合わせを見つけましたよ！"); } 
+    else { html += '<div class="sug-benefit-msg">最適なプランをご提案します！</div>'; showConciergeBubble("こちらのセットもおすすめですよ！"); }
+    html += '<div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">追加</span><span class="sug-add-price">' + (best.diff > 0 ? '+¥'+best.diff.toLocaleString() : '±¥0') + '</span></div><div class="sug-col"><span class="sug-col-label">合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div>';
+    html += '<div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
+    document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block';
+    render(); 
+}
+
+function handleReserveAction() {
+    if (selected.length === 0) return alert("メニューを選んでください");
+    var best = analyzeSuggestions(true);
+    if (best && (best.type === 'cheaper' || best.type === 'equal')) {
+        var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
+        var msg = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>料金はそのままで、部位を増やすことができます。";
+        if(best.type === 'cheaper') msg = "現在選択中の【" + oldNames.join(', ') + "】を、セットプラン【" + menuData[best.sid].label + "】に変更しませんか？<br><br>今の選び方よりも ¥" + (Math.abs(best.diff)).toLocaleString() + " お安く予約できます。";
+        document.getElementById('final-suggestion-modal').style.display = 'flex';
+        document.getElementById('final-sug-desc').innerHTML = msg;
+        document.getElementById('final-old-price').innerText = "¥" + getOriginalTotal(selected).toLocaleString();
+        document.getElementById('final-new-price').innerText = "¥" + (getOriginalTotal(selected) + best.diff).toLocaleString();
+        return;
+    }
+    proceedReservation();
+}
+
 initApp();
 </script>
 </body>
