@@ -3,29 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.51.2</title>
+<title>NARX プレミアム予約システム Ver.51.3</title>
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "中島式メンズ脱毛サロン NARX (ナークス)",
-  "description": "業界18年の実績。オーナー中島による独自の『中島式メンズ脱毛』。福岡市の完全予約制プライベートサロン。初回限定50%OFFキャンペーン実施中。",
+  "description": "業界18年の実績。オーナー中島による独自の『中島式メンズ脱毛』。初回限定50%OFFキャンペーン実施中。",
   "image": "https://narx24.github.io/new-sim/narx-datsumo.jp/logo.png",
   "url": "https://narx24.github.io/new-sim/narx-datsumo.jp/index.html",
   "telephone": "080-2129-9072",
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "福岡市",
-    "addressRegion": "福岡県",
-    "addressCountry": "JP"
-  },
+  "address": { "@type": "PostalAddress", "addressLocality": "福岡市", "addressRegion": "福岡県", "addressCountry": "JP" },
   "priceRange": "￥5,000 - ￥26,400",
-  "founder": { "@type": "Person", "name": "中島 ひろき" },
-  "makesOffer": [
-    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "全身脱毛（顔・VIO込）", "price": "26400", "priceCurrency": "JPY" } },
-    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "全顔5点セレクト脱毛", "price": "5000", "priceCurrency": "JPY" } }
-  ]
+  "founder": { "@type": "Person", "name": "中島 ひろき" }
 }
 </script>
 
@@ -68,7 +59,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item input{transform:scale(1.4);margin-right:18px;accent-color:var(--gold);}
 .item-info{flex:1;}
 .item-name{display:block;font-size:0.95rem;}
-.special-label { font-size: 0.65rem; color: #999; margin-left: 6px; font-style: italic; }
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;}
 #suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:80%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 15px;border-radius:12px;display:none;z-index:2000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
@@ -168,7 +158,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
           <circle cx="50" cy="50" r="18" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M44 48 L46 48 M54 48 L56 48" stroke="#d4af37" stroke-width="2" stroke-linecap="round"/>
           <path d="M46 58 Q50 62 54 58" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-          <path d="M25 68 L75 68 L85 95 L15 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
+          <path d="M25 68 L72 68 L80 95 L20 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M50 68 L40 85 M50 68 L60 85" stroke="#d4af37" stroke-width="1.2"/>
           <rect x="58" y="78" width="8" height="4" fill="#d4af37"/>
         </svg>
@@ -192,32 +182,14 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     <div id="action-btn-container"></div>
 </div>
 
-<div id="repeat-guidance-modal">
-    <div class="guidance-box">
-        <div class="guidance-title">内容をコピーしました</div>
-        <div class="guidance-step">
-            <b>❶. LINE予約メニューへ</b><br>
-            LINEの予約メニュー〔複数メニュー【時間枠】〕より、<span id="guide-hours" style="color:var(--gold); font-weight:bold;">●.● 時間枠</span>に予約をお取りください。
-        </div>
-        <div class="guidance-step">
-            <b>❷. 備考欄に貼り付け</b><br>
-            日時を選んだら、予約画面の【備考欄】にコピー内容を貼り付けてください。
-        </div>
-        <button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
-        <button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button>
-    </div>
-</div>
-
 <script>
-// ==========================================
-// 💡 全ての変数を冒頭に集約
-// ==========================================
+// 💡 全ての変数をここへ確実に配置（エラー根絶の核心）
 var GAS_URL = "https://script.google.com/macros/s/AKfycbzEOzq81mhZCSy4zJyeQ6ObRMimRdNYLlnG7Jz-nAT9VrJ7vtcw7aQto0H-pmf92xMT/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var bubbleTimer = null;
-var internalNumericSlot = 0; // 💡 これを計算の柱とする（文字は一切読まない）
+var internalNumericSlot = 0; // 生数字
 
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
@@ -416,9 +388,7 @@ function updateTotal() {
 
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
-    var keys = Object.keys(menuData);
-    var currentTotal = getOriginalTotal(selected);
-    var currentLeaves = [];
+    var keys = Object.keys(menuData), currentTotal = getOriginalTotal(selected), currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var lNodes = itemLeaves[selected[s]];
         for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
@@ -528,7 +498,7 @@ function proceedToCalendar() {
                     busySlots = JSON.parse(xhr.responseText);
                     renderCalendar();
                     document.getElementById('calendar-modal').style.display = 'block';
-                } catch(e) { console.log("parse error"); }
+                } catch(e) { alert("予約情報の取得でエラーが発生しました。"); }
             }
         }
     };
@@ -537,8 +507,7 @@ function proceedToCalendar() {
 
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
-    // 💡 UIの文字を読まずに internalNumericSlot（生数値）を直接使う
-    var reqMs = internalNumericSlot * 60 * 60 * 1000;
+    var reqMs = internalNumericSlot * 60 * 60 * 1000; // 💡 修正：内部生数値を直接使う
     var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; 
     firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
     document.getElementById('cal-title').innerText = (firstDay.getMonth()+1)+"/"+firstDay.getDate() + "の週";
@@ -591,7 +560,7 @@ function submitReservation() {
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = {
         type:'reserve', userType:userType, date:tDate, time:tTime, endTime:tEndTime,
-        slot:internalNumericSlot.toFixed(1), // 💡 修正：間違っていた名称を internalNumericSlot に統一
+        slot:internalNumericSlot.toFixed(1), // 💡 修正：名称を確実に統一
         price:document.getElementById('total-price').innerText,
         menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo
     };
