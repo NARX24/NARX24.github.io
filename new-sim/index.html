@@ -3,7 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.49.6</title>
+<title>NARX プレミアム予約システム Ver.49.7</title>
+
+<!-- 💡 AI検索エンジン・Google向け構造化データ (New Client Prices) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "中島式メンズ脱毛サロン NARX (ナークス)",
+  "description": "業界18年の実績。オーナー中島による『中島式メンズ脱毛』。痛みをおさえ、結果にこだわる完全予約制プライベートサロン。初回限定50%OFFキャンペーン実施中。",
+  "image": "https://narx24.github.io/new-sim/narx-datsumo.jp/logo.png",
+  "url": "https://narx24.github.io/new-sim/narx-datsumo.jp/index.html",
+  "telephone": "080-2129-9072",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "福岡市",
+    "addressRegion": "福岡県",
+    "addressCountry": "JP"
+  },
+  "priceRange": "￥5,000 - ￥26,400",
+  "makesOffer": [
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "【ご新規様】全身脱毛（顔・VIO込）",
+        "price": "26400",
+        "priceCurrency": "JPY"
+      }
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "【ご新規様】全顔5点セレクト脱毛",
+        "price": "5000",
+        "priceCurrency": "JPY"
+      }
+    }
+  ]
+}
+</script>
+
 <script>
 window.onerror = function(msg, url, line) {
     alert("システムエラーが発生しました:\n" + msg + "\n行番号: " + line);
@@ -11,7 +52,7 @@ window.onerror = function(msg, url, line) {
 </script>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
-body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:260px;overflow-x:hidden;}
+body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
 
 /* ヘッダー */
 .header-logo-container { text-align: center; padding: 20px 0 15px; border-bottom: 1px solid var(--gold); background: var(--black); }
@@ -20,14 +61,14 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 /* 💡 固定ヘッダーグループ（パネル＋チップス＋タブ） */
 .sticky-header-group {
     position: sticky; top: 0; z-index: 1000; background: var(--black); 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.8);
 }
 
 #gate-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.98);z-index:99999;display:flex;justify-content:center;align-items:center;}
 .modal-content{border:1px solid var(--gold);padding:40px 20px;width:85%;max-width:420px;background:var(--black);text-align:center;border-radius:12px;}
 
 /* ビジュアル */
-.dual-visual-container { display:flex; gap:2px; height:180px; background:var(--light-gray); border:2px solid var(--gold); margin: 0 20px; border-radius: 8px 8px 0 0; overflow:hidden; }
+.dual-visual-container { display:flex; gap:1px; height:180px; background:var(--light-gray); border:2px solid var(--gold); margin: 0 10px; border-radius: 8px 8px 0 0; overflow:hidden; }
 .view-panel { flex:1; position:relative; display:flex; justify-content:center; align-items:center; background-color:var(--panel-bg); }
 .view-panel:first-child { border-right:1px solid #ddd; }
 .view-panel span { position:absolute; top:5px; font-size:8px; color:#999; letter-spacing:1px; font-weight:bold; z-index:10; }
@@ -46,7 +87,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 /* 💡 選択部位チップスエリア（パネルに密着） */
 #selected-chips-area { 
     background: #0a0a0a; padding: 8px 12px; border: 2px solid var(--gold); border-top: none; 
-    margin: 0 20px 0; border-radius: 0 0 8px 8px;
+    margin: 0 10px 0; border-radius: 0 0 8px 8px;
 }
 .chips-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .chips-title { font-size: 0.65rem; color: var(--gold); font-weight: bold; }
@@ -56,54 +97,51 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .chip-close { background: var(--gold); color: #000; border-radius: 50%; width: 12px; height: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 0.5rem; font-weight: bold; cursor: pointer; }
 
 /* タブUI（選択部位の真下に配置） */
-.tabs { display:flex; gap:2px; margin: 10px 20px 0; border-bottom: 1px solid var(--light-gray); }
-.tab { flex:1; padding:10px 0; text-align:center; color:#666; cursor:pointer; font-size:0.75rem; }
+.tabs { display:flex; gap:2px; margin: 10px 10px 0; border-bottom: 1px solid var(--light-gray); }
+.tab { flex:1; padding:12px 0; text-align:center; color:#666; cursor:pointer; font-size:0.8rem; }
 .tab.active { color:var(--gold); border-bottom:2px solid var(--gold); font-weight:bold; }
 
-/* 💡 ラスト・コンシェルジュ用モーダル */
+/* 💡 ラスト・コンシェルジュ用モーダル（ブラウザ警告の代わり） */
 #final-suggestion-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 100003; display: none; justify-content: center; align-items: center; }
 .final-sug-box { width: 90%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; color: #fff; }
-.final-sug-text { font-size: 0.85rem; line-height: 1.7; margin-bottom: 25px; }
-.final-sug-compare { background: #222; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-around; }
+.final-sug-text { font-size: 0.85rem; line-height: 1.8; margin-bottom: 25px; color: #ccc; }
+.final-sug-compare { background: #222; border-radius: 8px; padding: 15px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-around; }
 
-/* 既存客用ポップアップ */
+/* 既存客用案内ポップアップ */
 #repeat-guidance-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100002; display: none; justify-content: center; align-items: center; }
 .guidance-box { width: 85%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; text-align: left; }
 .guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 20px; }
 .guidance-step { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid var(--gold); }
 .guidance-step b { color: var(--gold); font-size: 1rem; }
 
-/* メニューリスト */
-.menu-container { padding: 0 20px; }
-.menu-sub-header { color: var(--gold); font-size: 0.85rem; text-align: center; padding: 20px 0 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-.menu-sub-header::before, .menu-sub-header::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); margin: 0 15px; }
-
+/* アイテムリスト */
+.menu-container { padding: 0 10px; }
 .item{background:var(--dark-gray);margin-bottom:8px;padding:16px;border-radius:6px;display:flex;align-items:center;cursor:pointer;border:1px solid transparent;transition:0.2s;}
 .item.selected{border-color:var(--gold);background:#080808;}
 .item.disabled{opacity:0.15;cursor:default;filter:grayscale(1);pointer-events: none;}
 .item input{transform:scale(1.4);margin-right:18px;accent-color:var(--gold);}
 .item-info{flex:1;}
-.item-name{display:block;font-size:0.9rem;}
+.item-name{display:block;font-size:0.95rem;}
 .special-label { font-size: 0.65rem; color: #999; margin-left: 6px; font-style: italic; }
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;}
 
 /* AI提案パネル */
 #suggestion-box{position:fixed;bottom:195px;left:50%;transform:translateX(-50%);width:80%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 15px;border-radius:12px;display:none;z-index:2000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
-.sug-benefit-msg{text-align:center;font-size:0.65rem;color:var(--gold);background:#111;padding:4px;border-radius:4px;font-weight:bold;margin-bottom:8px;}
-.sug-menu-name{font-size:0.85rem;font-weight:bold;color:#111;margin-bottom:4px;text-align:center;}
-.sug-compare-panel{background:rgba(255,255,255,0.85);padding:8px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.sug-benefit-msg { text-align:center; font-size:0.7rem; color:var(--gold); background:#111; padding:6px; border-radius:4px; font-weight:bold; margin-bottom:8px; }
+.sug-menu-name{font-size:0.9rem;font-weight:bold;color:#111;margin-bottom:4px;text-align:center;}
+.sug-compare-panel { background:rgba(255,255,255,0.85); padding:10px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
 .sug-col{flex:1;text-align:center;}
 .sug-col-label{font-size:0.5rem;color:#666;display:block;}
-.sug-col-price{font-size:0.8rem;color:#111;font-weight:bold;}
+.sug-col-price{font-size:0.85rem;color:#111;font-weight:bold;}
 .sug-add-price{color:#c00; font-weight:bold; font-size:0.85rem;}
 
-.sug-btn-group{display:flex; gap:6px;}
-.btn-sug-apply{background:#000; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; flex:1.5; font-size:0.75rem; cursor:pointer;}
-.btn-sug-skip{background:transparent; color:#111; border:none; flex:1; font-weight:bold; font-size:0.7rem; cursor:pointer;}
+.sug-btn-group{display:flex; gap:8px;}
+.btn-sug-apply{background:#000; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; flex:1.5; font-size:0.8rem; cursor:pointer;}
+.btn-sug-skip{background:transparent; color:#111; border:none; flex:1; font-weight:bold; font-size:0.75rem; cursor:pointer;}
 
-#concierge-wrapper{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:2001;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
-#concierge-bubble{display:none;background:#fff;color:#111;padding:10px 14px;border-radius:12px;font-size:0.7rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:0.3s;text-align:center;pointer-events:auto;min-width:180px;}
+#concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2001;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
+#concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:0.3s;text-align:center;pointer-events:auto;min-width:200px;}
 .bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
 .concierge-icon{width:56px;height:56px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;transition:0.3s;border:2px solid var(--gold);}
 .concierge-icon.on{background:var(--gold);}
@@ -111,26 +149,9 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon.off{background:#111;}
 .concierge-icon.off svg path, .concierge-icon.off svg circle { fill: var(--gold); }
 
-/* カレンダーUI、その他省略（Ver.49.5を継承） */
-#calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
-.cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
-.cal-outer-wrapper { height: calc(100% - 110px); overflow: auto; background: #333; }
-.cal-table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; background: #fff; }
-.cal-table thead th { position: sticky; top: 0; background: #eee; color: #333; z-index: 10; font-size: 0.65rem; padding: 12px 2px; border: 1px solid #ccc; font-weight: bold; }
-.cal-table thead th.sun, .cal-table thead th.holiday { color: #dc3545; }
-.cal-table thead th.sat { color: #007bff; }
-.cal-table td:first-child { position: sticky; left: 0; background: #222; color: var(--gold); z-index: 9; width: 50px; font-weight: bold; font-size: 0.7rem; border-right: 1px solid var(--gold); }
-.cal-status-o { background: #fff; color: #c09015; font-size: 1.2rem; font-weight: bold; border: 1px solid #ddd; cursor: pointer; }
-.cal-status-x { background: #bbb; color: #888; font-size: 1.0rem; border: 1px solid #aaa; pointer-events: none; }
-.cal-status-off { background: #444; color: #666; border: 1px solid #555; pointer-events: none; }
-
-#info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 100001; display: none; overflow-y: auto; padding: 20px 0; }
-.form-group { text-align: left; margin-bottom: 15px; }
-.form-group label { display: block; font-size: 0.8rem; color: var(--gold); margin-bottom: 5px; }
-.form-group input, .form-group textarea { width: 100%; padding: 14px; border-radius: 6px; border: 1px solid #444; background: #111; color: #fff; box-sizing: border-box; font-family: inherit; }
-
+/* フッター */
 .bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
-.btn-reserve{background:var(--gold);color:#000;width:100%;padding:16px;border-radius:6px;font-weight:bold;border:none;cursor:pointer;font-size:0.95rem;}
+.btn-reserve{background:var(--gold);color:#000;width:100%;padding:16px;border-radius:6px;font-weight:bold;border:none;cursor:pointer;font-size:1rem;}
 #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200000; display: none; justify-content: center; align-items: center; color: var(--gold); font-weight: bold; }
 </style>
 </head>
@@ -141,12 +162,12 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <!-- ラスト・コンシェルジュ モーダル -->
 <div id="final-suggestion-modal">
     <div class="final-sug-box">
-        <h3 style="color:var(--gold); text-align:center; margin-bottom:15px;">AIコンシェルジュからの最終案内</h3>
+        <h3 style="color:var(--gold); text-align:center; margin-bottom:15px;">AIコンシェルジュからのご案内</h3>
         <div id="final-sug-desc" class="final-sug-text"></div>
         <div class="final-sug-compare">
-            <div style="text-align:center;"><span style="font-size:0.6rem; color:#888;">現在</span><br><span id="final-old-price" style="font-size:0.9rem; text-decoration:line-through;"></span></div>
+            <div style="text-align:center;"><span style="font-size:0.6rem; color:#888;">現在の合計</span><br><span id="final-old-price" style="font-size:0.9rem; text-decoration:line-through;"></span></div>
             <div style="color:var(--gold); font-weight:bold; font-size:1.2rem;">▶</div>
-            <div style="text-align:center;"><span style="font-size:0.6rem; color:var(--gold);">変更後の合計</span><br><span id="final-new-price" style="font-size:1.1rem; color:#f44; font-weight:bold;"></span></div>
+            <div style="text-align:center;"><span id="final-compare-label" style="font-size:0.6rem; color:var(--gold);">変更後の合計</span><br><span id="final-new-price" style="font-size:1.1rem; color:#f44; font-weight:bold;"></span></div>
         </div>
         <button class="btn-reserve" onclick="applyAndProceed()">お得なセットに変更して進む</button>
         <button class="btn-reserve" style="background:#333; color:#fff; margin-top:10px;" onclick="cancelAndProceed()">このままのメニューで予約する</button>
@@ -154,26 +175,9 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     </div>
 </div>
 
-<!-- リピーター案内 -->
-<div id="repeat-guidance-modal">
-    <div class="guidance-box">
-        <div class="guidance-title">内容をコピーしました</div>
-        <div class="guidance-step">
-            <b>❶. LINE予約メニューへ</b><br>
-            LINEの予約メニュー〔複数メニュー【時間枠】〕より、<span id="guide-hours" style="color:var(--gold); font-weight:bold;">●.●</span> 時間枠に予約をお取りください。
-        </div>
-        <div class="guidance-step">
-            <b>❷. 備考欄に貼り付け</b><br>
-            日時を選んだら、予約画面の【備考欄】にコピー内容を貼り付けてください。
-        </div>
-        <button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
-        <button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button>
-    </div>
-</div>
-
 <div id="gate-modal">
     <div class="modal-content">
-        <div class="header-logo-container"><img src="logo_white.png" class="header-logo-img" alt="NARX"></div>
+        <div class="header-logo-container" style="border:none;"><img src="logo_white.png" class="header-logo-img" alt="NARX"></div>
         <h2 style="color:var(--gold); font-size:1.1rem; letter-spacing: 2px; margin: 20px 0;">NARX 18th ANNIVERSARY</h2>
         <button class="btn-reserve" onclick="forceStart('new')">初めて来店する（初回50%OFF）</button>
         <button class="btn-reserve" style="background:#222;color:#fff;margin-top:12px;" onclick="forceStart('repeat')">既に会員である（通常価格）</button>
@@ -183,6 +187,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div class="container">
     <div class="header-logo-container"><img src="logo_white.png" class="header-logo-img" alt="NARX"></div>
     
+    <!-- 💡 固定ヘッダーグループ -->
     <div class="sticky-header-group">
         <div id="mode-display-area" style="text-align:center; padding:10px 0 5px;"><div id="mode-display"></div></div>
 
@@ -209,6 +214,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div id="concierge-wrapper">
     <div id="concierge-bubble"><div class="bubble-tail"></div><span id="concierge-msg"></span></div>
     <div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()">
+        <!-- 💡 ロボットヘッド復元 -->
         <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
             <path d="M30 20 h40 v12 h-40 z" /><path d="M22 32 h56 v4 h-56 z" /><circle cx="30" cy="45" r="4" /><circle cx="70" cy="45" r="4" /><path d="M34 66 L50 82 L66 66" stroke="#d4af37" stroke-width="4" fill="none" />
         </svg>
@@ -234,18 +240,16 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <script>
 // ==========================================
-// 1. 変数・祝日
+// 1. 変数定義
 // ==========================================
-var GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
+var GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeUtRmk07Q/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var bubbleTimer = null;
 
-var holidays2026 = ["2026/1/1", "2026/1/12", "2026/2/11", "2026/2/23", "2026/3/20", "2026/3/21", "2026/4/29", "2026/5/3", "2026/5/4", "2026/5/5", "2026/5/6", "2026/7/20", "2026/8/11", "2026/9/21", "2026/9/22", "2026/9/23", "2026/10/12", "2026/11/3", "2026/11/23"];
-
 // ==========================================
-// 2. メニューデータ (最新施術時間)
+// 2. メニューデータ (Ver.49.5 最新時間反映)
 // ==========================================
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
@@ -338,7 +342,7 @@ function getOriginalTotal(idList) {
 }
 
 // ==========================================
-// 3. アプリ制御
+// 3. 制御ロジック
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
@@ -417,6 +421,7 @@ function render() {
         var lNodes = itemLeaves[sid];
         for (var ln = 0; ln < lNodes.length; ln++) { if (currentLeaves.indexOf(lNodes[ln]) === -1) currentLeaves.push(lNodes[ln]); }
     }
+    
     for (var cl = 0; cl < currentLeaves.length; cl++) {
         var leaf = menuData[currentLeaves[cl]];
         if (leaf.imgs) {
@@ -426,7 +431,12 @@ function render() {
     }
     
     if (suggestionId) {
+        var sugItem = menuData[suggestionId];
         var sugLeaves = itemLeaves[suggestionId];
+        if (sugItem.imgs) {
+             if (sugItem.imgs.body) { var sb = document.getElementById("img-" + sugItem.imgs.body); if(sb) sb.classList.add('suggest-blink'); }
+             if (sugItem.imgs.face) { var sf = document.getElementById("img-" + sugItem.imgs.face); if(sf) sf.classList.add('suggest-blink'); }
+        }
         for (var sl = 0; sl < sugLeaves.length; sl++) {
             var leafId = sugLeaves[sl];
             if (currentLeaves.indexOf(leafId) === -1) { 
@@ -450,11 +460,13 @@ function render() {
             var id = keys[m], item = menuData[id];
             if (item.cat !== currentTab) continue;
             if (currentTab === 'part' && item.subCat !== sub.id) continue;
+            
             var isSel = selected.indexOf(id) !== -1, isDis = false;
             if (!isSel) {
                 var itemL = itemLeaves[id];
                 for (var l = 0; l < itemL.length; l++) { if (currentLeaves.indexOf(itemL[l]) !== -1) { isDis = true; break; } }
             }
+            
             var div = document.createElement('div');
             div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
             (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
@@ -485,10 +497,10 @@ function updateTotal() {
     document.getElementById('total-time-display').innerText = "枠 " + slotVal + " 時間枠";
 }
 
+// AIコンシェルジュ
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var keys = Object.keys(menuData);
-    var currentTotal = getOriginalTotal(selected);
     var currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var lNodes = itemLeaves[selected[s]];
@@ -498,6 +510,7 @@ function analyzeSuggestions(isManual) {
         var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
         var candLeaves = itemLeaves[sid], foundLeafCount = 0;
         for (var l = 0; l < candLeaves.length; l++) { if (currentLeaves.indexOf(candLeaves[l]) !== -1) foundLeafCount++; }
+        
         if (foundLeafCount >= 2) {
             var intersectingItems = [];
             for(var j=0; j<selected.length; j++) {
@@ -523,21 +536,22 @@ function checkSuggestion(isManual) {
     
     if (best.type === 'equal') {
         html += '<div class="sug-benefit-msg">同じ金額で、さらに部位を増やせます！</div>';
+        showConciergeBubble("同額でもっとお得になる選び方があります！");
     } else if (best.type === 'cheaper') {
         html += '<div class="sug-benefit-msg">セットの方がお安くなります！</div>';
+        showConciergeBubble("お安くなる組み合わせを見つけましたよ！");
     } else {
         html += '<div class="sug-benefit-msg">こちらの方が断然お得ですよ！</div>';
+        showConciergeBubble("最適なプランをご提案します！");
     }
     
     html += '<div class="sug-menu-name">' + setItem.label + '</div>';
-    html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div>' +
+    html += '<div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在の合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div>' +
             '<div class="sug-col"><span class="sug-col-label">追加料金</span><span class="sug-add-price">' + (best.diff > 0 ? '+¥'+best.diff.toLocaleString() : '±¥0') + '</span></div>' +
-            '<div class="sug-col"><span class="sug-col-label">合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div>';
+            '<div class="sug-col"><span class="sug-col-label">変更後の合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div>';
     
     html += '<div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block';
-    
-    showConciergeBubble(best.type === 'equal' ? "同額でもっとお得になる選び方があります！" : "お安くなる組み合わせを見つけましたよ！");
     render(); 
 }
 
@@ -566,7 +580,7 @@ function showConciergeBubble(msg) {
 function handleReserveAction() {
     if (selected.length === 0) return alert("メニューを選んでください");
     var best = analyzeSuggestions(true);
-    // 指示：最後はアップセルせず「お得（安いor同額）」な場合のみ提案
+    // 最後はアップセルせず「お得（安いor同額）」な場合のみ提案
     if (best && (best.type === 'cheaper' || best.type === 'equal')) {
         var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
         var msg = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>料金はそのままで、対象部位をさらに増やすことができます。";
