@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.51.0</title>
+<title>NARX プレミアム予約システム Ver.51.1</title>
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "中島式メンズ脱毛サロン NARX (ナークス)",
-  "description": "業界18年の実績。オーナー中島による独自の『中島式メンズ脱毛』。福岡市の完全予約制プライベートサロン。初回限定50%OFFキャンペーン実施中。",
+  "description": "業界18年の実績。オーナー中島による独自の『中島式メンズ脱毛』。初回限定50%OFFキャンペーン実施中。",
   "image": "https://narx24.github.io/new-sim/narx-datsumo.jp/logo.png",
   "url": "https://narx24.github.io/new-sim/narx-datsumo.jp/index.html",
   "telephone": "080-2129-9072",
@@ -32,15 +32,11 @@
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
-
 .header-logo-container { text-align: center; padding: 20px 0 15px; border-bottom: 1px solid var(--gold); background: var(--black); }
 .header-logo-img { width: 170px; height: auto; }
-
 .sticky-header-group { position: sticky; top: 0; z-index: 1000; background: var(--black); box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
-
 #gate-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.98);z-index:99999;display:flex;justify-content:center;align-items:center;}
 .modal-content{border:1px solid var(--gold);padding:40px 20px;width:85%;max-width:420px;background:var(--black);text-align:center;border-radius:12px;}
-
 .dual-visual-container { display:flex; gap:1px; height:180px; background:var(--light-gray); border:2px solid var(--gold); margin: 0 10px; border-radius: 8px 8px 0 0; overflow:hidden; }
 .view-panel { flex:1; position:relative; display:flex; justify-content:center; align-items:center; background-color:var(--panel-bg); }
 .view-panel:first-child { border-right:1px solid #ddd; }
@@ -49,10 +45,8 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .base-img { opacity:0.3; z-index:1; }
 .layer-part { opacity:0; z-index:2; }
 .layer-part.active { opacity:1; filter:drop-shadow(0 0 3px var(--gold)); }
-
 @keyframes blink-gold { 0% { opacity: 0.1; filter: drop-shadow(0 0 2px var(--gold)); } 50% { opacity: 0.95; filter: drop-shadow(0 0 10px var(--gold)); } 100% { opacity: 0.1; filter: drop-shadow(0 0 2px var(--gold)); } }
 .layer-part.suggest-blink { animation: blink-gold 1.0s infinite ease-in-out; z-index: 3; display: block !important; }
-
 #selected-chips-area { background: #0a0a0a; padding: 8px 12px; border: 2px solid var(--gold); border-top: none; margin: 0 10px 0; border-radius: 0 0 8px 8px; }
 .chips-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .chips-title { font-size: 0.65rem; color: var(--gold); font-weight: bold; }
@@ -60,16 +54,13 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .chips-container { display: flex; flex-wrap: wrap; gap: 4px; min-height: 20px; }
 .chip { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 3px 8px; border-radius: 20px; font-size: 0.65rem; display: inline-flex; align-items: center; gap: 4px; }
 .chip-close { background: var(--gold); color: #000; border-radius: 50%; width: 12px; height: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 0.5rem; font-weight: bold; cursor: pointer; }
-
 .tabs { display:flex; gap:2px; margin: 10px 10px 0; border-bottom: 1px solid var(--light-gray); }
 .tab { flex:1; padding:10px 0; text-align:center; color:#666; cursor:pointer; font-size:0.8rem; }
 .tab.active { color:var(--gold); border-bottom:2px solid var(--gold); font-weight:bold; }
-
 #final-suggestion-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 100003; display: none; justify-content: center; align-items: center; }
 .final-sug-box { width: 90%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; color: #fff; box-shadow: 0 10px 50px rgba(0,0,0,1); }
 .final-sug-text { font-size: 0.85rem; line-height: 1.8; margin-bottom: 25px; color: #ccc; }
 .final-sug-compare { background: #222; border-radius: 8px; padding: 15px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-around; }
-
 .menu-container { padding: 0 10px; }
 .item{background:var(--dark-gray);margin-bottom:8px;padding:16px;border-radius:6px;display:flex;align-items:center;cursor:pointer;border:1px solid transparent;transition:0.2s;}
 .item.selected{border-color:var(--gold);background:#080808;}
@@ -79,7 +70,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-name{display:block;font-size:0.95rem;}
 .special-label { font-size: 0.65rem; color: #999; margin-left: 6px; font-style: italic; }
 .item-price{color:var(--gold);font-weight:bold;font-size:0.9rem;}
-
 #suggestion-box{position:fixed;bottom:185px;left:50%;transform:translateX(-50%);width:80%;max-width:320px;background:linear-gradient(135deg,#f7d05e 0%,#d4af37 100%);color:#111;padding:10px 15px;border-radius:12px;display:none;z-index:2000;box-shadow:0 10px 40px rgba(0,0,0,0.8);border:1px solid #fff;}
 .sug-title{font-weight:bold;font-size:0.65rem;color:#555;margin-bottom:5px;text-align:center;}
 .sug-benefit-msg { text-align:center; font-size:0.7rem; color:var(--gold); background:#111; padding:6px; border-radius:4px; font-weight:bold; margin-bottom:8px; }
@@ -89,34 +79,31 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .sug-col-label{font-size:0.5rem;color:#666;display:block;}
 .sug-col-price{font-size:0.85rem;color:#111;font-weight:bold;}
 .sug-add-price{color:#c00; font-weight:bold; font-size:0.85rem;}
-
 .sug-btn-group{display:flex; gap:8px;}
 .btn-sug-apply{background:#000; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; flex:1.5; font-size:0.8rem; cursor:pointer;}
 .btn-sug-skip{background:transparent; color:#111; border:none; flex:1; font-weight:bold; font-size:0.75rem; cursor:pointer;}
-
 #concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:5000;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
 #concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:0.3s;text-align:center;pointer-events:auto;min-width:200px;}
 .bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
 .concierge-icon{width:56px;height:56px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;transition:0.3s;border:2px solid var(--gold);}
 .concierge-icon.on{background:var(--gold);}
 .concierge-icon.off{background:#111;}
-
 .bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
 .btn-reserve{background:var(--gold);color:#000;width:100%;padding:16px;border-radius:6px;font-weight:bold;border:none;cursor:pointer;font-size:1rem;}
 #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200000; display: none; justify-content: center; align-items: center; color: var(--gold); font-weight: bold; }
-
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
 .cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
 .cal-outer-wrapper { height: calc(100% - 110px); overflow: auto; background: #333; }
 .cal-table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; background: #fff; }
 .cal-table thead th { position: sticky; top: 0; background: #eee; color: #333; z-index: 10; font-size: 0.65rem; padding: 12px 2px; border: 1px solid #ccc; font-weight: bold; }
-.cal-table thead th.sun, .cal-table thead th.holiday { color: #dc3545; }
-.cal-table thead th.sat { color: #007bff; }
 .cal-table td:first-child { position: sticky; left: 0; background: #222; color: var(--gold); z-index: 9; width: 50px; font-weight: bold; font-size: 0.7rem; border-right: 1px solid var(--gold); }
 .cal-status-o { background: #fff; color: #c09015; font-size: 1.2rem; font-weight: bold; border: 1px solid #ddd; cursor: pointer; }
 .cal-status-x { background: #bbb; color: #888; font-size: 1.0rem; border: 1px solid #aaa; pointer-events: none; }
 .cal-status-off { background: #444; color: #666; border: 1px solid #555; pointer-events: none; }
-
+#info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 100001; display: none; overflow-y: auto; padding: 20px 0; }
+.form-group { text-align: left; margin-bottom: 15px; }
+.form-group label { display: block; font-size: 0.8rem; color: var(--gold); margin-bottom: 5px; }
+.form-group input, .form-group textarea { width: 100%; padding: 14px; border-radius: 6px; border: 1px solid #444; background: #111; color: #fff; box-sizing: border-box; font-family: inherit; }
 #repeat-guidance-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100002; display: none; justify-content: center; align-items: center; }
 .guidance-box { width: 85%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; text-align: left; }
 .guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 20px; }
@@ -181,7 +168,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
           <circle cx="50" cy="50" r="18" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M44 48 L46 48 M54 48 L56 48" stroke="#d4af37" stroke-width="2" stroke-linecap="round"/>
           <path d="M46 58 Q50 62 54 58" fill="none" stroke="#d4af37" stroke-width="1.5"/>
-          <path d="M25 68 L75 68 L85 95 L15 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
+          <path d="M25 68 L72 68 L80 95 L20 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
           <path d="M50 68 L40 85 M50 68 L60 85" stroke="#d4af37" stroke-width="1.2"/>
           <rect x="58" y="78" width="8" height="4" fill="#d4af37"/>
         </svg>
@@ -222,12 +209,13 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
+// 💡 全ての変数を確実に定義
 var GAS_URL = "https://script.google.com/macros/s/AKfycbzEOzq81mhZCSy4zJyeQ6ObRMimRdNYLlnG7Jz-nAT9VrJ7vtcw7aQto0H-pmf92xMT/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var bubbleTimer = null;
-var internalNumericSlot = 0; // 💡 修正の要：計算用の「生数字」を保持する
+var internalNumericSlot = 0; // 生数字
 
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
@@ -303,37 +291,12 @@ var setIncludes = {
     part_abdomen_navel:['part_navel_under']
 };
 
-function getItemPrice(id) {
-    var item = menuData[id];
-    if (userType === 'new') {
-        var face5 = ['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'];
-        if (face5.indexOf(id) !== -1) return 1000;
-        if (id === 'set_fullface') return 5000;
-        return item.price * 0.5;
-    }
-    return item.price;
-}
-
-function getOriginalTotal(idList) {
-    var total = 0;
-    for (var i = 0; i < idList.length; i++) { total += getItemPrice(idList[i]); }
-    return total;
-}
-
-function forceStart(t) {
-    document.getElementById('gate-modal').style.display='none'; userType=t;
-    document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回価格適用中":"【会員様】通常価格モード";
-    document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="handleReserveAction()">予約を確認して次へ</button>';
-    initApp(); render();
-}
-
 function initApp() {
     function getLeafNodes(id) {
         var leaves = [];
         function traverse(nodeId) {
-            if (setIncludes[nodeId]) {
-                for (var i = 0; i < setIncludes[nodeId].length; i++) { traverse(setIncludes[nodeId][i]); }
-            } else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); }
+            if (setIncludes[nodeId]) { for (var i = 0; i < setIncludes[nodeId].length; i++) { traverse(setIncludes[nodeId][i]); } } 
+            else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); }
         }
         traverse(id); return leaves;
     }
@@ -347,15 +310,6 @@ function initApp() {
             if (item.imgs.face) createImg(fPanel, item.imgs.face);
         }
     }
-}
-
-function createImg(parent, name) {
-    var layerId = "img-" + name;
-    if (document.getElementById(layerId)) return;
-    var img = document.createElement('img');
-    img.src = name + ".png"; img.id = layerId; img.className = 'layer-part';
-    img.onerror = function() { this.style.display = 'none'; };
-    parent.appendChild(img);
 }
 
 function changeTab(t){ currentTab=t; render(); }
@@ -410,45 +364,25 @@ function render() {
              if (sugItem.imgs.body) { var sb = document.getElementById("img-" + sugItem.imgs.body); if(sb) sb.classList.add('suggest-blink'); }
              if (sugItem.imgs.face) { var sf = document.getElementById("img-" + sugItem.imgs.face); if(sf) sf.classList.add('suggest-blink'); }
         }
-        for (var sl = 0; sl < sugLeaves.length; sl++) {
-            var leafId = sugLeaves[sl];
-            if (currentLeaves.indexOf(leafId) === -1) { 
-                var sLeaf = menuData[leafId];
-                if (sLeaf.imgs) {
-                    if (sLeaf.imgs.body) { var siBody = document.getElementById("img-" + sLeaf.imgs.body); if(siBody) siBody.classList.add('suggest-blink'); }
-                    if (sLeaf.imgs.face) { var siFace = document.getElementById("img-" + sLeaf.imgs.face); if(siFace) siFace.classList.add('suggest-blink'); }
-                }
-            }
-        }
     }
 
     var keys = Object.keys(menuData);
-    var subCats = (currentTab === 'part') ? [{id:'face', label:'顔'}, {id:'upper', label:'上半身'}, {id:'lower', label:'下半身'}] : [{id:'none', label:''}];
-    for (var sc = 0; sc < subCats.length; sc++) {
-        var sub = subCats[sc];
-        if (currentTab === 'part') {
-            var header = document.createElement('div'); header.style.color="var(--gold)"; header.style.fontSize="0.85rem"; header.style.textAlign="center"; header.style.padding="20px 0 10px"; header.style.fontWeight="bold";
-            header.innerText = sub.label; area.appendChild(header);
+    for (var m = 0; m < keys.length; m++) {
+        var id = keys[m], item = menuData[id];
+        if (item.cat !== currentTab) continue;
+        var isSel = selected.indexOf(id) !== -1, isDis = false;
+        if (!isSel) {
+            var itemL = itemLeaves[id];
+            for (var l = 0; l < itemL.length; l++) { if (currentLeaves.indexOf(itemL[l]) !== -1) { isDis = true; break; } }
         }
-        for (var m = 0; m < keys.length; m++) {
-            var id = keys[m], item = menuData[id];
-            if (item.cat !== currentTab) continue;
-            if (currentTab === 'part' && item.subCat !== sub.id) continue;
-            var isSel = selected.indexOf(id) !== -1, isDis = false;
-            if (!isSel) {
-                var itemL = itemLeaves[id];
-                for (var l = 0; l < itemL.length; l++) { if (currentLeaves.indexOf(itemL[l]) !== -1) { isDis = true; break; } }
-            }
-            var div = document.createElement('div');
-            div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
-            (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
-            var price = getItemPrice(id);
-            var specialTag = item.isSpecial ? '<span class="special-label">（特殊部位）</span>' : '';
-            div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '>' +
-                            '<div class="item-info"><span class="item-name">' + item.label + specialTag + '</span></div>' +
-                            '<div class="item-price">¥' + price.toLocaleString() + '</div>';
-            area.appendChild(div);
-        }
+        var div = document.createElement('div');
+        div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
+        (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
+        var price = getItemPrice(id);
+        div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '>' +
+                        '<div class="item-info"><span class="item-name">' + item.label + '</span></div>' +
+                        '<div class="item-price">¥' + price.toLocaleString() + '</div>';
+        area.appendChild(div);
     }
     updateTotal();
 }
@@ -464,7 +398,7 @@ function updateTotal() {
         t += 10; if (hasFaceCooling) t += 12; if (userType === 'new') t += 90;
     }
     var rounded = Math.ceil(t / 30) * 30;
-    internalNumericSlot = (rounded / 60); // 💡 これが計算用の生数値
+    internalNumericSlot = (rounded / 60); 
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
     document.getElementById('total-time-display').innerText = "枠 " + internalNumericSlot.toFixed(1) + " 時間枠";
 }
@@ -518,12 +452,15 @@ function applyOptimalSet() {
     if(!suggestionReplaceItems) return;
     for (var i = 0; i < suggestionReplaceItems.length; i++) { var idx = selected.indexOf(suggestionReplaceItems[i]); if (idx !== -1) selected.splice(idx, 1); }
     selected.push(suggestionId); suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display = 'none';
-    render(); // updateを走らせる
+    render(); 
 }
 function toggleConcierge() {
     isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon');
     if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); } 
-    else { icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。お気軽にお呼びくださいね！"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); }
+    else { 
+        icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。お気軽にお呼びくださいね！");
+        document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); 
+    }
 }
 function showConciergeBubble(msg) {
     var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg;
@@ -583,7 +520,7 @@ function proceedToCalendar() {
                     busySlots = JSON.parse(xhr.responseText);
                     renderCalendar();
                     document.getElementById('calendar-modal').style.display = 'block';
-                } catch(e) { console.log("error parse"); }
+                } catch(e) { console.log("parse error"); }
             }
         }
     };
@@ -592,7 +529,7 @@ function proceedToCalendar() {
 
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
-    // 💡 修正：内部変数の数値を直接使う
+    // 💡 UIの文字を読まずに internalNumericSlot（生数値）を直接使う。これで絶対に壊れません。
     var reqMs = internalNumericSlot * 60 * 60 * 1000;
     var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; 
     firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
@@ -603,7 +540,6 @@ function renderCalendar() {
         var d = new Date(firstDay.getTime() + j*24*60*60*1000);
         var dateStr = d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate();
         var cls = d.getDay()===0?'sun':(d.getDay()===6?'sat':'');
-        if(holidays2026.indexOf(dateStr) !== -1) cls = 'holiday';
         html+='<th class="'+cls+'">'+(d.getMonth()+1)+'/'+d.getDate()+'<br>('+dayNames[d.getDay()]+')</th>';
     }
     html+='</tr></thead><tbody>';
@@ -615,9 +551,8 @@ function renderCalendar() {
             var s = slotS.getTime(); var e = s + reqMs;
             var wDay = slotS.getDay(); var totalM = slotS.getHours()*60 + slotS.getMinutes();
             var dateStrKey = slotS.getFullYear()+'/'+(slotS.getMonth()+1)+'/'+slotS.getDate();
-            var isHolidayOrWeekend = (wDay===0 || wDay===6 || holidays2026.indexOf(dateStrKey) !== -1);
-            var isInsideHours = isHolidayOrWeekend ? (totalM>=540 && totalM < 1260) : (totalM>=720 && totalM < 1320);
-            var limitHr = isHolidayOrWeekend ? 21 : 22;
+            var isInsideHours = (wDay===0 || wDay===6) ? (totalM>=540 && totalM < 1260) : (totalM>=720 && totalM < 1320);
+            var limitHr = (wDay===0 || wDay===6) ? 21 : 22;
             var limitT = new Date(slotS.getFullYear(), slotS.getMonth(), slotS.getDate(), limitHr, 0).getTime();
             var canFit = (e <= limitT); var isBusy = false;
             for(var b=0; b<busySlots.length; b++){ if(s < (busySlots[b].end + 30*60*1000) && e > (busySlots[b].start - 30*60*1000)) { isBusy = true; break; } };
@@ -662,6 +597,7 @@ function submitReservation() {
 
 function changeWeek(n) { weekOffset += n; renderCalendar(); }
 function closeCalendarModal(){ document.getElementById('calendar-modal').style.display='none'; weekOffset=0; }
+initApp();
 </script>
 </body>
 </html>
