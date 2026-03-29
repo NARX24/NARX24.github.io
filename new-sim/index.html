@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>NARX プレミアム予約システム Ver.50.1</title>
 
-<!-- 💡 AI検索エンジン向け構造化データ -->
+<!-- AI検索エンジン向け構造化データ -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -51,7 +51,7 @@
 
 <script>
 window.onerror = function(msg, url, line) {
-    console.error("Critical: " + msg + " at line " + line);
+    console.error("System Error: " + msg + " at line " + line);
 };
 </script>
 <style>
@@ -70,7 +70,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 #gate-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.98);z-index:99999;display:flex;justify-content:center;align-items:center;}
 .modal-content{border:1px solid var(--gold);padding:40px 20px;width:85%;max-width:420px;background:var(--black);text-align:center;border-radius:12px;}
 
-/* ビジュアルパネル */
+/* ビジュアル */
 .dual-visual-container { display:flex; gap:1px; height:180px; background:var(--light-gray); border:2px solid var(--gold); margin: 0 10px; border-radius: 8px 8px 0 0; overflow:hidden; }
 .view-panel { flex:1; position:relative; display:flex; justify-content:center; align-items:center; background-color:var(--panel-bg); }
 .view-panel:first-child { border-right:1px solid #ddd; }
@@ -87,7 +87,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 }
 .layer-part.suggest-blink { animation: blink-gold 1.0s infinite ease-in-out; z-index: 3; display: block !important; }
 
-/* 選択チップス */
+/* 選択チップスエリア */
 #selected-chips-area { 
     background: #0a0a0a; padding: 8px 12px; border: 2px solid var(--gold); border-top: none; 
     margin: 0 10px 0; border-radius: 0 0 8px 8px;
@@ -101,7 +101,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 /* タブUI */
 .tabs { display:flex; gap:2px; margin: 10px 10px 0; border-bottom: 1px solid var(--light-gray); }
-.tab { flex:1; padding:12px 0; text-align:center; color:#666; cursor:pointer; font-size:0.8rem; }
+.tab { flex:1; padding:10px 0; text-align:center; color:#666; cursor:pointer; font-size:0.8rem; }
 .tab.active { color:var(--gold); border-bottom:2px solid var(--gold); font-weight:bold; }
 
 /* ラスト・コンシェルジュ モーダル */
@@ -136,7 +136,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .btn-sug-apply{background:#000; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; flex:1.5; font-size:0.8rem; cursor:pointer;}
 .btn-sug-skip{background:transparent; color:#111; border:none; flex:1; font-weight:bold; font-size:0.75rem; cursor:pointer;}
 
-/* 🤖 AIコンシェルジュ位置固定 */
+/* AIコンシェルジュ位置固定 */
 #concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:2001;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
 #concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:0.3s;text-align:center;pointer-events:auto;min-width:200px;}
 .bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
@@ -228,20 +228,21 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div id="concierge-wrapper">
     <div id="concierge-bubble"><div class="bubble-tail"></div><span id="concierge-msg"></span></div>
     <div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()">
-        <!-- 💡 指示通り完全に復元したコンシェルジュアイコン -->
+        <!-- 💡 指示通り完全に復元した黄金のシルエット・コンシェルジュ -->
         <svg viewBox="0 0 100 100" width="34" height="34" xmlns="http://www.w3.org/2000/svg">
-          <!-- 帽子（コンシェルジュスタイル） -->
+          <!-- コンシェルジュハット -->
           <path d="M30 28 Q50 18 70 28 L70 34 L30 34 Z" fill="#d4af37"/>
-          <!-- 顔（誠実な表情） -->
-          <circle cx="50" cy="50" r="18" fill="#fff" stroke="#d4af37" stroke-width="2"/>
+          <!-- 顔（誠実なシルエット） -->
+          <circle cx="50" cy="50" r="18" fill="#fff" stroke="#d4af37" stroke-width="2.5"/>
           <circle cx="44" cy="48" r="1.5" fill="#000"/>
           <circle cx="56" cy="48" r="1.5" fill="#000"/>
-          <path d="M46 58 Q50 61 54 58" fill="none" stroke="#000" stroke-width="1.2"/>
-          <!-- ジャケット（ジャケットとネームタグ） -->
-          <path d="M30 68 L70 68 L78 95 L22 95 Z" fill="#111" stroke="#d4af37" stroke-width="2"/>
-          <path d="M50 68 L40 85 M50 68 L60 85" stroke="#d4af37" stroke-width="1.2"/>
-          <!-- ネームタグ（右胸付近） -->
-          <rect x="58" y="78" width="8" height="4" fill="#d4af37"/>
+          <path d="M46 58 Q50 61 54 58" fill="none" stroke="#000" stroke-width="1.5"/>
+          <!-- コンシェルジュジャケット（シルエットスタイル） -->
+          <path d="M30 68 L70 68 L78 95 L22 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/>
+          <!-- 襟の切り込み -->
+          <path d="M50 68 L42 84 M50 68 L58 84" stroke="#d4af37" stroke-width="1.5"/>
+          <!-- ネームタグ（金色のアクセント） -->
+          <rect x="58" y="76" width="8" height="4" fill="#d4af37"/>
         </svg>
     </div>
 </div>
@@ -263,19 +264,33 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     <div id="action-btn-container"></div>
 </div>
 
+<div id="repeat-guidance-modal">
+    <div class="guidance-box">
+        <div class="guidance-title">内容をコピーしました</div>
+        <div class="guidance-step">
+            <b>❶. LINE予約メニューへ</b><br>
+            LINEの予約メニュー〔複数メニュー【時間枠】〕より、<span id="guide-hours" style="color:var(--gold); font-weight:bold;">●.● 時間枠</span>に予約をお取りください。
+        </div>
+        <div class="guidance-step">
+            <b>❷. 備考欄に貼り付け</b><br>
+            日時を選んだら、予約画面の【備考欄】にコピー内容を貼り付けてください。
+        </div>
+        <button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
+        <button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button>
+    </div>
+</div>
+
 <script>
 // ==========================================
-// 1. 変数・設定
+// 1. 変数・データ設定
 // ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwd_vgJV_asH2zWXKwBhDdSU_aAQZkLen4f29HRnN1bsY4UcudqL9VRABDYHeLtRmk07Q/exec";
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], dismissedSuggestions = [];
 var bubbleTimer = null;
+var rawSlotValue = 0; // 💡 修正点：内部計算用の純粋な数値を保持
 
-// ==========================================
-// 2. メニューデータ
-// ==========================================
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
     set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット',cat:'set',imgs:{body:'set_fullbody_noface_body'},cool:0},
@@ -367,7 +382,7 @@ function getOriginalTotal(idList) {
 }
 
 // ==========================================
-// 3. アプリ制御
+// 3. アプリ制御・描画
 // ==========================================
 function forceStart(t) {
     document.getElementById('gate-modal').style.display='none'; userType=t;
@@ -455,7 +470,12 @@ function render() {
     }
     
     if (suggestionId) {
+        var sugItem = menuData[suggestionId];
         var sugLeaves = itemLeaves[suggestionId];
+        if (sugItem.imgs) {
+             if (sugItem.imgs.body) { var sb = document.getElementById("img-" + sugItem.imgs.body); if(sb) sb.classList.add('suggest-blink'); }
+             if (sugItem.imgs.face) { var sf = document.getElementById("img-" + sugItem.imgs.face); if(sf) sf.classList.add('suggest-blink'); }
+        }
         for (var sl = 0; sl < sugLeaves.length; sl++) {
             var leafId = sugLeaves[sl];
             if (currentLeaves.indexOf(leafId) === -1) { 
@@ -473,9 +493,7 @@ function render() {
     for (var sc = 0; sc < subCats.length; sc++) {
         var sub = subCats[sc];
         if (currentTab === 'part') {
-            var header = document.createElement('div'); header.className = 'menu-sub-header';
-            header.style.color="var(--gold)"; header.style.fontSize="0.85rem"; header.style.textAlign="center"; header.style.padding="20px 0 10px"; header.style.fontWeight="bold";
-            header.innerText = sub.label; area.appendChild(header);
+            var header = document.createElement('div'); header.className = 'menu-sub-header'; header.innerText = sub.label; area.appendChild(header);
         }
         for (var m = 0; m < keys.length; m++) {
             var id = keys[m], item = menuData[id];
@@ -511,14 +529,15 @@ function updateTotal() {
         t += 10; if (hasFaceCooling) t += 12; if (userType === 'new') t += 90;
     }
     var rounded = Math.ceil(t / 30) * 30;
-    var slotVal = (rounded / 60).toFixed(1);
+    rawSlotValue = (rounded / 60); // 💡 修正：計算用の数値を保持
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
-    document.getElementById('total-time-display').innerText = "枠 " + slotVal + " 時間枠";
+    document.getElementById('total-time-display').innerText = "枠 " + rawSlotValue.toFixed(1) + " 時間枠";
 }
 
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var keys = Object.keys(menuData);
+    var currentTotal = getOriginalTotal(selected);
     var currentLeaves = [];
     for (var s = 0; s < selected.length; s++) {
         var lNodes = itemLeaves[selected[s]];
@@ -537,7 +556,6 @@ function analyzeSuggestions(isManual) {
             }
             if (intersectingItems.length < 2) continue;
             var oldP = getOriginalTotal(intersectingItems), setP = getItemPrice(sid), diff = setP - oldP;
-            // 💡 誠実提案：あまりに高額な提案を控え、本当にお得なプランを優先
             if (diff <= 5000) return {sid:sid, type: (diff < 0 ? 'cheaper' : (diff === 0 ? 'equal' : 'upsell')), diff:diff, oldPrice:oldP, intersectingItems:intersectingItems};
         }
     }
@@ -559,7 +577,7 @@ function checkSuggestion(isManual) {
         html += '<div class="sug-benefit-msg">セットの方がお安くなります！</div>';
         showConciergeBubble("お安くなる組み合わせを見つけましたよ！");
     } else {
-        html += '<div class="sug-benefit-msg">こちらの方が断然お得ですよ！</div>';
+        html += '<div class="sug-benefit-msg">少しの追加で部位を大幅に増やせます！</div>';
         showConciergeBubble("最適なプランをご提案します！");
     }
     
@@ -594,7 +612,6 @@ function showConciergeBubble(msg) {
     bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000);
 }
 
-// 💡 予約ボタン押下時の制御
 function handleReserveAction() {
     if (selected.length === 0) return alert("メニューを選んでください");
     var best = analyzeSuggestions(true);
@@ -635,7 +652,6 @@ function handleRepeatBooking() {
     document.getElementById('repeat-guidance-modal').style.display = 'flex';
 }
 
-// 💡 修正点：エラーの根絶。数値抽出ロジックを確実に。
 function proceedToCalendar() {
     showLoading(true);
     var xhr = new XMLHttpRequest();
@@ -649,7 +665,6 @@ function proceedToCalendar() {
                     renderCalendar();
                     document.getElementById('calendar-modal').style.display = 'block';
                 } catch(e) {
-                    console.error("Parse Error:", e);
                     alert("通信エラーが発生しました。再度お試しください。");
                 }
             } else {
@@ -660,14 +675,10 @@ function proceedToCalendar() {
     xhr.send(JSON.stringify({type:'getBusySlots'}));
 }
 
-// 💡 修正点：フッターの文字列から数値を正確に抜き取る正規表現を強化
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
-    var timeStrRaw = document.getElementById('total-time-display').innerText;
-    // 「枠 1.5 時間枠」から「1.5」を確実に抽出（全ての余計な文字を排除）
-    var match = timeStrRaw.match(/(\d+\.\d+)|(\d+)/);
-    var slotVal = match ? parseFloat(match[0]) : 0;
-    var reqMs = slotVal * 60 * 60 * 1000;
+    // 💡 修正点：UIテキストをパースせず、保持していた生数値を使う
+    var reqMs = rawSlotValue * 60 * 60 * 1000;
 
     var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; 
     firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
@@ -723,7 +734,7 @@ function submitReservation() {
     var menuLabels = []; for(var i=0; i<selected.length; i++){ menuLabels.push(menuData[selected[i]].label); }
     var payload = {
         type:'reserve', userType:userType, date:tDate, time:tTime, endTime:tEndTime,
-        slot:document.getElementById('total-time-display').innerText.replace("枠 ",""),
+        slot:rawSlotValue.toFixed(1), // 💡 修正：数値をそのまま送信
         price:document.getElementById('total-price').innerText,
         menus:menuLabels.join(', '), name:n, tel:tel, email:em, memo:memo
     };
