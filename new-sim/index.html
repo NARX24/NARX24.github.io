@@ -384,10 +384,53 @@ function renderCalendar() {
 }
 function openInfoModal(d, t, et) { tDate=d; tTime=t; tEndTime=et; var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); } document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; document.getElementById('info-modal').style.display='block'; }
 function submitReservation() {
-    var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
-    if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
-    var payload = { type:'reserve', userType:userType, date:tDate, time:tTime, endTime:tEndTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
-    var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); }}; xhr.send(JSON.stringify(payload));
+    var n = document.getElementById('cust-name').value;
+    var tel = document.getElementById('cust-tel').value;
+    var em = document.getElementById('cust-email').value;
+    var memo = document.getElementById('cust-memo').value;
+
+    if(!n || !tel || !em) return alert("必須項目を入力してください");
+
+    showLoading(true);
+
+    var labels = [];
+    for(var i=0; i<selected.length; i++){
+        labels.push(menuData[selected[i]].label);
+    }
+
+    // 💡 Googleカレンダー側が受け取れる「正しい形式」に整理
+    var payload = {
+        type: 'reserve',
+        userType: userType,
+        date: tDate,      // yyyy/mm/dd
+        time: tTime,      // hh:mm
+        endTime: tEndTime,
+        slot: String(internalNumericSlot), // 数値を文字列に変換
+        price: document.getElementById('total-price').innerText,
+        menus: labels.join(', '),
+        name: n,
+        tel: tel,
+        email: em,
+        memo: memo
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", GAS_URL, true);
+    // 💡 重要：JSON形式で送ることを明示
+    xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8"); 
+
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4){
+            showLoading(false);
+            if(xhr.status === 200) {
+                alert("ご予約ありがとうございます。Googleカレンダーに登録し、確定メールを送信しました。");
+                location.reload();
+            } else {
+                alert("通信エラーが発生しました。もう一度お試しください。");
+            }
+        }
+    };
+    xhr.send(JSON.stringify(payload));
 }
 function handleRepeatBooking() { 
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
