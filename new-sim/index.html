@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.59.0</title>
+<title>NARX プレミアム予約システム Ver.60.0</title>
 
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
@@ -32,19 +32,19 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .tab { flex:1; padding:10px 0; text-align:center; color:#666; cursor:pointer; font-size:0.85rem; }
 .tab.active { color:var(--gold); border-bottom:2px solid var(--gold); font-weight:bold; }
 
-/* カテゴリ仕切り */
 .category-header { color: var(--gold); font-size: 0.85rem; text-align: center; padding: 35px 0 15px; letter-spacing: 4px; font-weight: bold; position: relative; }
 .category-header::before, .category-header::after { content: ""; position: absolute; top: 55%; width: 20%; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
 .category-header::before { left: 5%; }
 .category-header::after { right: 5%; }
 
-/* 💡 特殊部位バッジ装飾 */
-.special-badge { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 1px 7px; border-radius: 12px; margin-left: 8px; vertical-align: middle; display: inline-block; font-style: normal; letter-spacing: 0; }
+/* 💡 特殊部位バッジ */
+.special-badge { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 1px 7px; border-radius: 12px; margin-left: 8px; vertical-align: middle; display: inline-block; font-style: normal; }
 
 #final-suggestion-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 100003; display: none; justify-content: center; align-items: center; }
 .final-sug-box { width: 90%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; color: #fff; box-shadow: 0 10px 50px rgba(0,0,0,1); }
 .final-sug-text { font-size: 0.85rem; line-height: 1.8; margin-bottom: 25px; color: #ccc; }
 .final-sug-compare { background: #222; border-radius: 8px; padding: 15px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-around; }
+
 .menu-container { padding: 0 10px; }
 .item { background:var(--dark-gray); margin-bottom: 8px; padding: 16px; border-radius: 6px; display: flex; align-items: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
 .item.selected { border-color: var(--gold); background: #080808; }
@@ -53,6 +53,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-info { flex: 1; }
 .item-name { display: block; font-size: 0.95rem; }
 .item-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; }
+.sub-label { font-size: 0.65rem; color: #999; margin-left: 5px; font-style: normal; font-weight: normal; }
 
 #suggestion-box { position:fixed; bottom:185px; left:50%; transform:translateX(-50%); width:85%; max-width:320px; background:#f7d05e; color:#111; padding:15px; border-radius:12px; display:none; z-index:2000; box-shadow:0 10px 40px rgba(0,0,0,0.8); border:1px solid #fff; }
 .sug-title { font-weight:bold; font-size:0.7rem; color:#555; text-align:center; margin-bottom:5px; }
@@ -66,14 +67,14 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .btn-sug-apply { background:#000; color:#fff; border:none; padding:12px; border-radius:6px; font-weight:bold; flex:1.5; font-size:0.85rem; cursor:pointer; }
 .btn-sug-skip { background:transparent; color:#111; border:2px solid #111; padding:10px; border-radius:6px; flex:1; font-weight:bold; font-size:0.8rem; cursor:pointer; }
 
-#concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:5000;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
-#concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:0.3s;text-align:center;pointer-events:auto;min-width:200px;}
-.bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
-.concierge-icon{width:56px;height:56px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;transition:0.3s;border:2px solid var(--gold);}
-.concierge-icon.on{background:var(--gold);}
-.concierge-icon.off{background:#111;}
-.bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
-.btn-reserve{background:var(--gold);color:#000;width:100%;padding:16px;border-radius:6px;font-weight:bold;border:none;cursor:pointer;font-size:1rem;}
+#concierge-wrapper { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); z-index:5000; display:flex; align-items:center; flex-direction:column; pointer-events:none; }
+#concierge-bubble { display:none; background:#fff; color:#111; padding:12px 16px; border-radius:12px; font-size:0.75rem; font-weight:bold; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.6); opacity:0; transition:0.3s; text-align:center; pointer-events:auto; min-width:200px; }
+.bubble-tail { position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-top:10px solid #fff; }
+.concierge-icon { width:56px; height:56px; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.8); pointer-events:auto; transition:0.3s; border:2px solid var(--gold); }
+.concierge-icon.on { background:var(--gold); }
+.concierge-icon.off { background:#111; }
+.bottom-bar { position:fixed; bottom:0; left:0; width:100%; background:rgba(5,5,5,0.98); border-top:2px solid var(--gold); padding:15px 20px; box-sizing:border-box; z-index:100; }
+.btn-reserve { background:var(--gold); color:#000; width:100%; padding:16px; border-radius:6px; font-weight:bold; border:none; cursor:pointer; font-size:1rem; }
 #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200000; display: none; justify-content: center; align-items: center; color: var(--gold); font-weight: bold; }
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
 .cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
@@ -107,7 +108,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <script>
 // ==========================================
-// 💡 GASのURLをここに貼り付けてください
+// 💡 GASのURL
 // ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwcyiNOsEDn5ynbWsjgUlceZkAlIZlQxehl9RokxxvIeh3_FqkcfA0aDlaRtbXUtL6TjQ/exec";
 
@@ -130,8 +131,6 @@ var menuData = {
     set_arms_legs:{price:28600,time:110,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'},cool:0},
     set_arms:{price:15400,time:60,label:'両腕セット',cat:'set',imgs:{body:'set_arms'},cool:0},
     set_legs:{price:17600,time:60,label:'両足セット',cat:'set',imgs:{body:'set_legs'},cool:0},
-    
-    // パーツ：顔
     part_nose_under:{price:4400,time:7,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},cool:1},
     part_mouth_under:{price:4400,time:7,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},cool:1},
     part_cheek:{price:4400,time:7,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},cool:1},
@@ -139,27 +138,23 @@ var menuData = {
     part_neck:{price:4400,time:10,label:'首',cat:'part',subCat:'face',imgs:{face:'part_neck'},cool:1},
     part_forehead:{price:6600,time:10,label:'額',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_forehead'},cool:0},
     part_eyebrow_upper:{price:8800,time:18,label:'眉上',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_upper'},cool:0},
-    part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',imgs:{face:'part_eyebrow_middle'},cool:0},
-    part_eyebrow_lower:{price:6600,time:18,label:'眉下',cat:'part',subCat:'face',imgs:{face:'part_eyebrow_lower'},cool:0},
+    part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},cool:0},
+    part_eyebrow_lower:{price:6600,time:18,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'},cool:0},
     part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_tragus'},cool:0},
     part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'},cool:0},
     part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
-    
-    // パーツ：上半身
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
     part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nipple_around'},cool:0},
-    part_chest_nipple:{price:6600,time:18,label:'胸',cat:'part',subCat:'upper',imgs:{body:'part_chest_nipple'},cool:0},
+    part_chest_nipple:{price:6600,time:18,label:'胸',cat:'part',subCat:'upper',imgs:{body:'part_chest_nipple'},cool:0,note:'※乳輪周り含む'},
     part_navel_under:{price:4400,time:10,label:'ヘソ下',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_navel_under'},cool:0},
-    part_abdomen_navel:{price:6600,time:15,label:'腹部',cat:'part',subCat:'upper',imgs:{body:'part_abdomen_navel'},cool:0},
+    part_abdomen_navel:{price:6600,time:15,label:'腹部',cat:'part',subCat:'upper',imgs:{body:'part_abdomen_navel'},cool:0,note:'※ヘソ下含む'},
     part_back_upper:{price:6600,time:20,label:'背中上',cat:'part',subCat:'upper',imgs:{body:'part_back_upper'},cool:0},
     part_back_lower:{price:6600,time:20,label:'背中下',cat:'part',subCat:'upper',imgs:{body:'part_back_lower'},cool:0},
     part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'upper',imgs:{body:'part_elbow_upper'},cool:0},
     part_elbow_lower:{price:8800,time:25,label:'肘下',cat:'part',subCat:'upper',imgs:{body:'part_elbow_lower'},cool:0},
     part_hand_finger:{price:4400,time:15,label:'手の甲指',cat:'part',subCat:'upper',imgs:{body:'part_hand_finger'},cool:0},
-    
-    // パーツ：下半身
     part_buttocks:{price:6600,time:18,label:'臀部',cat:'part',subCat:'lower',imgs:{body:'part_buttocks'},cool:0},
     part_knee_upper:{price:8800,time:30,label:'膝上',cat:'part',subCat:'lower',imgs:{body:'part_knee_upper'},cool:0},
     part_knee_lower:{price:8800,time:35,label:'膝下',cat:'part',subCat:'lower',imgs:{body:'part_knee_lower'},cool:0},
@@ -167,7 +162,6 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'},cool:0},
     part_i_line:{price:7700,time:20,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
-    
     other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
     other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
     other_derma_injection:{price:22000,time:30,label:'ダーマ肌育',cat:'other',cool:1},
@@ -180,7 +174,7 @@ var setIncludes = {
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
-    set_upperbody:['set_fullface','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower'],
+    set_upperbody:['set_fullface','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
     set_lowerbody:['set_vio','part_buttocks'],
     set_fullbody_all:['set_upperbody','set_lowerbody'],
     set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
@@ -222,23 +216,33 @@ function analyzeSuggestions(isManual) {
     for (var s = 0; s < selected.length; s++) { var lNodes = itemLeaves[selected[s]]; for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); } }
     for (var i = 0; i < keys.length; i++) {
         var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
-        var candL = itemLeaves[sid], foundL = 0; for (var l = 0; l < candL.length; l++) { if (curL.indexOf(candL[l]) !== -1) foundL++; }
-        if (foundL >= 2) {
-            var intersect = []; for(var j=0; j<selected.length; j++) { var selId = selected[j], selL = itemLeaves[selId], isInc = true; for(var k=0; k<selL.length; k++){ if(candL.indexOf(selL[k]) === -1) isInc=false; } if(isInc) intersect.push(selId); }
-            if (intersect.length < 2) continue;
-            var oldP = getOriginalTotal(intersect), setP = getItemPrice(sid), diff = setP - oldP;
-            if (diff <= 5000) return {sid:sid, type: (diff < 0 ? 'cheaper' : (diff === 0 ? 'equal' : 'upsell')), diff:diff, oldPrice:oldP, intersectingItems:intersect};
+        var candL = itemLeaves[sid], foundL = 0;
+        var intersect = [];
+        for(var j=0; j<selected.length; j++) {
+            var selId = selected[j], selL = itemLeaves[selId], isInc = true;
+            for(var k=0; k<selL.length; k++){ if(candL.indexOf(selL[k]) === -1) isInc=false; }
+            if(isInc) intersect.push(selId);
         }
+        if (intersect.length < 2) continue;
+        var oldP = getOriginalTotal(intersect), setP = getItemPrice(sid), diff = setP - oldP;
+        if (diff <= 5000) return {sid:sid, type: (diff < 0 ? 'cheaper' : (diff === 0 ? 'equal' : 'upsell')), diff:diff, oldPrice:oldP, intersectingItems:intersect};
     } return null;
 }
 
 function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').style.display = 'none'; var best = analyzeSuggestions(isManual); if (!best) { suggestionId = null; return; }
     suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
-    var currentTotal = getOriginalTotal(selected), setItem = menuData[best.sid], newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
-    var diffVal = getOriginalTotal(selected) - newTotal;
-    var diffMsg = diffVal > 0 ? '¥' + diffVal.toLocaleString() + 'お得になります！' : '部位が増えて同額です！';
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + getOriginalTotal(selected).toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
+    var setItem = menuData[best.sid];
+    var currentTotal = getOriginalTotal(selected);
+    var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
+    var diffVal = currentTotal - newTotal;
+    
+    var diffMsg = "";
+    if(diffVal > 0) diffMsg = '¥' + diffVal.toLocaleString() + 'お得になります！';
+    else if(diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
+    else diffMsg = '最適なセットプランのご提案';
+
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
 
@@ -253,10 +257,13 @@ function handleReserveAction() {
     if (best && (best.type === 'cheaper' || best.type === 'equal')) {
         suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
         var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
-        document.getElementById('final-suggestion-modal').style.display = 'flex'; document.getElementById('final-sug-desc').innerHTML = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？";
+        document.getElementById('final-suggestion-modal').style.display = 'flex'; 
         var curP = getOriginalTotal(selected);
+        var setP = curP + best.diff;
+        var finalMsg = best.diff < 0 ? "今より ¥"+Math.abs(best.diff).toLocaleString()+" お安く予約できます。" : "料金はそのままで、部位を増やすことができます。";
+        document.getElementById('final-sug-desc').innerHTML = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>" + finalMsg;
         document.getElementById('final-old-price').innerText = "¥" + curP.toLocaleString();
-        document.getElementById('final-new-price').innerText = "¥" + (curP + best.diff).toLocaleString(); return;
+        document.getElementById('final-new-price').innerText = "¥" + setP.toLocaleString(); return;
     } proceedReservation();
 }
 function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedReservation, 100); }
@@ -266,7 +273,7 @@ function proceedReservation() { if (userType === 'new') { proceedToCalendar(); }
 function proceedToCalendar() {
     showLoading(true);
     var xhr = new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
-    xhr.onreadystatechange = function() { if (xhr.readyState === 4) { showLoading(false); if (xhr.status === 200) { try { busySlots = JSON.parse(xhr.responseText); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block'; } catch(e) { alert("予約状況の取得に失敗しました。"); } } } };
+    xhr.onreadystatechange = function() { if (xhr.readyState === 4) { showLoading(false); if (xhr.status === 200) { try { busySlots = JSON.parse(xhr.responseText); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block'; } catch(e) { alert("予約情報の解析に失敗しました。"); } } } };
     xhr.send(JSON.stringify({type:'getBusySlots'}));
 }
 
@@ -314,7 +321,6 @@ function handleRepeatBooking() { document.getElementById('guide-hours').innerTex
 function toggleConcierge() { isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon'); if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); } else { icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); } }
 function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
 function skipSuggestion(id) { document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
-
 function forceStart(t) { document.getElementById('gate-modal').style.display='none'; userType=t; document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回適用中":"【会員様】通常価格"; document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="handleReserveAction()">予約を確認して次へ</button>'; initApp(); render(); }
 
 function initApp() {
@@ -361,28 +367,28 @@ function render() {
                         var header = document.createElement('div'); header.className = "category-header"; header.innerText = subCats[sc].label;
                         area.appendChild(header); headAdded = true;
                     }
-                    createItem(area, id, item, curL);
+                    createMenuItem(area, id, item, curL);
                 }
             }
         }
     } else {
         for (var m = 0; m < keys.length; m++) {
             var id = keys[m], item = menuData[id];
-            if (item.cat === currentTab) createItem(area, id, item, curL);
+            if (item.cat === currentTab) createMenuItem(area, id, item, curL);
         }
     }
     updateTotal();
 }
 
-function createItem(area, id, item, curL) {
+function createMenuItem(area, id, item, curL) {
     var isSel = selected.indexOf(id) !== -1, isDis = false;
     if (!isSel) { var itemL = itemLeaves[id]; for (var l = 0; l < itemL.length; l++) { if (curL.indexOf(itemL[l]) !== -1) { isDis = true; break; } } }
     var div = document.createElement('div'); div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
     (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
     var specialTag = item.isSpecial ? '<i class="special-badge">特殊部位</i>' : '';
-    div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + specialTag + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div);
+    var noteTag = item.note ? '<span class="sub-label">' + item.note + '</span>' : '';
+    div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + noteTag + specialTag + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div);
 }
-
 initApp();
 </script>
 <div id="calendar-modal"><div class="cal-header"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><button onclick="changeWeek(-1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">◀ 前週</button><span id="cal-title" style="color:var(--gold); font-size:0.95rem; font-weight:bold;"></span><button onclick="changeWeek(1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">次週 ▶</button></div><button onclick="closeCalendarModal()" style="color:#888; background:none; border:none; width:100%; margin-top:10px;">メニューに戻る</button></div><div class="cal-outer-wrapper"><div id="calendar-container"></div></div></div>
