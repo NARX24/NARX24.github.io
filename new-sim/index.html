@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.56.0</title>
-
+<title>NARX プレミアム予約システム Ver.58.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -31,6 +30,13 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .tabs { display:flex; gap:2px; margin: 10px 10px 0; border-bottom: 1px solid var(--light-gray); }
 .tab { flex:1; padding:10px 0; text-align:center; color:#666; cursor:pointer; font-size:0.85rem; }
 .tab.active { color:var(--gold); border-bottom:2px solid var(--gold); font-weight:bold; }
+
+/* 💡 高級感のあるカテゴリ仕切り */
+.category-header { color: var(--gold); font-size: 0.8rem; text-align: center; padding: 30px 0 15px; letter-spacing: 3px; font-weight: bold; position: relative; }
+.category-header::before, .category-header::after { content: ""; position: absolute; top: 55%; width: 25%; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
+.category-header::before { left: 0; }
+.category-header::after { right: 0; }
+
 #final-suggestion-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 100003; display: none; justify-content: center; align-items: center; }
 .final-sug-box { width: 90%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; color: #fff; box-shadow: 0 10px 50px rgba(0,0,0,1); }
 .final-sug-text { font-size: 0.85rem; line-height: 1.8; margin-bottom: 25px; color: #ccc; }
@@ -44,7 +50,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .item-name { display:block; font-size:0.95rem; }
 .item-price { color:var(--gold); font-weight:bold; font-size:0.9rem; }
 
-/* AI提案パネル（高級版） */
 #suggestion-box { position:fixed; bottom:185px; left:50%; transform:translateX(-50%); width:85%; max-width:320px; background:#f7d05e; color:#111; padding:15px; border-radius:12px; display:none; z-index:2000; box-shadow:0 10px 40px rgba(0,0,0,0.8); border:1px solid #fff; }
 .sug-title { font-weight:bold; font-size:0.7rem; color:#555; text-align:center; margin-bottom:5px; }
 .sug-benefit-msg { text-align:center; font-size:0.75rem; color:#fff; background:#111; padding:6px; border-radius:4px; font-weight:bold; margin-bottom:10px; }
@@ -57,14 +62,14 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .btn-sug-apply { background:#000; color:#fff; border:none; padding:12px; border-radius:6px; font-weight:bold; flex:1.5; font-size:0.85rem; cursor:pointer; }
 .btn-sug-skip { background:transparent; color:#111; border:2px solid #111; padding:10px; border-radius:6px; flex:1; font-weight:bold; font-size:0.8rem; cursor:pointer; }
 
-#concierge-wrapper { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); z-index:5000; display:flex; align-items:center; flex-direction:column; pointer-events:none; }
-#concierge-bubble { display:none; background:#fff; color:#111; padding:12px 16px; border-radius:12px; font-size:0.75rem; font-weight:bold; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.6); opacity:0; transition:0.3s; text-align:center; pointer-events:auto; min-width:200px; }
-.bubble-tail { position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-top:10px solid #fff; }
-.concierge-icon { width:56px; height:56px; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.8); pointer-events:auto; transition:0.3s; border:2px solid var(--gold); }
-.concierge-icon.on { background:var(--gold); }
-.concierge-icon.off { background:#111; }
-.bottom-bar { position:fixed; bottom:0; left:0; width:100%; background:rgba(5,5,5,0.98); border-top:2px solid var(--gold); padding:15px 20px; box-sizing:border-box; z-index:100; }
-.btn-reserve { background:var(--gold); color:#000; width:100%; padding:16px; border-radius:6px; font-weight:bold; border:none; cursor:pointer; font-size:1rem; }
+#concierge-wrapper{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:5000;display:flex;align-items:center;flex-direction:column;pointer-events:none;}
+#concierge-bubble{display:none;background:#fff;color:#111;padding:12px 16px;border-radius:12px;font-size:0.75rem;font-weight:bold;margin-bottom:12px;box-shadow:0 4px 15px rgba(0,0,0,0.6);opacity:0;transition:0.3s;text-align:center;pointer-events:auto;min-width:200px;}
+.bubble-tail{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #fff;}
+.concierge-icon{width:56px;height:56px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.8);pointer-events:auto;transition:0.3s;border:2px solid var(--gold);}
+.concierge-icon.on{background:var(--gold);}
+.concierge-icon.off{background:#111;}
+.bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(5,5,5,0.98);border-top:2px solid var(--gold);padding:15px 20px;box-sizing:border-box;z-index:100;}
+.btn-reserve{background:var(--gold);color:#000;width:100%;padding:16px;border-radius:6px;font-weight:bold;border:none;cursor:pointer;font-size:1rem;}
 #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200000; display: none; justify-content: center; align-items: center; color: var(--gold); font-weight: bold; }
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
 .cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
@@ -93,7 +98,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div class="container"><div class="header-logo-container"><img src="logo_white.png" class="header-logo-img" alt="NARX"></div><div class="sticky-header-group"><div id="mode-display-area" style="text-align:center; padding:10px 0 5px;"><div id="mode-display"></div></div><div class="dual-visual-container"><div class="view-panel" id="body-panel"><span>BODY</span><img src="base_body.png" class="base-img"></div><div class="view-panel" id="face-panel"><span>FACE</span><img src="base_face.png" class="base-img"></div></div><div id="selected-chips-area"><div class="chips-header"><span class="chips-title">現在選択中のメニュー</span><button class="btn-reset" onclick="resetSelection()">↻ クリア</button></div><div class="chips-container" id="chips-container"></div></div><div class="tabs"><div id="tab-set" class="tab active" onclick="changeTab('set')">セットメニュー</div><div id="tab-part" class="tab" onclick="changeTab('part')">パーツメニュー</div><div id="tab-other" class="tab" onclick="changeTab('other')">その他</div></div></div><div id="menu-area" class="menu-container"></div></div>
 <div id="concierge-wrapper"><div id="concierge-bubble"><div class="bubble-tail"></div><span id="concierge-msg"></span></div><div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()"><svg viewBox="0 0 100 100" width="34" height="34" xmlns="http://www.w3.org/2000/svg"><path d="M30 28 Q50 16 70 28 L70 34 L30 34 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/><circle cx="50" cy="50" r="18" fill="#111" stroke="#d4af37" stroke-width="2.5"/><path d="M44 48 L46 48 M54 48 L56 48" stroke="#d4af37" stroke-width="2" stroke-linecap="round"/><path d="M46 58 Q50 62 54 58" fill="none" stroke="#d4af37" stroke-width="1.5"/><path d="M25 68 L75 68 L85 95 L15 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/><path d="M50 68 L40 85 M50 68 L60 85" stroke="#d4af37" stroke-width="1.2"/><rect x="58" y="78" width="8" height="4" fill="#d4af37"/></svg></div></div>
 <div id="suggestion-box"></div>
-<div class="bottom-bar"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"><div style="text-align:left;"><div style="font-size:0.65rem; color:#888;">料金合計(税込)</div><span id="total-price" style="font-size:1.5rem; color:var(--gold); font-weight:bold;">¥0</span></div><div style="text-align:right;"><div style="font-size:0.65rem; color:#888;">ご予約時間</div><span id="total-time-display" style="font-size:1rem; font-weight:bold; color:var(--gold);">枠 0.0 時間枠</span></div></div><div id="action-btn-container"></div></div>
+<div class="bottom-bar"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px; width:100%;"><div style="text-align:left;"><div style="font-size:0.65rem; color:#888;">料金合計(税込)</div><span id="total-price" style="font-size:1.5rem; color:var(--gold); font-weight:bold;">¥0</span></div><div style="text-align:right;"><div style="font-size:0.65rem; color:#888;">ご予約時間</div><span id="total-time-display" style="font-size:1rem; font-weight:bold; color:var(--gold);">枠 0.0 時間枠</span></div></div><div id="action-btn-container" style="width:100%;"></div></div>
 <div id="repeat-guidance-modal"><div class="guidance-box"><div class="guidance-title">内容をコピーしました</div><div class="guidance-step"><b>❶. LINE予約メニューへ</b><br>LINEの予約メニューより、<span id="guide-hours" style="color:var(--gold); font-weight:bold;">●.● 時間枠</span>に予約をお取りください。</div><button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button><button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button></div></div>
 
 <script>
@@ -121,6 +126,8 @@ var menuData = {
     set_arms_legs:{price:28600,time:110,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'},cool:0},
     set_arms:{price:15400,time:60,label:'両腕セット',cat:'set',imgs:{body:'set_arms'},cool:0},
     set_legs:{price:17600,time:60,label:'両足セット',cat:'set',imgs:{body:'set_legs'},cool:0},
+    
+    // パーツ：顔
     part_nose_under:{price:4400,time:7,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},cool:1},
     part_mouth_under:{price:4400,time:7,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},cool:1},
     part_cheek:{price:4400,time:7,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},cool:1},
@@ -130,6 +137,12 @@ var menuData = {
     part_eyebrow_upper:{price:8800,time:18,label:'眉上',cat:'part',subCat:'face',imgs:{face:'part_eyebrow_upper'},cool:0},
     part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',imgs:{face:'part_eyebrow_middle'},cool:0},
     part_eyebrow_lower:{price:6600,time:18,label:'眉下',cat:'part',subCat:'face',imgs:{face:'part_eyebrow_lower'},cool:0},
+    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',imgs:{face:'part_tragus'},cool:0},
+    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',imgs:{face:'part_earlobe'},cool:0},
+    part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',imgs:{face:'part_nose_hair'},cool:0},
+    part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
+    
+    // パーツ：上半身
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
     part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'upper',imgs:{body:'part_nipple_around'},cool:0},
@@ -141,6 +154,8 @@ var menuData = {
     part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'upper',imgs:{body:'part_elbow_upper'},cool:0},
     part_elbow_lower:{price:8800,time:25,label:'肘下',cat:'part',subCat:'upper',imgs:{body:'part_elbow_lower'},cool:0},
     part_hand_finger:{price:4400,time:15,label:'手の甲指',cat:'part',subCat:'upper',imgs:{body:'part_hand_finger'},cool:0},
+    
+    // パーツ：下半身
     part_buttocks:{price:6600,time:18,label:'臀部',cat:'part',subCat:'lower',imgs:{body:'part_buttocks'},cool:0},
     part_knee_upper:{price:8800,time:30,label:'膝上',cat:'part',subCat:'lower',imgs:{body:'part_knee_upper'},cool:0},
     part_knee_lower:{price:8800,time:35,label:'膝下',cat:'part',subCat:'lower',imgs:{body:'part_knee_lower'},cool:0},
@@ -148,6 +163,7 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'},cool:0},
     part_i_line:{price:7700,time:20,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
+    
     other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
     other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
     other_derma_injection:{price:22000,time:30,label:'ダーマ肌育',cat:'other',cool:1},
@@ -156,19 +172,24 @@ var menuData = {
     opt_new_5:{price:1100,time:10,label:'ＳＶ',cat:'other'}
 };
 
-// 💡 復活：セットメニュー構成データ
+// 💡 復元：セットの構成データ（AI提案の判断基準）
 var setIncludes = {
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
     set_upperbody:['set_fullface','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower'],
     set_lowerbody:['set_vio','part_buttocks'],
-    set_fullbody_all:['set_upperbody','set_lowerbody','set_fullface','set_vio'],
+    set_fullbody_all:['set_upperbody','set_lowerbody'],
+    set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
+    set_legs:['part_knee_upper','part_knee_lower','part_foot_toe'],
     set_chest_abdomen:['part_chest_nipple','part_abdomen_navel'],
     set_arms_legs:['set_arms','set_legs'],
-    set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
-    set_legs:['part_knee_upper','part_knee_lower','part_foot_toe']
+    set_fullface_eyebrow:['set_fullface','set_eyebrow']
 };
+
+function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
+function closeCalendarModal(){ document.getElementById('calendar-modal').style.display='none'; weekOffset=0; }
+function changeWeek(n) { weekOffset += n; proceedToCalendar(); }
 
 function getItemPrice(id) {
     var item = menuData[id]; if (userType === 'new') {
@@ -194,7 +215,7 @@ function updateTotal() {
 
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
-    var keys = Object.keys(menuData), currentTotal = getOriginalTotal(selected), curL = [];
+    var keys = Object.keys(menuData), curL = [];
     for (var s = 0; s < selected.length; s++) { var lNodes = itemLeaves[selected[s]]; for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); } }
     for (var i = 0; i < keys.length; i++) {
         var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
@@ -212,8 +233,8 @@ function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').style.display = 'none'; var best = analyzeSuggestions(isManual); if (!best) { suggestionId = null; return; }
     suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
     var currentTotal = getOriginalTotal(selected), setItem = menuData[best.sid], newTotal = currentTotal - best.oldPrice + getItemPrice(best.sid);
-    var diffMsg = best.diff < 0 ? '¥' + Math.abs(best.diff).toLocaleString() + 'お得になります！' : '部位が増えて同額です！';
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
+    var diffText = best.diff < 0 ? '¥' + Math.abs(best.diff).toLocaleString() + 'お得になります！' : '料金そのままで部位が増えます！';
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffText+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
 
@@ -237,9 +258,9 @@ function cancelAndProceed() { document.getElementById('final-suggestion-modal').
 function proceedReservation() { if (userType === 'new') { proceedToCalendar(); } else { handleRepeatBooking(); } }
 
 function proceedToCalendar() {
-    document.getElementById('loading-overlay').style.display = 'flex';
+    showLoading(true);
     var xhr = new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
-    xhr.onreadystatechange = function() { if (xhr.readyState === 4) { document.getElementById('loading-overlay').style.display = 'none'; if (xhr.status === 200) { try { busySlots = JSON.parse(xhr.responseText); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block'; } catch(e) { alert("解析に失敗しました。"); } } } };
+    xhr.onreadystatechange = function() { if (xhr.readyState === 4) { showLoading(false); if (xhr.status === 200) { try { busySlots = JSON.parse(xhr.responseText); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block'; } catch(e) { alert("予約情報の解析に失敗しました。"); } } } };
     xhr.send(JSON.stringify({type:'getBusySlots'}));
 }
 
@@ -279,16 +300,16 @@ function renderCalendar() {
 function openInfoModal(d, t, et) { tDate=d; tTime=t; tEndTime=et; var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); } document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; document.getElementById('info-modal').style.display='block'; }
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
-    if(!n||!tel||!em) return alert("必須項目を入力してください"); document.getElementById('loading-overlay').style.display = 'flex';
-    var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
+    if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = { type:'reserve', userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
-    var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.onreadystatechange=function(){ if(xhr.readyState===4){ document.getElementById('loading-overlay').style.display = 'none'; alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); }}; xhr.send(JSON.stringify(payload));
+    var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); }}; xhr.send(JSON.stringify(payload));
 }
 function handleRepeatBooking() { document.getElementById('guide-hours').innerText = internalNumericSlot.toFixed(1) + " 時間枠"; document.getElementById('repeat-guidance-modal').style.display = 'flex'; }
 function toggleConcierge() { isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon'); if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); } else { icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); } }
 function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
 function skipSuggestion(id) { document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
 function forceStart(t) { document.getElementById('gate-modal').style.display='none'; userType=t; document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回適用中":"【会員様】通常価格"; document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="handleReserveAction()">予約を確認して次へ</button>'; initApp(); render(); }
+
 function initApp() {
     function getLeafNodes(id) { var leaves = []; function traverse(nodeId) { if (setIncludes[nodeId]) { for (var i = 0; i < setIncludes[nodeId].length; i++) { traverse(setIncludes[nodeId][i]); } } else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); } } traverse(id); return leaves; }
     var keys = Object.keys(menuData); for (var i = 0; i < keys.length; i++) { itemLeaves[keys[i]] = getLeafNodes(keys[i]); }
@@ -299,18 +320,66 @@ function createImg(parent, name) { var layerId = "img-" + name; if (document.get
 function changeTab(t){ currentTab=t; render(); }
 function resetSelection(){ selected = []; suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display='none'; render(); }
 function toggleItem(id){ document.getElementById('suggestion-box').style.display='none'; var idx=selected.indexOf(id); if(idx!==-1)selected.splice(idx,1); else selected.push(id); checkSuggestion(false); render(); }
+
 function render() {
     var area = document.getElementById('menu-area'); area.innerHTML=''; var tabs = document.querySelectorAll('.tab'); for (var t = 0; t < tabs.length; t++) { tabs[t].classList.remove('active'); } document.getElementById("tab-" + currentTab).classList.add('active');
     var container = document.getElementById('chips-container'); if (selected.length === 0) { container.innerHTML = '<span style="color:#444; font-size:0.65rem;">部位を選択してください</span>'; } else { container.innerHTML = ''; for (var i = 0; i < selected.length; i++) { var chip = document.createElement('div'); chip.className = 'chip'; chip.innerHTML = '<span>' + menuData[selected[i]].label + '</span><span class="chip-close" onclick="event.stopPropagation(); toggleItem(\'' + selected[i] + '\')">×</span>'; container.appendChild(chip); } }
     var parts = document.querySelectorAll('.layer-part'); for (var p = 0; p < parts.length; p++) { parts[p].classList.remove('active', 'suggest-blink'); }
     var curL = []; for (var s = 0; s < selected.length; s++) { var sid = selected[s], item = menuData[sid]; if (item.imgs) { if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); } if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); } } var lNodes = itemLeaves[sid]; for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); } }
     for (var cl = 0; cl < curL.length; cl++) { var leaf = menuData[curL[cl]]; if (leaf.imgs) { if (leaf.imgs.body) { var lb = document.getElementById("img-" + leaf.imgs.body); if(lb) lb.classList.add('active'); } if (leaf.imgs.face) { var lf = document.getElementById("img-" + leaf.imgs.face); if(lf) lf.classList.add('active'); } } }
-    var keys = Object.keys(menuData); for (var m = 0; m < keys.length; m++) { var id = keys[m], item = menuData[id]; if (item.cat !== currentTab) continue; var isSel = selected.indexOf(id) !== -1, isDis = false; if (!isSel) { var itemL = itemLeaves[id]; for (var l = 0; l < itemL.length; l++) { if (curL.indexOf(itemL[l]) !== -1) { isDis = true; break; } } }
-    var div = document.createElement('div'); div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : ''); (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
-    div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div); }
+    
+    // 💡 AI提案中のハイライト
+    if (suggestionId) {
+        var sugLeaves = itemLeaves[suggestionId];
+        for (var sl = 0; sl < sugLeaves.length; sl++) {
+            var leafId = sugLeaves[sl];
+            if (curL.indexOf(leafId) === -1) { 
+                var sLeaf = menuData[leafId];
+                if (sLeaf.imgs) {
+                    if (sLeaf.imgs.body) { var siBody = document.getElementById("img-" + sLeaf.imgs.body); if(siBody) siBody.classList.add('suggest-blink'); }
+                    if (sLeaf.imgs.face) { var siFace = document.getElementById("img-" + sLeaf.imgs.face); if(siFace) siFace.classList.add('suggest-blink'); }
+                }
+            }
+        }
+    }
+
+    var keys = Object.keys(menuData);
+    if (currentTab === 'part') {
+        var subCats = [
+            {id:'face', label:'Face / 顔パーツ'},
+            {id:'upper', label:'Upper Body / 上半身パーツ'},
+            {id:'lower', label:'Lower Body / 下半身パーツ'}
+        ];
+        for (var sc = 0; sc < subCats.length; sc++) {
+            var headerAdded = false;
+            for (var m = 0; m < keys.length; m++) {
+                var id = keys[m], item = menuData[id];
+                if (item.cat === 'part' && item.subCat === subCats[sc].id) {
+                    if (!headerAdded) {
+                        var header = document.createElement('div'); header.className = "category-header"; header.innerText = subCats[sc].label;
+                        area.appendChild(header); headerAdded = true;
+                    }
+                    createMenuItem(area, id, item, curL);
+                }
+            }
+        }
+    } else {
+        for (var m = 0; m < keys.length; m++) {
+            var id = keys[m], item = menuData[id];
+            if (item.cat === currentTab) createMenuItem(area, id, item, curL);
+        }
+    }
     updateTotal();
 }
-function changeWeek(n) { weekOffset += n; proceedToCalendar(); }
+
+function createMenuItem(area, id, item, curL) {
+    var isSel = selected.indexOf(id) !== -1, isDis = false;
+    if (!isSel) { var itemL = itemLeaves[id]; for (var l = 0; l < itemL.length; l++) { if (curL.indexOf(itemL[l]) !== -1) { isDis = true; break; } } }
+    var div = document.createElement('div'); div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
+    (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
+    div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div);
+}
+
 initApp();
 </script>
 <div id="calendar-modal"><div class="cal-header"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><button onclick="changeWeek(-1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">◀ 前週</button><span id="cal-title" style="color:var(--gold); font-size:0.95rem; font-weight:bold;"></span><button onclick="changeWeek(1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">次週 ▶</button></div><button onclick="closeCalendarModal()" style="color:#888; background:none; border:none; width:100%; margin-top:10px;">メニューに戻る</button></div><div class="cal-outer-wrapper"><div id="calendar-container"></div></div></div>
