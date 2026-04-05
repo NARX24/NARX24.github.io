@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge UI Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --narx-gold: #d4af37;
+            --narx-dark: #1a1a1a;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* 1. 全体を浮かせるラッパー */
+        #concierge-wrapper {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        /* 2. 吹き出しのデザイン */
+        #concierge-bubble {
+            background: white;
+            color: #333;
+            padding: 15px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 240px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        #concierge-bubble.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 吹き出しの三角部分 */
+        #concierge-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+        }
+
+        /* 3. アイコンボタン本体 */
+        .concierge-trigger {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #444, #111);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            border: 3px solid var(--narx-gold);
+            position: relative;
+        }
+
+        .concierge-trigger:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--narx-gold);
+        }
+
+        /* アイコン内のキラリと光るアニメーション */
+        .concierge-trigger::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: moveShine 4s infinite;
+        }
+
+        @keyframes moveShine {
+            0% { top: -150%; left: -150%; }
+            100% { top: 150%; left: 150%; }
+        }
+
+        .icon-svg {
+            width: 45px;
+            height: 45px;
+            fill: var(--narx-gold);
+            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-center p-10 bg-white rounded-3xl shadow-2xl">
+        <h1 class="text-2xl font-bold text-gray-800">NARX コンシェルジュ UI</h1>
+        <p class="text-gray-500 mt-2">画面右下のボタンに注目してください</p>
+    </div>
+
+    <!-- UI構造 -->
+    <div id="concierge-wrapper">
+        <div id="concierge-bubble" id="bubble">
+            最適な脱毛プランを<br>ご提案いたします！
+        </div>
+        
+        <div class="concierge-trigger" onclick="document.getElementById('concierge-bubble').classList.toggle('visible')">
+            <!-- ロボット/AI風のSVGアイコン -->
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,14.39 5.05,16.53 6.71,18L7.39,17.26C6.53,15.9 6,14.3 6,12.5C6,9.19 8.69,6.5 12,6.5C15.31,6.5 18,9.19 18,12.5C18,14.3 17.47,15.9 16.61,17.26L17.29,18C18.95,16.53 20,14.39 20,12A8,8 0 0,0 12,4M12,8.5A4,4 0 0,0 8,12.5A4,4 0 0,0 12,16.5A4,4 0 0,0 16,12.5A4,4 0 0,0 12,8.5M10,11.5A1.5,1.5 0 0,1 11.5,13A1.5,1.5 0 0,1 10,14.5A1.5,1.5 0 0,1 8.5,13A1.5,1.5 0 0,1 10,11.5M14,11.5A1.5,1.5 0 0,1 15.5,13A1.5,1.5 0 0,1 14,14.5A1.5,1.5 0 0,1 12.5,13A1.5,1.5 0 0,1 14,11.5Z" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        // 1.5秒後に自動で表示させる
+        setTimeout(() => {
+            document.getElementById('concierge-bubble').classList.add('visible');
+        }, 1500);
+    </script>
+</body>
+</html>
