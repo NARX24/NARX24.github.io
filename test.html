@@ -6,6 +6,7 @@
     <title>AI Concierge UI Preview</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* NARXスタイルのアニメーションとデザイン */
         :root {
             --narx-gold: #d4af37;
             --narx-dark: #1a1a1a;
@@ -18,7 +19,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0;
         }
 
         /* コンシェルジュ全体のラッパー */
@@ -87,8 +87,26 @@
         }
 
         .concierge-trigger:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(5deg);
             box-shadow: 0 8px 30px rgba(212, 175, 55, 0.4);
+        }
+
+        /* アイコン内の光沢アニメーション */
+        .concierge-trigger::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .icon-svg {
@@ -96,22 +114,32 @@
             height: 40px;
             fill: var(--narx-gold);
         }
+
+        /* 案内テキスト */
+        .guide-text {
+            color: #666;
+            font-size: 13px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="text-center p-4">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">NARX AI Concierge</h1>
-        <p class="text-gray-500">右下のアイコンをクリックすると<br>メッセージが表示されます。</p>
+    <div class="text-center">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">NARX AI Concierge UI</h1>
+        <p class="text-gray-500">右下のアイコンをクリックして動作を確認してください。</p>
     </div>
 
     <!-- AIコンシェルジュ UI構造 -->
     <div id="concierge-wrapper">
-        <div id="concierge-bubble">
+        <!-- 吹き出し -->
+        <div id="concierge-bubble" id="bubble">
             <span id="concierge-message">こんにちは！<br>最適な脱毛プランをご提案します。</span>
         </div>
         
+        <!-- コンシェルジュアイコン -->
         <div class="concierge-trigger" onclick="toggleBubble()">
+            <!-- AI/Robot SVG Icon -->
             <svg class="icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.1 21.45a.5.5 0 0 0 .616.616L7.22 20.713A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.474 0-2.85-.398-4.034-1.09a.5.5 0 0 0-.424-.044l-3.344.928.928-3.344a.5.5 0 0 0-.044-.424A7.957 7.957 0 0 1 4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8zm-3-9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-6 4a3 3 0 0 0 6 0H9z"/>
             </svg>
@@ -119,16 +147,39 @@
     </div>
 
     <script>
+        const messages = [
+            "こんにちは！<br>最適な脱毛プランをご提案します。",
+            "今なら「全身脱毛セット」がお得ですよ！",
+            "施術時間は約60分を予定しております。",
+            "気になる部位を選択してみてくださいね。"
+        ];
+        let currentMsgIndex = 0;
+
         function toggleBubble() {
             const bubble = document.getElementById('concierge-bubble');
-            bubble.classList.toggle('visible');
+            const messageSpan = document.getElementById('concierge-message');
+
+            if (bubble.classList.contains('visible')) {
+                // すでに表示されている場合はメッセージを切り替える
+                currentMsgIndex = (currentMsgIndex + 1) % messages.length;
+                
+                // フェードアウトさせてからテキストを変えてフェードイン
+                bubble.style.opacity = 0;
+                setTimeout(() => {
+                    messageSpan.innerHTML = messages[currentMsgIndex];
+                    bubble.style.opacity = 1;
+                }, 200);
+            } else {
+                // 表示する
+                bubble.classList.add('visible');
+            }
         }
 
-        // 自動表示
+        // 3秒後に自動的に最初のメッセージを表示
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('concierge-bubble').classList.add('visible');
-            }, 1000);
+            }, 1500);
         };
     </script>
 </body>
