@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.61.0</title>
+<title>NARX プレミアム予約システム Ver.62.0</title>
 
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
@@ -89,7 +89,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .form-group label { display: block; font-size: 0.8rem; color: var(--gold); margin-bottom: 5px; }
 .form-group input, .form-group textarea { width: 100%; padding: 14px; border-radius: 6px; border: 1px solid #444; background: #111; color: #fff; box-sizing: border-box; font-family: inherit; }
 
-/* 💡 会員用コピー案内モーダルのデザイン改善 */
 #repeat-guidance-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100002; display: none; justify-content: center; align-items: center; }
 .guidance-box { width: 85%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; text-align: left; }
 .guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 5px; }
@@ -109,27 +108,21 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     <div class="guidance-box">
         <div class="guidance-title">施術内容をコピーしました</div>
         <div style="text-align:center; font-size:0.75rem; color:#ccc; margin-bottom:20px; line-height:1.4;">LINE予約の「備考欄」に貼り付ける準備が整いました。</div>
-        
         <div class="guidance-step">
             <b style="color:var(--gold);">❶. 予約メニューの選択</b><br>
             公式LINEの予約画面より<br><span style="color:var(--white); font-weight:bold; border-bottom:1px solid var(--gold);">「複数メニュー【時間枠】」</span>をお選びください。
         </div>
-        
         <div class="guidance-step" style="border: 2px solid var(--gold); background: #1a1500; text-align:center; padding: 20px 15px; border-left: none;">
             <b style="color:#fff; font-size:0.9rem;">❷. 時間枠の選択 <span style="color:var(--gold);">[重要]</span></b><br>
             <div style="font-size:0.75rem; color:#ccc; margin-top:8px;">お客様の施術に必要な時間枠です。<br>必ず以下の時間枠をご選択ください。</div>
             <div id="guide-hours" style="color:var(--gold); font-size:1.4rem; font-weight:bold; margin:12px 0 5px; letter-spacing:1px; background:#000; padding:10px; border-radius:6px; border:1px dashed var(--gold);">【 ●.● 時間枠 】</div>
         </div>
-        
         <button class="btn-reserve" style="margin-top:10px;" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
         <button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button>
     </div>
 </div>
 
 <script>
-// ==========================================
-// 💡 GASのURL
-// ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwcyiNOsEDn5ynbWsjgUlceZkAlIZlQxehl9RokxxvIeh3_FqkcfA0aDlaRtbXUtL6TjQ/exec";
 
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
@@ -151,8 +144,6 @@ var menuData = {
     set_arms_legs:{price:28600,time:110,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'},cool:0},
     set_arms:{price:15400,time:60,label:'両腕セット',cat:'set',imgs:{body:'set_arms'},cool:0},
     set_legs:{price:17600,time:60,label:'両足セット',cat:'set',imgs:{body:'set_legs'},cool:0},
-    
-    // パーツ：顔
     part_nose_under:{price:4400,time:7,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},cool:1},
     part_mouth_under:{price:4400,time:7,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},cool:1},
     part_cheek:{price:4400,time:7,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},cool:1},
@@ -166,8 +157,6 @@ var menuData = {
     part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'},cool:0},
     part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
-    
-    // パーツ：上半身
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
     part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nipple_around'},cool:0},
@@ -179,8 +168,6 @@ var menuData = {
     part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'upper',imgs:{body:'part_elbow_upper'},cool:0},
     part_elbow_lower:{price:8800,time:25,label:'肘下',cat:'part',subCat:'upper',imgs:{body:'part_elbow_lower'},cool:0},
     part_hand_finger:{price:4400,time:15,label:'手の甲指',cat:'part',subCat:'upper',imgs:{body:'part_hand_finger'},cool:0},
-    
-    // パーツ：下半身
     part_buttocks:{price:6600,time:18,label:'臀部',cat:'part',subCat:'lower',imgs:{body:'part_buttocks'},cool:0},
     part_knee_upper:{price:8800,time:30,label:'膝上',cat:'part',subCat:'lower',imgs:{body:'part_knee_upper'},cool:0},
     part_knee_lower:{price:8800,time:35,label:'膝下',cat:'part',subCat:'lower',imgs:{body:'part_knee_lower'},cool:0},
@@ -188,7 +175,6 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'},cool:0},
     part_i_line:{price:7700,time:20,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
-    
     other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
     other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
     other_derma_injection:{price:22000,time:30,label:'ダーマ肌育',cat:'other',cool:1},
@@ -201,7 +187,7 @@ var setIncludes = {
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
     set_vio:['part_v_line','part_i_line','part_o_line'],
-    set_upperbody:['set_fullface','part_nape','part_armpit','part_chest_nipple','part_abdomen_navel','part_back_upper','part_back_lower'],
+    set_upperbody:['set_fullface','part_nape','part_armpit','part_chest_nipple','part_nipple_around','part_navel_under','part_abdomen_navel','part_back_upper','part_back_lower'],
     set_lowerbody:['set_vio','part_buttocks'],
     set_fullbody_all:['set_upperbody','set_lowerbody'],
     set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
@@ -243,7 +229,7 @@ function analyzeSuggestions(isManual) {
     for (var s = 0; s < selected.length; s++) { var lNodes = itemLeaves[selected[s]]; for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); } }
     for (var i = 0; i < keys.length; i++) {
         var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
-        var candL = itemLeaves[sid], foundL = 0;
+        var candL = itemLeaves[sid];
         var intersect = [];
         for(var j=0; j<selected.length; j++) {
             var selId = selected[j], selL = itemLeaves[selId], isInc = true;
@@ -252,7 +238,12 @@ function analyzeSuggestions(isManual) {
         }
         if (intersect.length < 2) continue;
         var oldP = getOriginalTotal(intersect), setP = getItemPrice(sid), diff = setP - oldP;
-        if (diff <= 5000) return {sid:sid, type: (diff < 0 ? 'cheaper' : (diff === 0 ? 'equal' : 'upsell')), diff:diff, oldPrice:oldP, intersectingItems:intersect};
+        
+        // 💡 誠実ロジック：新規モードなら安くなるか同額時のみ、会員モードなら差額5000円以内のみ
+        if (userType === 'new') { if (diff > 0) continue; }
+        else { if (diff > 5000) continue; }
+
+        return {sid:sid, type: (diff < 0 ? 'cheaper' : (diff === 0 ? 'equal' : 'upsell')), diff:diff, oldPrice:oldP, intersectingItems:intersect};
     } return null;
 }
 
@@ -267,9 +258,9 @@ function checkSuggestion(isManual) {
     var diffMsg = "";
     if(diffVal > 0) diffMsg = '¥' + diffVal.toLocaleString() + 'お得になります！';
     else if(diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
-    else diffMsg = '最適なセットプランのご提案';
+    else diffMsg = 'おすすめのセットプラン';
 
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + getOriginalTotal(selected).toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
 
@@ -286,11 +277,10 @@ function handleReserveAction() {
         var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
         document.getElementById('final-suggestion-modal').style.display = 'flex'; 
         var curP = getOriginalTotal(selected);
-        var setP = curP + best.diff;
         var finalMsg = best.diff < 0 ? "今より ¥"+Math.abs(best.diff).toLocaleString()+" お安く予約できます。" : "料金はそのままで、部位を増やすことができます。";
         document.getElementById('final-sug-desc').innerHTML = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>" + finalMsg;
         document.getElementById('final-old-price').innerText = "¥" + curP.toLocaleString();
-        document.getElementById('final-new-price').innerText = "¥" + setP.toLocaleString(); return;
+        document.getElementById('final-new-price').innerText = "¥" + (curP + best.diff).toLocaleString(); return;
     } proceedReservation();
 }
 function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedReservation, 100); }
@@ -300,7 +290,18 @@ function proceedReservation() { if (userType === 'new') { proceedToCalendar(); }
 function proceedToCalendar() {
     showLoading(true);
     var xhr = new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
-    xhr.onreadystatechange = function() { if (xhr.readyState === 4) { showLoading(false); if (xhr.status === 200) { try { busySlots = JSON.parse(xhr.responseText); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block'; } catch(e) { alert("予約状況の取得に失敗しました。"); } } } };
+    xhr.onreadystatechange = function() { 
+        if (xhr.readyState === 4) { 
+            showLoading(false); 
+            if (xhr.status === 200) { 
+                try { 
+                    busySlots = JSON.parse(xhr.responseText); 
+                    renderCalendar(); 
+                    document.getElementById('calendar-modal').style.display = 'block'; 
+                } catch(e) { alert("カレンダーの読み込みに失敗しました。再試行してください。"); } 
+            } else { alert("予約状況の取得に失敗しました。時間をおいて再度お試しください。"); }
+        } 
+    };
     xhr.send(JSON.stringify({type:'getBusySlots'}));
 }
 
@@ -345,13 +346,12 @@ function submitReservation() {
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); }}; xhr.send(JSON.stringify(payload));
 }
 
-// 💡 確実にクリップボードにコピーさせる＆モーダルの案内を表示する機能
+// 💡 クリップボード保存内容の整理
 function handleRepeatBooking() { 
     var labels = []; 
     for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
-    var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠\n※公式LINEの予約画面備考欄に貼り付けてください。";
+    var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠";
     
-    // コピー処理（新旧ブラウザ対応）
     var fallbackCopy = function(text) {
         var textArea = document.createElement("textarea");
         textArea.value = text;
@@ -360,16 +360,16 @@ function handleRepeatBooking() {
         textArea.focus(); textArea.select();
         try { document.execCommand('copy'); } catch (err) {}
         document.body.removeChild(textArea);
-        showGuidanceModal();
+        showModal();
     };
 
-    var showGuidanceModal = function() {
+    var showModal = function() {
         document.getElementById('guide-hours').innerText = "【 " + internalNumericSlot.toFixed(1) + " 時間枠 】";
         document.getElementById('repeat-guidance-modal').style.display = 'flex';
     };
 
     if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(txt).then(showGuidanceModal).catch(function(){ fallbackCopy(txt); });
+        navigator.clipboard.writeText(txt).then(showModal).catch(function(){ fallbackCopy(txt); });
     } else {
         fallbackCopy(txt);
     }
@@ -447,6 +447,8 @@ function createMenuItem(area, id, item, curL) {
     var noteTag = item.note ? '<span class="sub-label">' + item.note + '</span>' : '';
     div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + noteTag + specialTag + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div);
 }
+
+function changeWeek(n) { weekOffset += n; proceedToCalendar(); }
 initApp();
 </script>
 </body>
