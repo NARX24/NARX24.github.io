@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.60.0</title>
+<title>NARX プレミアム予約システム Ver.61.0</title>
 
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
@@ -37,7 +37,6 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .category-header::before { left: 5%; }
 .category-header::after { right: 5%; }
 
-/* 💡 特殊部位バッジ */
 .special-badge { font-size: 0.55rem; color: var(--gold); border: 1px solid var(--gold); padding: 1px 7px; border-radius: 12px; margin-left: 8px; vertical-align: middle; display: inline-block; font-style: normal; }
 
 #final-suggestion-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 100003; display: none; justify-content: center; align-items: center; }
@@ -89,11 +88,12 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .form-group { text-align: left; margin-bottom: 15px; }
 .form-group label { display: block; font-size: 0.8rem; color: var(--gold); margin-bottom: 5px; }
 .form-group input, .form-group textarea { width: 100%; padding: 14px; border-radius: 6px; border: 1px solid #444; background: #111; color: #fff; box-sizing: border-box; font-family: inherit; }
+
+/* 💡 会員用コピー案内モーダルのデザイン改善 */
 #repeat-guidance-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100002; display: none; justify-content: center; align-items: center; }
 .guidance-box { width: 85%; max-width: 400px; background: #111; border: 2px solid var(--gold); border-radius: 12px; padding: 25px; text-align: left; }
-.guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 20px; }
+.guidance-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 5px; }
 .guidance-step { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid var(--gold); }
-.guidance-step b { color: var(--gold); font-size: 1rem; }
 </style>
 </head>
 <body>
@@ -104,7 +104,27 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div id="concierge-wrapper"><div id="concierge-bubble"><div class="bubble-tail"></div><span id="concierge-msg"></span></div><div id="concierge-icon" class="concierge-icon on" onclick="toggleConcierge()"><svg viewBox="0 0 100 100" width="34" height="34" xmlns="http://www.w3.org/2000/svg"><path d="M30 28 Q50 16 70 28 L70 34 L30 34 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/><circle cx="50" cy="50" r="18" fill="#111" stroke="#d4af37" stroke-width="2.5"/><path d="M44 48 L46 48 M54 48 L56 48" stroke="#d4af37" stroke-width="2" stroke-linecap="round"/><path d="M46 58 Q50 62 54 58" fill="none" stroke="#d4af37" stroke-width="1.5"/><path d="M25 68 L75 68 L85 95 L15 95 Z" fill="#111" stroke="#d4af37" stroke-width="2.5"/><path d="M50 68 L40 85 M50 68 L60 85" stroke="#d4af37" stroke-width="1.2"/><rect x="58" y="78" width="8" height="4" fill="#d4af37"/></svg></div></div>
 <div id="suggestion-box"></div>
 <div class="bottom-bar"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"><div style="text-align:left;"><div style="font-size:0.65rem; color:#888;">料金合計(税込)</div><span id="total-price" style="font-size:1.5rem; color:var(--gold); font-weight:bold;">¥0</span></div><div style="text-align:right;"><div style="font-size:0.65rem; color:#888;">ご予約時間</div><span id="total-time-display" style="font-size:1rem; font-weight:bold; color:var(--gold);">枠 0.0 時間枠</span></div></div><div id="action-btn-container"></div></div>
-<div id="repeat-guidance-modal"><div class="guidance-box"><div class="guidance-title">内容をコピーしました</div><div class="guidance-step"><b>❶. LINE予約メニューへ</b><br>LINEの予約メニューより、<span id="guide-hours" style="color:var(--gold); font-weight:bold;">●.● 時間枠</span>に予約をお取りください。</div><button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button><button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button></div></div>
+
+<div id="repeat-guidance-modal">
+    <div class="guidance-box">
+        <div class="guidance-title">施術内容をコピーしました</div>
+        <div style="text-align:center; font-size:0.75rem; color:#ccc; margin-bottom:20px; line-height:1.4;">LINE予約の「備考欄」に貼り付ける準備が整いました。</div>
+        
+        <div class="guidance-step">
+            <b style="color:var(--gold);">❶. 予約メニューの選択</b><br>
+            公式LINEの予約画面より<br><span style="color:var(--white); font-weight:bold; border-bottom:1px solid var(--gold);">「複数メニュー【時間枠】」</span>をお選びください。
+        </div>
+        
+        <div class="guidance-step" style="border: 2px solid var(--gold); background: #1a1500; text-align:center; padding: 20px 15px; border-left: none;">
+            <b style="color:#fff; font-size:0.9rem;">❷. 時間枠の選択 <span style="color:var(--gold);">[重要]</span></b><br>
+            <div style="font-size:0.75rem; color:#ccc; margin-top:8px;">お客様の施術に必要な時間枠です。<br>必ず以下の時間枠をご選択ください。</div>
+            <div id="guide-hours" style="color:var(--gold); font-size:1.4rem; font-weight:bold; margin:12px 0 5px; letter-spacing:1px; background:#000; padding:10px; border-radius:6px; border:1px dashed var(--gold);">【 ●.● 時間枠 】</div>
+        </div>
+        
+        <button class="btn-reserve" style="margin-top:10px;" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
+        <button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button>
+    </div>
+</div>
 
 <script>
 // ==========================================
@@ -131,6 +151,8 @@ var menuData = {
     set_arms_legs:{price:28600,time:110,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'},cool:0},
     set_arms:{price:15400,time:60,label:'両腕セット',cat:'set',imgs:{body:'set_arms'},cool:0},
     set_legs:{price:17600,time:60,label:'両足セット',cat:'set',imgs:{body:'set_legs'},cool:0},
+    
+    // パーツ：顔
     part_nose_under:{price:4400,time:7,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},cool:1},
     part_mouth_under:{price:4400,time:7,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},cool:1},
     part_cheek:{price:4400,time:7,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},cool:1},
@@ -144,6 +166,8 @@ var menuData = {
     part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'},cool:0},
     part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
+    
+    // パーツ：上半身
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
     part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nipple_around'},cool:0},
@@ -155,6 +179,8 @@ var menuData = {
     part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'upper',imgs:{body:'part_elbow_upper'},cool:0},
     part_elbow_lower:{price:8800,time:25,label:'肘下',cat:'part',subCat:'upper',imgs:{body:'part_elbow_lower'},cool:0},
     part_hand_finger:{price:4400,time:15,label:'手の甲指',cat:'part',subCat:'upper',imgs:{body:'part_hand_finger'},cool:0},
+    
+    // パーツ：下半身
     part_buttocks:{price:6600,time:18,label:'臀部',cat:'part',subCat:'lower',imgs:{body:'part_buttocks'},cool:0},
     part_knee_upper:{price:8800,time:30,label:'膝上',cat:'part',subCat:'lower',imgs:{body:'part_knee_upper'},cool:0},
     part_knee_lower:{price:8800,time:35,label:'膝下',cat:'part',subCat:'lower',imgs:{body:'part_knee_lower'},cool:0},
@@ -162,6 +188,7 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'},cool:0},
     part_i_line:{price:7700,time:20,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
+    
     other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
     other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
     other_derma_injection:{price:22000,time:30,label:'ダーマ肌育',cat:'other',cool:1},
@@ -273,7 +300,7 @@ function proceedReservation() { if (userType === 'new') { proceedToCalendar(); }
 function proceedToCalendar() {
     showLoading(true);
     var xhr = new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
-    xhr.onreadystatechange = function() { if (xhr.readyState === 4) { showLoading(false); if (xhr.status === 200) { try { busySlots = JSON.parse(xhr.responseText); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block'; } catch(e) { alert("予約情報の解析に失敗しました。"); } } } };
+    xhr.onreadystatechange = function() { if (xhr.readyState === 4) { showLoading(false); if (xhr.status === 200) { try { busySlots = JSON.parse(xhr.responseText); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block'; } catch(e) { alert("予約状況の取得に失敗しました。"); } } } };
     xhr.send(JSON.stringify({type:'getBusySlots'}));
 }
 
@@ -317,10 +344,41 @@ function submitReservation() {
     var payload = { type:'reserve', userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); }}; xhr.send(JSON.stringify(payload));
 }
-function handleRepeatBooking() { document.getElementById('guide-hours').innerText = internalNumericSlot.toFixed(1) + " 時間枠"; document.getElementById('repeat-guidance-modal').style.display = 'flex'; }
+
+// 💡 確実にクリップボードにコピーさせる＆モーダルの案内を表示する機能
+function handleRepeatBooking() { 
+    var labels = []; 
+    for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
+    var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠\n※公式LINEの予約画面備考欄に貼り付けてください。";
+    
+    // コピー処理（新旧ブラウザ対応）
+    var fallbackCopy = function(text) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed"; textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus(); textArea.select();
+        try { document.execCommand('copy'); } catch (err) {}
+        document.body.removeChild(textArea);
+        showGuidanceModal();
+    };
+
+    var showGuidanceModal = function() {
+        document.getElementById('guide-hours').innerText = "【 " + internalNumericSlot.toFixed(1) + " 時間枠 】";
+        document.getElementById('repeat-guidance-modal').style.display = 'flex';
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(txt).then(showGuidanceModal).catch(function(){ fallbackCopy(txt); });
+    } else {
+        fallbackCopy(txt);
+    }
+}
+
 function toggleConcierge() { isConciergeON = !isConciergeON; var icon = document.getElementById('concierge-icon'); if (isConciergeON) { icon.className = 'concierge-icon on'; checkSuggestion(true); } else { icon.className = 'concierge-icon off'; showConciergeBubble("待機しております。"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); } }
 function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
 function skipSuggestion(id) { document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
+
 function forceStart(t) { document.getElementById('gate-modal').style.display='none'; userType=t; document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回適用中":"【会員様】通常価格"; document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="handleReserveAction()">予約を確認して次へ</button>'; initApp(); render(); }
 
 function initApp() {
@@ -391,7 +449,5 @@ function createMenuItem(area, id, item, curL) {
 }
 initApp();
 </script>
-<div id="calendar-modal"><div class="cal-header"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><button onclick="changeWeek(-1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">◀ 前週</button><span id="cal-title" style="color:var(--gold); font-size:0.95rem; font-weight:bold;"></span><button onclick="changeWeek(1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">次週 ▶</button></div><button onclick="closeCalendarModal()" style="color:#888; background:none; border:none; width:100%; margin-top:10px;">メニューに戻る</button></div><div class="cal-outer-wrapper"><div id="calendar-container"></div></div></div>
-<div id="info-modal"><div class="modal-content" style="background:#111; max-width:90%;"><h3 style="color:var(--gold); text-align:center;">内容の確認</h3><div id="selected-summary" style="font-size:0.85rem; background:#222; padding:20px; border-radius:8px; margin-bottom:25px; border-left:4px solid var(--gold); line-height:1.7; text-align:left;"></div><div class="form-group"><label>お名前</label><input type="text" id="cust-name"></div><div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel"></div><div class="form-group"><label>メール</label><input type="email" id="cust-email"></div><div class="form-group"><label>備考</label><textarea id="cust-memo" rows="3"></textarea></div><button class="btn-reserve" onclick="submitReservation()">予約を確定する</button><button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#888; width:100%; margin-top:20px;">修正する</button></div></div>
 </body>
 </html>
