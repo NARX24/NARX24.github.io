@@ -93,41 +93,23 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div class="container"><div class="header-logo-container"><img src="logo_white.png" class="header-logo-img" alt="NARX"></div><div class="sticky-header-group"><div id="mode-display-area" style="text-align:center; padding:10px 0 5px;"><div id="mode-display"></div></div><div class="dual-visual-container"><div class="view-panel" id="body-panel"><span>BODY</span><img src="base_body.png" class="base-img"></div><div class="view-panel" id="face-panel"><span>FACE</span><img src="base_face.png" class="base-img"></div></div><div id="selected-chips-area"><div class="chips-header"><span class="chips-title">現在選択中のメニュー</span><button class="btn-reset" onclick="resetSelection()">↻ クリア</button></div><div class="chips-container" id="chips-container"></div></div><div class="tabs"><div id="tab-set" class="tab active" onclick="changeTab('set')">セットメニュー</div><div id="tab-part" class="tab" onclick="changeTab('part')">パーツメニュー</div><div id="tab-other" class="tab" onclick="changeTab('other')">その他</div></div></div><div id="menu-area" class="menu-container"></div></div>
 <div id="concierge-wrapper"><div id="concierge-bubble"><div class="bubble-tail"></div><span id="concierge-msg"></span></div><div id="concierge-icon" class="concierge-icon" onclick="toggleConcierge()"><img id="concierge-img" src="concierge_on.png" alt="AIコンシェルジュ"></div></div>
 <div id="suggestion-box"></div>
-<div class="bottom-bar"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"><div style="text-align:left;"><div style="font-size:0.65rem; color:#888;">料金合計(税込)</div><span id="total-price" style="font-size:1.5rem; color:var(--gold); font-weight:bold;">¥0</span></div><div style="text-align:right;"><div style="font-size:0.65rem; color:#888;">ご予約時間</div><span id="total-time-display" style="font-size:1rem; font-weight:bold; color:var(--gold);">枠 0.0 時間枠</span></div></div><div id="action-btn-container"></div></div>
+<div class="bottom-bar"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"><div style="text-align:left;"><div style="font-size:0.65rem; color:#888;">料金合計(税込)</div><span id="total-price" style="font-size:1.5rem; color:var(--gold); font-weight:bold;">¥0</span></div><div style="text-align:right;"><div id="counsel-label" style="font-size:0.65rem; color:var(--gold); font-weight:bold; visibility:hidden;">※全メニュー無料カウンセリング(90分)込</div><div style="font-size:0.65rem; color:#888;">ご予約時間</div><span id="total-time-display" style="font-size:1rem; font-weight:bold; color:var(--gold);">枠 0.0 時間枠</span></div></div><div id="action-btn-container"></div></div>
 <div id="calendar-modal"><div class="cal-header"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><button onclick="changeWeek(-1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">◀ 前週</button><span id="cal-title" style="color:var(--gold); font-size:0.95rem; font-weight:bold;"></span><button onclick="changeWeek(1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">次週 ▶</button></div><button onclick="closeCalendarModal()" style="color:#888; background:none; border:none; width:100%; margin-top:10px;">メニューに戻る</button></div><div class="cal-outer-wrapper"><div id="calendar-container"></div></div></div>
 <div id="info-modal"><div class="modal-content" style="background:#111; max-width:90%;"><h3 style="color:var(--gold); text-align:center;">内容の確認</h3><div id="selected-summary" style="font-size:0.85rem; background:#222; padding:20px; border-radius:8px; margin-bottom:25px; border-left:4px solid var(--gold); line-height:1.7; text-align:left;"></div><div class="form-group"><label>お名前</label><input type="text" id="cust-name"></div><div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel"></div><div class="form-group"><label>メール</label><input type="email" id="cust-email"></div><div class="form-group"><label>備考 / その他 / 伝えたい事</label><textarea id="cust-memo" rows="3"></textarea></div><button class="btn-reserve" onclick="submitReservation()">予約を確定する</button><button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#888; width:100%; margin-top:20px;">修正する</button></div></div>
-<div id="repeat-guidance-modal">
-    <div class="guidance-box">
-        <div class="guidance-title">施術内容をコピーしました</div>
-        <div style="text-align:center; font-size:0.75rem; color:#ccc; margin-bottom:20px; line-height:1.4;">LINE予約の「備考欄」に貼り付ける準備が整いました。</div>
-        <div class="guidance-step">
-            <b style="color:var(--gold);">❶. 予約メニューの選択</b><br>
-            公式LINEの予約画面より<br><span style="color:var(--white); font-weight:bold; border-bottom:1px solid var(--gold);">「複数メニュー【時間枠】」</span>をお選びください。
-        </div>
-        <div class="guidance-step" style="border: 2px solid var(--gold); background: #1a1500; text-align:center; padding: 20px 15px; border-left: none;">
-            <b style="color:#fff; font-size:0.9rem;">❷. 時間枠の選択 <span style="color:var(--gold);">[重要]</span></b><br>
-            <div style="font-size:0.75rem; color:#ccc; margin-top:8px;">お客様の施術に必要な時間枠です。<br>必ず以下の時間枠をご選択ください。</div>
-            <div id="guide-hours" style="color:var(--gold); font-size:1.4rem; font-weight:bold; margin:12px 0 5px; letter-spacing:1px; background:#000; padding:10px; border-radius:6px; border:1px dashed var(--gold);">【 ●.● 時間枠 】</div>
-        </div>
-        <button class="btn-reserve" style="margin-top:10px;" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
-        <button onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="background:none; border:none; color:#777; width:100%; margin-top:15px; font-size:0.85rem;">閉じる</button>
-    </div>
-</div>
+<div id="repeat-guidance-modal"><div class="guidance-box"><div class="guidance-title">施術内容をコピーしました</div><div class="guidance-step"><b style="color:var(--gold);">❶. 予約メニューの選択</b><br>LINE予約画面より<br><span style="color:var(--white); font-weight:bold;">「複数メニュー【時間枠】」</span>をお選びください。</div><div class="guidance-step" style="border: 2px solid var(--gold); background: #1a1500; text-align:center; padding: 20px 15px; border-left: none;"><b style="color:#fff; font-size:0.9rem;">❷. 時間枠の選択 <span style="color:var(--gold);">[重要]</span></b><br><div id="guide-hours" style="color:var(--gold); font-size:1.4rem; font-weight:bold; margin:12px 0 5px;">【 ●.● 時間枠 】</div></div><button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button></div></div>
 <script>
 // ==========================================
 // 💡 GASのURL
 // ==========================================
-var GAS_URL = "https://script.google.com/macros/s/AKfycbx1bIxuMMCbVc1bAj3Xct8Z2Xuc9LzlUUbRz_eV6AMjGLl-WJWO4tyKBx4B5FRPXkKiZQ/exec";
+var GAS_URL = "https://script.google.com/macros/s/AKfycbyxGSFORQYuRqGtofsjp7YSxzcKrfZuHZrYYdEzZVtetpl-cHiKmJOvggoy4HOE-nsk7g/exec";
 
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], internalNumericSlot = 0;
-var editEventId = null; // 💡 変更モード用のID保持
+var editEventId = null;
 
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
-    set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット',cat:'set',imgs:{body:'set_fullbody_noface_body'},cool:0},
-    set_fullbody_novio:{price:41800,time:200,label:'VIOなし全身セット',cat:'set',imgs:{body:'set_fullbody_novio_body',face:'set_fullface'},cool:1},
     set_upperbody:{price:30800,time:135,label:'上半身セット(顔含む)',cat:'set',imgs:{body:'set_upperbody_body',face:'set_fullface'},cool:1},
     set_lowerbody:{price:30800,time:135,label:'下半身セット(VIO含む)',cat:'set',imgs:{body:'set_lowerbody_body'},cool:0},
     set_fullface_vio:{price:27500,time:95,label:'全顔+VIOセット',cat:'set',imgs:{body:'set_vio',face:'set_fullface'},cool:1},
@@ -148,9 +130,9 @@ var menuData = {
     part_eyebrow_upper:{price:8800,time:18,label:'眉上',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_upper'},cool:0},
     part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},cool:0},
     part_eyebrow_lower:{price:6600,time:18,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'},cool:0},
-    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',imgs:{face:'part_tragus'},cool:0},
-    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',imgs:{face:'part_earlobe'},cool:0},
-    part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',imgs:{face:'part_nose_hair'},cool:0},
+    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_tragus'},cool:0},
+    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'},cool:0},
+    part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
@@ -215,7 +197,17 @@ function updateTotal() {
         p += getItemPrice(sid); t += item.time;
         if (item.cool === 1) faceCool = true;
     }
-    if (selected.length > 0 && !isOnlyFree) { t += 10; if (faceCool) t += 12; if (userType === 'new') t += 90; }
+    // 💡 カウンセリング加算のバグ修正
+    var counselLbl = document.getElementById('counsel-label');
+    if (userType === 'new') {
+        counselLbl.style.visibility = "visible";
+        if (!isOnlyFree && selected.length > 0) {
+            t += 10 + (faceCool ? 12 : 0) + 90;
+        }
+    } else {
+        counselLbl.style.visibility = "hidden";
+        if (selected.length > 0) t += 10;
+    }
     var rounded = Math.ceil(t / 30) * 30; internalNumericSlot = (rounded / 60); 
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
     document.getElementById('total-time-display').innerText = "枠 " + internalNumericSlot.toFixed(1) + " 時間枠";
@@ -250,7 +242,7 @@ function checkSuggestion(isManual) {
     var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
     var diffVal = currentTotal - newTotal;
     var diffMsg = diffVal > 0 ? '¥' + diffVal.toLocaleString() + 'お得になります！' : '料金そのままで部位が増えます！';
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + getOriginalTotal(selected).toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
 
@@ -292,7 +284,6 @@ function proceedToCalendar() {
             } else { alert("通信エラー"); }
         }
     };
-    // 💡 変更時、自分の枠を除外してもらうためにIDを送る
     xhr.send(JSON.stringify({type:'getBusySlots', excludeId: editEventId}));
 }
 
@@ -331,15 +322,16 @@ function renderCalendar() {
 }
 
 function openInfoModal(d, t, et) { 
-    tDate=d; tTime=t; tEndTime=et; var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); } 
+    tDate=d; tTime=t; tEndTime=et; var labels = []; 
+    for(var i=0; i<selected.length; i++){ var l = menuData[selected[i]].label; if(userType==='new' && l!=='無料カウンセリングのみ') l+='(無料カウンセリング込)'; labels.push(l); } 
     document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; 
     document.getElementById('info-modal').style.display='block'; 
 }
 
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
-    if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
-    // 💡 reserve時にoldEventIdを添える
+    if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; 
+    for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = { type:'reserve', oldEventId: editEventId, userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.href="index.html"; }}; xhr.send(JSON.stringify(payload));
@@ -384,7 +376,6 @@ function startFreeConsult() {
     proceedToCalendar(); 
 }
 
-// 💡 起動時に「変更モード」かチェック
 window.onload = function() {
     var urlParams = new URLSearchParams(window.location.search);
     var mode = urlParams.get('mode');
@@ -398,19 +389,27 @@ window.onload = function() {
         }).then(res => res.json()).then(data => {
             showLoading(false);
             if(data.error) return alert("予約データが見つかりません。");
-            document.getElementById('gate-modal').style.display='none';
-            userType = data.userType;
-            // メニュー復元
-            var menuNames = data.menus.split(', ');
-            selected = [];
-            Object.keys(menuData).forEach(k => { if(menuNames.indexOf(menuData[k].label) !== -1) selected.push(k); });
-            // 個人情報復元
-            document.getElementById('cust-name').value = data.name;
-            document.getElementById('cust-tel').value = data.tel;
-            document.getElementById('cust-email').value = data.email;
-            document.getElementById('cust-memo').value = data.memo;
             
-            forceStart(userType);
+            // 💡 修正：カウンセリングのみの予約変更なら直接カレンダーへ
+            if (data.menus === '無料カウンセリングのみ') {
+                editEventId = id; startFreeConsult();
+                // フォームに個人情報をセットしておく
+                document.getElementById('cust-name').value = data.name;
+                document.getElementById('cust-tel').value = data.tel;
+                document.getElementById('cust-email').value = data.email;
+                document.getElementById('cust-memo').value = data.memo;
+            } else {
+                document.getElementById('gate-modal').style.display='none';
+                userType = data.userType;
+                var menuNames = data.menus.replace('（無料カウンセリング込）','').split(', ');
+                selected = [];
+                Object.keys(menuData).forEach(k => { if(menuNames.indexOf(menuData[k].label) !== -1) selected.push(k); });
+                document.getElementById('cust-name').value = data.name;
+                document.getElementById('cust-tel').value = data.tel;
+                document.getElementById('cust-email').value = data.email;
+                document.getElementById('cust-memo').value = data.memo;
+                forceStart(userType);
+            }
         });
     }
 };
