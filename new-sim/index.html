@@ -254,12 +254,7 @@ function checkSuggestion(isManual) {
     var currentTotal = getOriginalTotal(selected);
     var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
     var diffVal = currentTotal - newTotal;
-    
-    var diffMsg = "";
-    if(diffVal > 0) diffMsg = '¥' + diffVal.toLocaleString() + 'お得になります！';
-    else if(diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
-    else diffMsg = '最適なセットプランのご提案';
-
+    var diffMsg = diffVal > 0 ? '¥' + diffVal.toLocaleString() + 'お得になります！' : '料金そのままで部位が増えます！';
     var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
@@ -277,45 +272,41 @@ function handleReserveAction() {
         var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
         document.getElementById('final-suggestion-modal').style.display = 'flex'; 
         var curP = getOriginalTotal(selected);
-        var setP = curP + best.diff;
         var finalMsg = best.diff < 0 ? "今より ¥"+Math.abs(best.diff).toLocaleString()+" お安く予約できます。" : "料金はそのままで、部位を増やすことができます。";
         document.getElementById('final-sug-desc').innerHTML = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>" + finalMsg;
         document.getElementById('final-old-price').innerText = "¥" + curP.toLocaleString();
-        document.getElementById('final-new-price').innerText = "¥" + setP.toLocaleString(); return;
-    } proceedReservation();
+        document.getElementById('final-new-price').innerText = "¥" + (curP + best.diff).toLocaleString(); return;
+    } proceedToCalendar();
 }
-function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedReservation, 100); }
-function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedReservation(); }
-function proceedReservation() { if (userType === 'new') { proceedToCalendar(); } else { handleRepeatBooking(); } }
+function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedToCalendar, 100); }
+function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedToCalendar(); }
 
-// 💡 堅牢なカレンダー取得処理（一番シンプルで安定した形）
+// 💡 【重要】カレンダー取得処理をスマホブラウザに最強のfetch APIへ変更
 function proceedToCalendar() {
     showLoading(true);
-    var xhr = new XMLHttpRequest(); 
-    xhr.open("POST", GAS_URL, true);
-    
-    xhr.onreadystatechange = function() { 
-        if (xhr.readyState === 4) { 
-            showLoading(false); 
-            if (xhr.status === 200) { 
-                try { 
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.error) {
-                        alert("システムエラー: " + response.error);
-                        return;
-                    }
-                    busySlots = response; 
-                    renderCalendar(); 
-                    document.getElementById('calendar-modal').style.display = 'block'; 
-                } catch(e) { 
-                    alert("カレンダーの読み込みに失敗しました。\n※GASのアクセス権限が「全員」になっているかご確認ください。"); 
-                } 
-            } else { 
-                alert("通信エラーが発生しました。電波状況をご確認ください。"); 
+    fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({type:'getBusySlots'}),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+    }).then(function(res){
+        return res.text();
+    }).then(function(text){
+        showLoading(false);
+        try {
+            busySlots = JSON.parse(text);
+            if(busySlots && busySlots.error) {
+                alert("システムエラー: " + busySlots.error);
+                return;
             }
-        } 
-    };
-    xhr.send(JSON.stringify({type:'getBusySlots'}));
+            renderCalendar();
+            document.getElementById('calendar-modal').style.display = 'block';
+        } catch(e) {
+            alert("カレンダーの読み込みに失敗しました。再試行してください。\n(詳細: " + text.substring(0, 40) + "...)");
+        }
+    }).catch(function(err){
+        showLoading(false);
+        alert("通信エラーが発生しました。電波状況をご確認ください。");
+    });
 }
 
 function renderCalendar() {
@@ -358,6 +349,7 @@ function submitReservation() {
     if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = { type:'reserve', userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); 
+    xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
     xhr.onreadystatechange=function(){ 
         if(xhr.readyState===4){ 
             showLoading(false); 
