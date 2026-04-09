@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.63.0</title>
+<title>NARX プレミアム予約システム</title>
 
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
@@ -123,6 +123,9 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </div>
 
 <script>
+// ==========================================
+// 💡 GASのURL
+// ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwcyiNOsEDn5ynbWsjgUlceZkAlIZlQxehl9RokxxvIeh3_FqkcfA0aDlaRtbXUtL6TjQ/exec";
 
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
@@ -199,7 +202,7 @@ var setIncludes = {
 
 function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
 function closeCalendarModal(){ document.getElementById('calendar-modal').style.display='none'; weekOffset=0; }
-function changeWeek(n) { weekOffset += n; proceedToCalendar(); }
+function changeWeek(n) { weekOffset += n; proceedToCalendar(0); }
 
 function getItemPrice(id) {
     var item = menuData[id]; if (userType === 'new') {
@@ -251,8 +254,9 @@ function checkSuggestion(isManual) {
     var currentTotal = getOriginalTotal(selected);
     var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
     var diffVal = currentTotal - newTotal;
+    
     var diffMsg = diffVal > 0 ? '¥' + diffVal.toLocaleString() + 'お得になります！' : '料金そのままで部位が増えます！';
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + getOriginalTotal(selected).toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
 
@@ -273,18 +277,19 @@ function handleReserveAction() {
         document.getElementById('final-sug-desc').innerHTML = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>" + finalMsg;
         document.getElementById('final-old-price').innerText = "¥" + curP.toLocaleString();
         document.getElementById('final-new-price').innerText = "¥" + (curP + best.diff).toLocaleString(); return;
-    } proceedReservation();
+    } proceedToCalendar(0);
 }
-function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedReservation, 100); }
-function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedReservation(); }
-function proceedReservation() { if (userType === 'new') { proceedToCalendar(); } else { handleRepeatBooking(); } }
+function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(function(){ proceedToCalendar(0); }, 100); }
+function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedToCalendar(0); }
 
-// 💡 堅牢なカレンダー取得処理（3回自動リトライ付き）
-function proceedToCalendar(retryCount = 0) {
+// 💡 堅牢なカレンダー取得処理（リトライ・CORS回避付き）
+function proceedToCalendar(retryCount) {
+    if (typeof retryCount !== 'number') retryCount = 0;
     showLoading(true);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", GAS_URL, true);
-    xhr.timeout = 15000; // 15秒でタイムアウト
+    xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8"); // CORS回避用ヘッダー
+    xhr.timeout = 10000;
     
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
@@ -295,27 +300,24 @@ function proceedToCalendar(retryCount = 0) {
                     renderCalendar();
                     document.getElementById('calendar-modal').style.display = 'block';
                 } catch(e) {
-                    handleCalendarError(retryCount);
+                    if (retryCount < 2) { setTimeout(function(){ proceedToCalendar(retryCount + 1); }, 1000); }
+                    else { alert("カレンダーデータの解析に失敗しました。お手数ですが再度お試しください。"); }
                 }
             } else {
-                handleCalendarError(retryCount);
+                if (retryCount < 2) { setTimeout(function(){ proceedToCalendar(retryCount + 1); }, 1000); }
+                else { showLoading(false); alert("通信エラーが発生しました。お手数ですが再度お試しください。"); }
             }
         }
     };
-    
-    xhr.onerror = function() { handleCalendarError(retryCount); };
-    xhr.ontimeout = function() { handleCalendarError(retryCount); };
+    xhr.onerror = function() { 
+        if (retryCount < 2) { setTimeout(function(){ proceedToCalendar(retryCount + 1); }, 1000); }
+        else { showLoading(false); alert("ネットワークエラーが発生しました。電波状況をご確認ください。"); }
+    };
+    xhr.ontimeout = function() { 
+        if (retryCount < 2) { setTimeout(function(){ proceedToCalendar(retryCount + 1); }, 1000); }
+        else { showLoading(false); alert("通信がタイムアウトしました。再度お試しください。"); }
+    };
     xhr.send(JSON.stringify({type:'getBusySlots'}));
-}
-
-function handleCalendarError(retryCount) {
-    if (retryCount < 2) {
-        console.log("Retry calendar fetch: " + (retryCount + 1));
-        setTimeout(function() { proceedToCalendar(retryCount + 1); }, 1000);
-    } else {
-        showLoading(false);
-        alert("カレンダーの読み込みに失敗しました。お手数ですが「メニューに戻る」から再度「予約を確認して次へ」をお試しください。");
-    }
 }
 
 function renderCalendar() {
@@ -352,15 +354,19 @@ function renderCalendar() {
     wrapper.innerHTML = html+'</tbody></table>';
 }
 function openInfoModal(d, t, et) { tDate=d; tTime=t; tEndTime=et; var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); } document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; document.getElementById('info-modal').style.display='block'; }
+
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
     if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = { type:'reserve', userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
-    var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); }}; xhr.send(JSON.stringify(payload));
+    var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); 
+    xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8"); // 💡 CORS回避
+    xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); if(xhr.status === 200){ alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); } else { alert("通信エラーが発生しました。時間を置いて再度お試しください。"); } }}; xhr.send(JSON.stringify(payload));
 }
 
 function handleRepeatBooking() { 
-    var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
+    var labels = []; 
+    for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠";
     
     var fallbackCopy = function(text) {
@@ -390,7 +396,12 @@ function toggleConcierge() { isConciergeON = !isConciergeON; var icon = document
 function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
 function skipSuggestion(id) { document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
 
-function forceStart(t) { document.getElementById('gate-modal').style.display='none'; userType=t; document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回適用中":"【会員様】通常価格"; document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="handleReserveAction()">予約を確認して次へ</button>'; initApp(); render(); }
+function forceStart(t) { document.getElementById('gate-modal').style.display='none'; userType=t; document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回適用中":"【会員様】通常価格"; 
+    // 💡 ボタンの挙動をモードによって切り替え
+    var btnAction = t === 'new' ? "handleReserveAction()" : "handleRepeatBooking()";
+    document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="'+btnAction+'">予約を確認して次へ</button>'; 
+    initApp(); render(); 
+}
 
 function initApp() {
     function getLeafNodes(id) { var leaves = []; function traverse(nodeId) { if (setIncludes[nodeId]) { for (var i = 0; i < setIncludes[nodeId].length; i++) { traverse(setIncludes[nodeId][i]); } } else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); } } traverse(id); return leaves; }
@@ -459,7 +470,7 @@ function createMenuItem(area, id, item, curL) {
     div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + noteTag + specialTag + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div);
 }
 
-changeWeek(0); 
+// 💡 暴発の原因だった「changeWeek(0);」を削除しました。
 initApp();
 </script>
 </body>
