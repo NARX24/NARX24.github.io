@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.71.0</title>
+<title>NARX プレミアム予約システム Ver.72.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -101,7 +101,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 // ==========================================
 // 💡 GASのURL
 // ==========================================
-var GAS_URL = "https://script.google.com/macros/s/AKfycbyxGSFORQYuRqGtofsjp7YSxzcKrfZuHZrYYdEzZVtetpl-cHiKmJOvggoy4HOE-nsk7g/exec";
+var GAS_URL = "https://script.google.com/macros/s/AKfycbxKw7vHKWRibtgOytoDJYZU3PmVbdi0VzsS4MsAoSRAkNCODbQjV3uql7TAfHTgB_sK3Q/exec";
 
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
@@ -197,13 +197,10 @@ function updateTotal() {
         p += getItemPrice(sid); t += item.time;
         if (item.cool === 1) faceCool = true;
     }
-    // 💡 カウンセリング加算のバグ修正
     var counselLbl = document.getElementById('counsel-label');
     if (userType === 'new') {
         counselLbl.style.visibility = "visible";
-        if (!isOnlyFree && selected.length > 0) {
-            t += 10 + (faceCool ? 12 : 0) + 90;
-        }
+        if (!isOnlyFree && selected.length > 0) { t += 10 + (faceCool ? 12 : 0) + 90; }
     } else {
         counselLbl.style.visibility = "hidden";
         if (selected.length > 0) t += 10;
@@ -242,7 +239,7 @@ function checkSuggestion(isManual) {
     var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
     var diffVal = currentTotal - newTotal;
     var diffMsg = diffVal > 0 ? '¥' + diffVal.toLocaleString() + 'お得になります！' : '料金そのままで部位が増えます！';
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + getOriginalTotal(selected).toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
 
@@ -280,7 +277,7 @@ function proceedToCalendar() {
                     var startIdx = text.indexOf('['); var endIdx = text.lastIndexOf(']');
                     if(startIdx !== -1 && endIdx !== -1) { text = text.substring(startIdx, endIdx + 1); }
                     busySlots = JSON.parse(text); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block';
-                } catch(e) { alert("データ解析エラー"); }
+                } catch(e) { alert("データ形式エラー"); }
             } else { alert("通信エラー"); }
         }
     };
@@ -320,14 +317,12 @@ function renderCalendar() {
     });
     wrapper.innerHTML = html+'</tbody></table>';
 }
-
 function openInfoModal(d, t, et) { 
     tDate=d; tTime=t; tEndTime=et; var labels = []; 
     for(var i=0; i<selected.length; i++){ var l = menuData[selected[i]].label; if(userType==='new' && l!=='無料カウンセリングのみ') l+='(無料カウンセリング込)'; labels.push(l); } 
     document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; 
     document.getElementById('info-modal').style.display='block'; 
 }
-
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
     if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; 
@@ -336,7 +331,6 @@ function submitReservation() {
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.href="index.html"; }}; xhr.send(JSON.stringify(payload));
 }
-
 function handleRepeatBooking() { 
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠";
@@ -349,16 +343,12 @@ function handleRepeatBooking() {
     var showModal = function() { document.getElementById('guide-hours').innerText = "【 " + internalNumericSlot.toFixed(1) + " 時間枠 】"; document.getElementById('repeat-guidance-modal').style.display = 'flex'; };
     if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(showModal).catch(function(){ fallbackCopy(txt); }); } else { fallbackCopy(txt); }
 }
-
 function toggleConcierge() {
-    isConciergeON = !isConciergeON;
-    var img = document.getElementById('concierge-img');
+    isConciergeON = !isConciergeON; var img = document.getElementById('concierge-img');
     if (isConciergeON) { img.src = 'concierge_on.png'; checkSuggestion(true); } else { img.src = 'concierge_off.png'; showConciergeBubble("待機しております。"); document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); }
 }
-
-function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
+function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (window.bubbleTimer) clearTimeout(window.bubbleTimer); window.bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
 function skipSuggestion(id) { document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
-
 function forceStart(t) { 
     document.getElementById('gate-modal').style.display='none'; userType=t; 
     document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回体験価格":"【会員様】通常価格"; 
@@ -366,54 +356,31 @@ function forceStart(t) {
     document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="'+btnAction+'">予約を確認して次へ</button>'; 
     initApp(); render(); 
 }
-
 function startFreeConsult() {
-    document.getElementById('gate-modal').style.display='none';
-    userType = 'new';
-    selected = ['free_consult']; 
+    document.getElementById('gate-modal').style.display='none'; userType = 'new'; selected = ['free_consult']; 
     document.getElementById('mode-display').innerText = "無料カウンセリング予約";
-    updateTotal();
-    proceedToCalendar(); 
+    updateTotal(); proceedToCalendar(); 
 }
-
 window.onload = function() {
     var urlParams = new URLSearchParams(window.location.search);
-    var mode = urlParams.get('mode');
-    var id = urlParams.get('id');
+    var mode = urlParams.get('mode'); var id = urlParams.get('id');
     if (mode === 'edit' && id) {
-        editEventId = id;
-        showLoading(true);
-        fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify({type:'getBookingDetails', id: id})
-        }).then(res => res.json()).then(data => {
-            showLoading(false);
-            if(data.error) return alert("予約データが見つかりません。");
-            
-            // 💡 修正：カウンセリングのみの予約変更なら直接カレンダーへ
-            if (data.menus === '無料カウンセリングのみ') {
+        editEventId = id; showLoading(true);
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({type:'getBookingDetails', id: id}) }).then(res => res.json()).then(data => {
+            showLoading(false); if(data.error) return alert("データが見つかりません。");
+            if (data.menus.includes('無料カウンセリングのみ')) {
                 editEventId = id; startFreeConsult();
-                // フォームに個人情報をセットしておく
-                document.getElementById('cust-name').value = data.name;
-                document.getElementById('cust-tel').value = data.tel;
-                document.getElementById('cust-email').value = data.email;
-                document.getElementById('cust-memo').value = data.memo;
             } else {
-                document.getElementById('gate-modal').style.display='none';
-                userType = data.userType;
-                var menuNames = data.menus.replace('（無料カウンセリング込）','').split(', ');
-                selected = [];
-                Object.keys(menuData).forEach(k => { if(menuNames.indexOf(menuData[k].label) !== -1) selected.push(k); });
-                document.getElementById('cust-name').value = data.name;
-                document.getElementById('cust-tel').value = data.tel;
-                document.getElementById('cust-email').value = data.email;
-                document.getElementById('cust-memo').value = data.memo;
+                document.getElementById('gate-modal').style.display='none'; userType = data.userType;
+                var cleanMenus = data.menus.replace('（無料カウンセリング込）','').split(', ');
+                selected = []; Object.keys(menuData).forEach(k => { if(cleanMenus.indexOf(menuData[k].label) !== -1) selected.push(k); });
                 forceStart(userType);
             }
+            document.getElementById('cust-name').value = data.name; document.getElementById('cust-tel').value = data.tel;
+            document.getElementById('cust-email').value = data.email; document.getElementById('cust-memo').value = data.memo;
         });
     }
 };
-
 function initApp() {
     function getLeafNodes(id) { var leaves = []; function traverse(nodeId) { if (setIncludes[nodeId]) { for (var i = 0; i < setIncludes[nodeId].length; i++) { traverse(setIncludes[nodeId][i]); } } else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); } } traverse(id); return leaves; }
     var keys = Object.keys(menuData); for (var i = 0; i < keys.length; i++) { itemLeaves[keys[i]] = getLeafNodes(keys[i]); }
@@ -424,7 +391,6 @@ function createImg(parent, name) { var layerId = "img-" + name; if (document.get
 function changeTab(t){ currentTab=t; render(); }
 function resetSelection(){ selected = []; suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display='none'; render(); }
 function toggleItem(id){ document.getElementById('suggestion-box').style.display='none'; var idx=selected.indexOf(id); if(idx!==-1)selected.splice(idx,1); else selected.push(id); checkSuggestion(false); render(); }
-
 function render() {
     var area = document.getElementById('menu-area'); area.innerHTML=''; var tabs = document.querySelectorAll('.tab'); for (var t = 0; t < tabs.length; t++) { tabs[t].classList.remove('active'); } document.getElementById("tab-" + currentTab).classList.add('active');
     var container = document.getElementById('chips-container'); if (selected.length === 0) { container.innerHTML = '<span style="color:#444; font-size:0.65rem;">部位を選択してください</span>'; } else { container.innerHTML = ''; for (var i = 0; i < selected.length; i++) { if(!menuData[selected[i]]) continue; var chip = document.createElement('div'); chip.className = 'chip'; chip.innerHTML = '<span>' + menuData[selected[i]].label + '</span><span class="chip-close" onclick="event.stopPropagation(); toggleItem(\'' + selected[i] + '\')">×</span>'; container.appendChild(chip); } }
@@ -450,9 +416,7 @@ function render() {
             for (var m = 0; m < keys.length; m++) {
                 var id = keys[m], item = menuData[id];
                 if (item.cat === 'part' && item.subCat === subCats[sc].id) {
-                    if (!headAdded) {
-                        var header = document.createElement('div'); header.className = "category-header"; header.innerText = subCats[sc].label; area.appendChild(header); headAdded = true;
-                    }
+                    if (!headAdded) { var header = document.createElement('div'); header.className = "category-header"; header.innerText = subCats[sc].label; area.appendChild(header); headAdded = true; }
                     createMenuItem(area, id, item, curL);
                 }
             }
