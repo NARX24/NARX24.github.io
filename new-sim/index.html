@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.62.0</title>
+<title>NARX プレミアム予約システム Ver.63.0</title>
 
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
@@ -238,11 +238,8 @@ function analyzeSuggestions(isManual) {
         }
         if (intersect.length < 2) continue;
         var oldP = getOriginalTotal(intersect), setP = getItemPrice(sid), diff = setP - oldP;
-        
-        // 💡 誠実ロジック：新規モードなら安くなるか同額時のみ、会員モードなら差額5000円以内のみ
         if (userType === 'new') { if (diff > 0) continue; }
         else { if (diff > 5000) continue; }
-
         return {sid:sid, type: (diff < 0 ? 'cheaper' : (diff === 0 ? 'equal' : 'upsell')), diff:diff, oldPrice:oldP, intersectingItems:intersect};
     } return null;
 }
@@ -254,12 +251,7 @@ function checkSuggestion(isManual) {
     var currentTotal = getOriginalTotal(selected);
     var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
     var diffVal = currentTotal - newTotal;
-    
-    var diffMsg = "";
-    if(diffVal > 0) diffMsg = '¥' + diffVal.toLocaleString() + 'お得になります！';
-    else if(diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
-    else diffMsg = 'おすすめのセットプラン';
-
+    var diffMsg = diffVal > 0 ? '¥' + diffVal.toLocaleString() + 'お得になります！' : '料金そのままで部位が増えます！';
     var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + getOriginalTotal(selected).toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
@@ -287,22 +279,43 @@ function applyAndProceed() { applyOptimalSet(); document.getElementById('final-s
 function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedReservation(); }
 function proceedReservation() { if (userType === 'new') { proceedToCalendar(); } else { handleRepeatBooking(); } }
 
-function proceedToCalendar() {
+// 💡 堅牢なカレンダー取得処理（3回自動リトライ付き）
+function proceedToCalendar(retryCount = 0) {
     showLoading(true);
-    var xhr = new XMLHttpRequest(); xhr.open("POST", GAS_URL, true);
-    xhr.onreadystatechange = function() { 
-        if (xhr.readyState === 4) { 
-            showLoading(false); 
-            if (xhr.status === 200) { 
-                try { 
-                    busySlots = JSON.parse(xhr.responseText); 
-                    renderCalendar(); 
-                    document.getElementById('calendar-modal').style.display = 'block'; 
-                } catch(e) { alert("カレンダーの読み込みに失敗しました。再試行してください。"); } 
-            } else { alert("予約状況の取得に失敗しました。時間をおいて再度お試しください。"); }
-        } 
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", GAS_URL, true);
+    xhr.timeout = 15000; // 15秒でタイムアウト
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                showLoading(false);
+                try {
+                    busySlots = JSON.parse(xhr.responseText);
+                    renderCalendar();
+                    document.getElementById('calendar-modal').style.display = 'block';
+                } catch(e) {
+                    handleCalendarError(retryCount);
+                }
+            } else {
+                handleCalendarError(retryCount);
+            }
+        }
     };
+    
+    xhr.onerror = function() { handleCalendarError(retryCount); };
+    xhr.ontimeout = function() { handleCalendarError(retryCount); };
     xhr.send(JSON.stringify({type:'getBusySlots'}));
+}
+
+function handleCalendarError(retryCount) {
+    if (retryCount < 2) {
+        console.log("Retry calendar fetch: " + (retryCount + 1));
+        setTimeout(function() { proceedToCalendar(retryCount + 1); }, 1000);
+    } else {
+        showLoading(false);
+        alert("カレンダーの読み込みに失敗しました。お手数ですが「メニューに戻る」から再度「予約を確認して次へ」をお試しください。");
+    }
 }
 
 function renderCalendar() {
@@ -346,10 +359,8 @@ function submitReservation() {
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); }}; xhr.send(JSON.stringify(payload));
 }
 
-// 💡 クリップボード保存内容の整理
 function handleRepeatBooking() { 
-    var labels = []; 
-    for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
+    var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠";
     
     var fallbackCopy = function(text) {
@@ -448,7 +459,7 @@ function createMenuItem(area, id, item, curL) {
     div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + noteTag + specialTag + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div);
 }
 
-function changeWeek(n) { weekOffset += n; proceedToCalendar(); }
+changeWeek(0); 
 initApp();
 </script>
 </body>
