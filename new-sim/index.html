@@ -124,7 +124,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 
 <script>
 // ==========================================
-// 💡 GASのURL
+// 💡 ご指定の新しいGAS URLを設定済みです
 // ==========================================
 var GAS_URL = "https://script.google.com/macros/s/AKfycby0VsoFXRzp7HCtnnPZg4VZp_pMCpc4G2GU-N1fjauSp-omZPWQNq8APmXXaisxVUpo4g/exec";
 
@@ -254,6 +254,7 @@ function checkSuggestion(isManual) {
     var currentTotal = getOriginalTotal(selected);
     var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
     var diffVal = currentTotal - newTotal;
+    
     var diffMsg = diffVal > 0 ? '¥' + diffVal.toLocaleString() + 'お得になります！' : '料金そのままで部位が増えます！';
     var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
@@ -281,32 +282,44 @@ function handleReserveAction() {
 function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedToCalendar, 100); }
 function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedToCalendar(); }
 
-// 💡 【重要】カレンダー取得処理をスマホブラウザに最強のfetch APIへ変更
+// 💡 【重要】カレンダー取得処理（絶対にエラーを見落とさない・安全なXHR通信）
 function proceedToCalendar() {
     showLoading(true);
-    fetch(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify({type:'getBusySlots'}),
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-    }).then(function(res){
-        return res.text();
-    }).then(function(text){
-        showLoading(false);
-        try {
-            busySlots = JSON.parse(text);
-            if(busySlots && busySlots.error) {
-                alert("システムエラー: " + busySlots.error);
-                return;
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", GAS_URL, true);
+    xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8"); // CORS回避
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            showLoading(false);
+            if (xhr.status === 200) {
+                try {
+                    // Googleが余計な文字を付けてきても、純粋なJSONだけを抽出して解析する
+                    var text = xhr.responseText.trim();
+                    var startIdx = text.indexOf('[');
+                    var endIdx = text.lastIndexOf(']');
+                    if(startIdx !== -1 && endIdx !== -1) {
+                        text = text.substring(startIdx, endIdx + 1);
+                    }
+                    busySlots = JSON.parse(text);
+                } catch(parseErr) {
+                    alert("データ形式エラーが発生しました。再度お試しください。");
+                    return;
+                }
+                
+                // 解析成功後、カレンダーを描画する
+                try {
+                    renderCalendar();
+                    document.getElementById('calendar-modal').style.display = 'block';
+                } catch(renderErr) {
+                    alert("カレンダーの表示に失敗しました。\n" + renderErr.message);
+                }
+            } else {
+                alert("通信エラーが発生しました。電波状況を確認し、再度お試しください。");
             }
-            renderCalendar();
-            document.getElementById('calendar-modal').style.display = 'block';
-        } catch(e) {
-            alert("カレンダーの読み込みに失敗しました。再試行してください。\n(詳細: " + text.substring(0, 40) + "...)");
         }
-    }).catch(function(err){
-        showLoading(false);
-        alert("通信エラーが発生しました。電波状況をご確認ください。");
-    });
+    };
+    xhr.send(JSON.stringify({type:'getBusySlots'}));
 }
 
 function renderCalendar() {
@@ -342,6 +355,7 @@ function renderCalendar() {
     });
     wrapper.innerHTML = html+'</tbody></table>';
 }
+
 function openInfoModal(d, t, et) { tDate=d; tTime=t; tEndTime=et; var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); } document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; document.getElementById('info-modal').style.display='block'; }
 
 function submitReservation() {
@@ -468,7 +482,6 @@ function createMenuItem(area, id, item, curL) {
     div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + noteTag + specialTag + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div);
 }
 
-// 初期化（暴発の原因だったchangeWeek(0)は削除済み）
 initApp();
 </script>
 </body>
