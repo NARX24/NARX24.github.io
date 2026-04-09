@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム</title>
+<title>NARX プレミアム予約システム Ver.71.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -95,9 +95,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div id="suggestion-box"></div>
 <div class="bottom-bar"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"><div style="text-align:left;"><div style="font-size:0.65rem; color:#888;">料金合計(税込)</div><span id="total-price" style="font-size:1.5rem; color:var(--gold); font-weight:bold;">¥0</span></div><div style="text-align:right;"><div style="font-size:0.65rem; color:#888;">ご予約時間</div><span id="total-time-display" style="font-size:1rem; font-weight:bold; color:var(--gold);">枠 0.0 時間枠</span></div></div><div id="action-btn-container"></div></div>
 <div id="calendar-modal"><div class="cal-header"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><button onclick="changeWeek(-1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">◀ 前週</button><span id="cal-title" style="color:var(--gold); font-size:0.95rem; font-weight:bold;"></span><button onclick="changeWeek(1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">次週 ▶</button></div><button onclick="closeCalendarModal()" style="color:#888; background:none; border:none; width:100%; margin-top:10px;">メニューに戻る</button></div><div class="cal-outer-wrapper"><div id="calendar-container"></div></div></div>
-<div id="info-modal"><div class="modal-content" style="background:#111; max-width:90%;"><h3 style="color:var(--gold); text-align:center;">内容の確認</h3><div id="selected-summary" style="font-size:0.85rem; background:#222; padding:20px; border-radius:8px; margin-bottom:25px; border-left:4px solid var(--gold); line-height:1.7; text-align:left;"></div><div class="form-group"><label>お名前</label><input type="text" id="cust-name"></div><div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel"></div><div class="form-group"><label>メール</label><input type="email" id="cust-email"></div>
-<div class="form-group"><label>備考 / その他 / 伝えたい事</label><textarea id="cust-memo" rows="3"></textarea></div>
-<button class="btn-reserve" onclick="submitReservation()">予約を確定する</button><button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#888; width:100%; margin-top:20px;">修正する</button></div></div>
+<div id="info-modal"><div class="modal-content" style="background:#111; max-width:90%;"><h3 style="color:var(--gold); text-align:center;">内容の確認</h3><div id="selected-summary" style="font-size:0.85rem; background:#222; padding:20px; border-radius:8px; margin-bottom:25px; border-left:4px solid var(--gold); line-height:1.7; text-align:left;"></div><div class="form-group"><label>お名前</label><input type="text" id="cust-name"></div><div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel"></div><div class="form-group"><label>メール</label><input type="email" id="cust-email"></div><div class="form-group"><label>備考 / その他 / 伝えたい事</label><textarea id="cust-memo" rows="3"></textarea></div><button class="btn-reserve" onclick="submitReservation()">予約を確定する</button><button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#888; width:100%; margin-top:20px;">修正する</button></div></div>
 <div id="repeat-guidance-modal">
     <div class="guidance-box">
         <div class="guidance-title">施術内容をコピーしました</div>
@@ -116,10 +114,15 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     </div>
 </div>
 <script>
-var GAS_URL = "https://script.google.com/macros/s/AKfycbzTbRgZ7HprO14sWEvJnaEkvFAvWSIQmof6vuQ073PosytB8Q9L4snbDoDPlDmfE4KzoA/exec";
+// ==========================================
+// 💡 GASのURL
+// ==========================================
+var GAS_URL = "https://script.google.com/macros/s/AKfycbx1bIxuMMCbVc1bAj3Xct8Z2Xuc9LzlUUbRz_eV6AMjGLl-WJWO4tyKBx4B5FRPXkKiZQ/exec";
+
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], internalNumericSlot = 0;
+var editEventId = null; // 💡 変更モード用のID保持
 
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
@@ -145,9 +148,9 @@ var menuData = {
     part_eyebrow_upper:{price:8800,time:18,label:'眉上',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_upper'},cool:0},
     part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},cool:0},
     part_eyebrow_lower:{price:6600,time:18,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'},cool:0},
-    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_tragus'},cool:0},
-    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'},cool:0},
-    part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
+    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',imgs:{face:'part_tragus'},cool:0},
+    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',imgs:{face:'part_earlobe'},cool:0},
+    part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',imgs:{face:'part_nose_hair'},cool:0},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
@@ -172,7 +175,8 @@ var menuData = {
     other_derma_injection:{price:22000,time:30,label:'ダーマ肌育',cat:'other',cool:1},
     other_scalp_care:{price:22000,time:25,label:'スカルプケア',cat:'other'},
     other_s_planning:{price:11000,time:60,label:'角質ケア',cat:'other'},
-    opt_new_5:{price:1100,time:10,label:'ＳＶ',cat:'other'}
+    opt_new_5:{price:1100,time:10,label:'ＳＶ',cat:'other'},
+    free_consult:{price:0, time:90, label:'無料カウンセリングのみ', cat:'special'}
 };
 
 var setIncludes = {
@@ -194,7 +198,8 @@ function closeCalendarModal(){ document.getElementById('calendar-modal').style.d
 function changeWeek(n) { weekOffset += n; proceedToCalendar(); }
 
 function getItemPrice(id) {
-    var item = menuData[id]; if (userType === 'new') {
+    var item = menuData[id]; if(!item) return 0;
+    if (userType === 'new') {
         var face5 = ['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'];
         if (face5.indexOf(id) !== -1) return 1000;
         if (id === 'set_fullface') return 5000;
@@ -203,27 +208,14 @@ function getItemPrice(id) {
 }
 function getOriginalTotal(idList) { var t = 0; for (var i = 0; i < idList.length; i++) { t += getItemPrice(idList[i]); } return t; }
 
-// 💡 修正：無料カウンセリング時の追加時間(90分)の2重加算を回避
 function updateTotal() {
-    var p = 0, t = 0, faceCool = false, isOnlyFreeConsult = false;
-    
-    // 無料カウンセリングのみが選ばれているかチェック
-    if (selected.length === 1 && selected[0] === 'free_consult') {
-        isOnlyFreeConsult = true;
-    }
-
+    var p = 0, t = 0, faceCool = false, isOnlyFree = (selected.length === 1 && selected[0] === 'free_consult');
     for (var i = 0; i < selected.length; i++) {
-        var sid = selected[i]; var item = menuData[sid]; p += getItemPrice(sid); t += item.time;
+        var sid = selected[i]; var item = menuData[sid]; if(!item)continue;
+        p += getItemPrice(sid); t += item.time;
         if (item.cool === 1) faceCool = true;
     }
-
-    // 無料カウンセリングの時「以外」に基本時間などを足す
-    if (selected.length > 0 && !isOnlyFreeConsult) { 
-        t += 10; 
-        if (faceCool) t += 12; 
-        if (userType === 'new') t += 90; 
-    }
-
+    if (selected.length > 0 && !isOnlyFree) { t += 10; if (faceCool) t += 12; if (userType === 'new') t += 90; }
     var rounded = Math.ceil(t / 30) * 30; internalNumericSlot = (rounded / 60); 
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
     document.getElementById('total-time-display').innerText = "枠 " + internalNumericSlot.toFixed(1) + " 時間枠";
@@ -258,7 +250,7 @@ function checkSuggestion(isManual) {
     var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
     var diffVal = currentTotal - newTotal;
     var diffMsg = diffVal > 0 ? '¥' + diffVal.toLocaleString() + 'お得になります！' : '料金そのままで部位が増えます！';
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + getOriginalTotal(selected).toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div>';
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
 
@@ -296,11 +288,12 @@ function proceedToCalendar() {
                     var startIdx = text.indexOf('['); var endIdx = text.lastIndexOf(']');
                     if(startIdx !== -1 && endIdx !== -1) { text = text.substring(startIdx, endIdx + 1); }
                     busySlots = JSON.parse(text); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block';
-                } catch(e) { alert("データ形式エラーが発生しました。"); }
-            } else { alert("通信エラーが発生しました。"); }
+                } catch(e) { alert("データ解析エラー"); }
+            } else { alert("通信エラー"); }
         }
     };
-    xhr.send(JSON.stringify({type:'getBusySlots'}));
+    // 💡 変更時、自分の枠を除外してもらうためにIDを送る
+    xhr.send(JSON.stringify({type:'getBusySlots', excludeId: editEventId}));
 }
 
 function renderCalendar() {
@@ -311,7 +304,7 @@ function renderCalendar() {
     var html='<table class="cal-table"><thead><tr><th>時間</th>';
     var dayNames = ['日','月','火','水','木','金','土'];
     for(var j=0; j<7; j++){
-        var d = new Date(firstDay.getTime() + j*24*60*60*1000); var dateStr = d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate();
+        var d = new Date(firstDay.getTime() + j*24*60*60*1000); 
         var cls = d.getDay()===0?'sun':(d.getDay()===6?'sat':''); html+='<th class="'+cls+'">'+(d.getMonth()+1)+'/'+d.getDate()+'<br>('+dayNames[d.getDay()]+')</th>';
     }
     html+='</tr></thead><tbody>';
@@ -336,14 +329,20 @@ function renderCalendar() {
     });
     wrapper.innerHTML = html+'</tbody></table>';
 }
-function openInfoModal(d, t, et) { tDate=d; tTime=t; tEndTime=et; var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); } document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; document.getElementById('info-modal').style.display='block'; }
+
+function openInfoModal(d, t, et) { 
+    tDate=d; tTime=t; tEndTime=et; var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); } 
+    document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; 
+    document.getElementById('info-modal').style.display='block'; 
+}
 
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
     if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
-    var payload = { type:'reserve', userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
+    // 💡 reserve時にoldEventIdを添える
+    var payload = { type:'reserve', oldEventId: editEventId, userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
-    xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); if(xhr.status === 200){ alert("ご予約ありがとうございます。確定メールを送信しました。"); location.reload(); } else { alert("通信エラーが発生しました。"); } }}; xhr.send(JSON.stringify(payload));
+    xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.href="index.html"; }}; xhr.send(JSON.stringify(payload));
 }
 
 function handleRepeatBooking() { 
@@ -368,7 +367,9 @@ function toggleConcierge() {
 function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (bubbleTimer) clearTimeout(bubbleTimer); bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
 function skipSuggestion(id) { document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
 
-function forceStart(t) { document.getElementById('gate-modal').style.display='none'; userType=t; document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回体験価格":"【会員様】通常価格"; 
+function forceStart(t) { 
+    document.getElementById('gate-modal').style.display='none'; userType=t; 
+    document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回体験価格":"【会員様】通常価格"; 
     var btnAction = t === 'new' ? "handleReserveAction()" : "handleRepeatBooking()";
     document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="'+btnAction+'">予約を確認して次へ</button>'; 
     initApp(); render(); 
@@ -378,11 +379,41 @@ function startFreeConsult() {
     document.getElementById('gate-modal').style.display='none';
     userType = 'new';
     selected = ['free_consult']; 
-    menuData['free_consult'] = {price:0, time:90, label:'無料カウンセリングのみ', cat:'special'};
     document.getElementById('mode-display').innerText = "無料カウンセリング予約";
     updateTotal();
     proceedToCalendar(); 
 }
+
+// 💡 起動時に「変更モード」かチェック
+window.onload = function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var mode = urlParams.get('mode');
+    var id = urlParams.get('id');
+    if (mode === 'edit' && id) {
+        editEventId = id;
+        showLoading(true);
+        fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({type:'getBookingDetails', id: id})
+        }).then(res => res.json()).then(data => {
+            showLoading(false);
+            if(data.error) return alert("予約データが見つかりません。");
+            document.getElementById('gate-modal').style.display='none';
+            userType = data.userType;
+            // メニュー復元
+            var menuNames = data.menus.split(', ');
+            selected = [];
+            Object.keys(menuData).forEach(k => { if(menuNames.indexOf(menuData[k].label) !== -1) selected.push(k); });
+            // 個人情報復元
+            document.getElementById('cust-name').value = data.name;
+            document.getElementById('cust-tel').value = data.tel;
+            document.getElementById('cust-email').value = data.email;
+            document.getElementById('cust-memo').value = data.memo;
+            
+            forceStart(userType);
+        });
+    }
+};
 
 function initApp() {
     function getLeafNodes(id) { var leaves = []; function traverse(nodeId) { if (setIncludes[nodeId]) { for (var i = 0; i < setIncludes[nodeId].length; i++) { traverse(setIncludes[nodeId][i]); } } else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); } } traverse(id); return leaves; }
