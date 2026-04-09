@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.72.0</title>
+<title>NARX プレミアム予約システム Ver.73.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -130,9 +130,9 @@ var menuData = {
     part_eyebrow_upper:{price:8800,time:18,label:'眉上',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_upper'},cool:0},
     part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},cool:0},
     part_eyebrow_lower:{price:6600,time:18,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'},cool:0},
-    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_tragus'},cool:0},
-    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'},cool:0},
-    part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
+    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',imgs:{face:'part_tragus'},cool:0},
+    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',imgs:{face:'part_earlobe'},cool:0},
+    part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',imgs:{face:'part_nose_hair'},cool:0},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
@@ -256,10 +256,11 @@ function handleReserveAction() {
         var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
         document.getElementById('final-suggestion-modal').style.display = 'flex'; 
         var curP = getOriginalTotal(selected);
+        var setP = curP + best.diff;
         var finalMsg = best.diff < 0 ? "今より ¥"+Math.abs(best.diff).toLocaleString()+" お安く予約できます。" : "料金はそのままで、部位を増やすことができます。";
         document.getElementById('final-sug-desc').innerHTML = "現在選択中の【" + oldNames.join(', ') + "】を、よりお得な【" + menuData[best.sid].label + "】に変更しませんか？<br><br>" + finalMsg;
         document.getElementById('final-old-price').innerText = "¥" + curP.toLocaleString();
-        document.getElementById('final-new-price').innerText = "¥" + (curP + best.diff).toLocaleString(); return;
+        document.getElementById('final-new-price').innerText = "¥" + setP.toLocaleString(); return;
     } proceedToCalendar();
 }
 function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedToCalendar, 100); }
@@ -317,20 +318,32 @@ function renderCalendar() {
     });
     wrapper.innerHTML = html+'</tbody></table>';
 }
+
 function openInfoModal(d, t, et) { 
     tDate=d; tTime=t; tEndTime=et; var labels = []; 
     for(var i=0; i<selected.length; i++){ var l = menuData[selected[i]].label; if(userType==='new' && l!=='無料カウンセリングのみ') l+='(無料カウンセリング込)'; labels.push(l); } 
     document.getElementById('selected-summary').innerHTML="【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText; 
     document.getElementById('info-modal').style.display='block'; 
 }
+
+// 💡 修正：メールアドレス確認ポップアップ（B案）を実装
 function submitReservation() {
-    var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value, memo=document.getElementById('cust-memo').value;
-    if(!n||!tel||!em) return alert("必須項目を入力してください"); showLoading(true); var labels = []; 
-    for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
+    var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value.trim(), memo=document.getElementById('cust-memo').value;
+    if(!n||!tel||!em) return alert("必須項目を入力してください"); 
+
+    // B案：送信直前のポップアップ確認
+    var confirmMsg = "入力されたメールアドレスは\n【 " + em + " 】\nでよろしいですか？\n\n※間違っていると予約の変更やキャンセルができなくなりますので、今一度ご確認ください。";
+    if (!window.confirm(confirmMsg)) {
+        return; // キャンセルなら何もしない
+    }
+
+    showLoading(true); 
+    var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = { type:'reserve', oldEventId: editEventId, userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.href="index.html"; }}; xhr.send(JSON.stringify(payload));
 }
+
 function handleRepeatBooking() { 
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠";
