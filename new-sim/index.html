@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.74.0</title>
+<title>NARX プレミアム予約システム Ver.75.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -103,52 +103,53 @@ var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOff
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionId = null, suggestionReplaceItems = [], internalNumericSlot = 0, editEventId = null;
 
+// 💡 施術時間を画像通りに更新
 var menuData = {
-    set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
-    set_upperbody:{price:30800,time:135,label:'上半身セット(顔含む)',cat:'set',imgs:{body:'set_upperbody_body',face:'set_fullface'},cool:1},
-    set_lowerbody:{price:30800,time:135,label:'下半身セット(VIO含む)',cat:'set',imgs:{body:'set_lowerbody_body'},cool:0},
-    set_fullface_vio:{price:27500,time:95,label:'全顔+VIOセット',cat:'set',imgs:{body:'set_vio',face:'set_fullface'},cool:1},
-    set_fullface_eyebrow:{price:24200,time:81,label:'全顔+眉毛セット',cat:'set',imgs:{face:'set_fullface_eyebrow_face'},cool:1},
-    set_fullface:{price:13200,time:52,label:'全顔セット',cat:'set',imgs:{face:'set_fullface'},cool:1},
-    set_eyebrow:{price:13200,time:40,label:'眉毛セット',cat:'set',imgs:{face:'set_eyebrow_face'},cool:0},
-    set_vio:{price:16500,time:50,label:'VIOセット',cat:'set',imgs:{body:'set_vio'},cool:0},
-    set_chest_abdomen:{price:11000,time:33,label:'胸＋腹部セット',cat:'set',imgs:{body:'set_chest_abdomen'},cool:0},
-    set_arms_legs:{price:28600,time:110,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'},cool:0},
-    set_arms:{price:15400,time:60,label:'両腕セット',cat:'set',imgs:{body:'set_arms'},cool:0},
-    set_legs:{price:17600,time:60,label:'両足セット',cat:'set',imgs:{body:'set_legs'},cool:0},
-    part_nose_under:{price:4400,time:7,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},cool:1},
-    part_mouth_under:{price:4400,time:7,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},cool:1},
-    part_cheek:{price:4400,time:7,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},cool:1},
-    part_face_line:{price:4400,time:10,label:'フェイスライン',cat:'part',subCat:'face',imgs:{face:'part_face_line'},cool:1},
-    part_neck:{price:4400,time:10,label:'首',cat:'part',subCat:'face',imgs:{face:'part_neck'},cool:1},
-    part_forehead:{price:6600,time:10,label:'額',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_forehead'},cool:0},
-    part_eyebrow_upper:{price:8800,time:18,label:'眉上',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_upper'},cool:0},
-    part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},cool:0},
-    part_eyebrow_lower:{price:6600,time:18,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'},cool:0},
-    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_tragus'},cool:0},
-    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'},cool:0},
-    part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
-    part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
-    part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
-    part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
-    part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nipple_around'},cool:0},
-    part_chest_nipple:{price:6600,time:18,label:'胸',cat:'part',subCat:'upper',imgs:{body:'part_chest_nipple'},cool:0,note:'※乳輪周り含む'},
-    part_navel_under:{price:4400,time:10,label:'ヘソ下',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_navel_under'},cool:0},
-    part_abdomen_navel:{price:6600,time:15,label:'腹部',cat:'part',subCat:'upper',imgs:{body:'part_abdomen_navel'},cool:0,note:'※ヘソ下含む'},
-    part_back_upper:{price:6600,time:20,label:'背中上',cat:'part',subCat:'upper',imgs:{body:'part_back_upper'},cool:0},
-    part_back_lower:{price:6600,time:20,label:'背中下',cat:'part',subCat:'upper',imgs:{body:'part_back_lower'},cool:0},
-    part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'upper',imgs:{body:'part_elbow_upper'},cool:0},
-    part_elbow_lower:{price:8800,time:25,label:'肘下',cat:'part',subCat:'upper',imgs:{body:'part_elbow_lower'},cool:0},
-    part_hand_finger:{price:4400,time:15,label:'手の甲指',cat:'part',subCat:'upper',imgs:{body:'part_hand_finger'},cool:0},
-    part_buttocks:{price:6600,time:18,label:'臀部',cat:'part',subCat:'lower',imgs:{body:'part_buttocks'},cool:0},
-    part_knee_upper:{price:8800,time:30,label:'膝上',cat:'part',subCat:'lower',imgs:{body:'part_knee_upper'},cool:0},
-    part_knee_lower:{price:8800,time:35,label:'膝下',cat:'part',subCat:'lower',imgs:{body:'part_knee_lower'},cool:0},
-    part_foot_toe:{price:4400,time:15,label:'足の甲指',cat:'part',subCat:'lower',imgs:{body:'part_foot_toe'},cool:0},
-    part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'},cool:0},
-    part_i_line:{price:7700,time:20,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
-    part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
-    other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
-    other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
+    set_fullbody_all:{price:52800,time:110,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
+    set_upperbody:{price:30800,time:60,label:'上半身セット(顔含む)',cat:'set',imgs:{body:'set_upperbody_body',face:'set_fullface'},cool:1},
+    set_lowerbody:{price:30800,time:50,label:'下半身セット(VIO含む)',cat:'set',imgs:{body:'set_lowerbody_body'},cool:0},
+    set_fullface_vio:{price:27500,time:50,label:'全顔+VIOセット',cat:'set',imgs:{body:'set_vio',face:'set_fullface'},cool:1},
+    set_fullface_eyebrow:{price:24200,time:40,label:'全顔+眉毛セット',cat:'set',imgs:{face:'set_fullface_eyebrow_face'},cool:1},
+    set_fullface:{price:13200,time:30,label:'全顔セット',cat:'set',imgs:{face:'set_fullface'},cool:1},
+    set_eyebrow:{price:13200,time:10,label:'眉毛セット',cat:'set',imgs:{face:'set_eyebrow_face'},cool:0},
+    set_vio:{price:16500,time:40,label:'VIOセット',cat:'set',imgs:{body:'set_vio'},cool:0},
+    set_chest_abdomen:{price:11000,time:20,label:'胸＋腹部セット',cat:'set',imgs:{body:'set_chest_abdomen'},cool:0},
+    set_arms_legs:{price:28600,time:50,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'},cool:0},
+    set_arms:{price:15400,time:20,label:'両腕セット',cat:'set',imgs:{body:'set_arms'},cool:0},
+    set_legs:{price:17600,time:30,label:'両足セット',cat:'set',imgs:{body:'set_legs'},cool:0},
+    part_nose_under:{price:4400,time:5,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},cool:1},
+    part_mouth_under:{price:4400,time:5,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},cool:1},
+    part_cheek:{price:4400,time:5,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},cool:1},
+    part_face_line:{price:4400,time:5,label:'フェイスライン',cat:'part',subCat:'face',imgs:{face:'part_face_line'},cool:1},
+    part_neck:{price:4400,time:5,label:'首',cat:'part',subCat:'face',imgs:{face:'part_neck'},cool:1},
+    part_forehead:{price:6600,time:5,label:'額',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_forehead'},cool:0},
+    part_eyebrow_upper:{price:8800,time:5,label:'眉上',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_upper'},cool:0},
+    part_eyebrow_middle:{price:4400,time:5,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},cool:0},
+    part_eyebrow_lower:{price:6600,time:5,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'},cool:0},
+    part_tragus:{price:4400,time:5,label:'耳珠',cat:'part',subCat:'face',imgs:{face:'part_tragus'},cool:0},
+    part_earlobe:{price:4400,time:5,label:'耳たぶ',cat:'part',subCat:'face',imgs:{face:'part_earlobe'},cool:0},
+    part_nose_hair:{price:8800,time:5,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
+    part_nose_wing:{price:4400,time:5,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
+    part_nape:{price:4400,time:10,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
+    part_armpit:{price:4400,time:5,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
+    part_nipple_around:{price:4400,time:5,label:'乳輪周り',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nipple_around'},cool:0},
+    part_chest_nipple:{price:6600,time:10,label:'胸',cat:'part',subCat:'upper',imgs:{body:'part_chest_nipple'},cool:0,note:'※乳輪周り含む'},
+    part_navel_under:{price:4400,time:5,label:'ヘソ下',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_navel_under'},cool:0},
+    part_abdomen_navel:{price:6600,time:10,label:'腹部',cat:'part',subCat:'upper',imgs:{body:'part_abdomen_navel'},cool:0,note:'※ヘソ下含む'},
+    part_back_upper:{price:6600,time:10,label:'背中上',cat:'part',subCat:'upper',imgs:{body:'part_back_upper'},cool:0},
+    part_back_lower:{price:6600,time:10,label:'背中下',cat:'part',subCat:'upper',imgs:{body:'part_back_lower'},cool:0},
+    part_elbow_upper:{price:6600,time:10,label:'肘上',cat:'part',subCat:'upper',imgs:{body:'part_elbow_upper'},cool:0},
+    part_elbow_lower:{price:8800,time:10,label:'肘下',cat:'part',subCat:'upper',imgs:{body:'part_elbow_lower'},cool:0},
+    part_hand_finger:{price:4400,time:10,label:'手の甲指',cat:'part',subCat:'upper',imgs:{body:'part_hand_finger'},cool:0},
+    part_buttocks:{price:6600,time:10,label:'臀部',cat:'part',subCat:'lower',imgs:{body:'part_buttocks'},cool:0},
+    part_knee_upper:{price:8800,time:15,label:'膝上',cat:'part',subCat:'lower',imgs:{body:'part_knee_upper'},cool:0},
+    part_knee_lower:{price:8800,time:15,label:'膝下',cat:'part',subCat:'lower',imgs:{body:'part_knee_lower'},cool:0},
+    part_foot_toe:{price:4400,time:10,label:'足の甲指',cat:'part',subCat:'lower',imgs:{body:'part_foot_toe'},cool:0},
+    part_v_line:{price:7700,time:10,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'},cool:0},
+    part_i_line:{price:7700,time:10,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
+    part_o_line:{price:5500,time:10,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
+    other_lala_peel:{price:12100,time:40,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
+    other_face_correction:{price:22000,time:40,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
     other_derma_injection:{price:22000,time:30,label:'ダーマ肌育',cat:'other',cool:1},
     other_scalp_care:{price:22000,time:25,label:'スカルプケア',cat:'other'},
     other_s_planning:{price:11000,time:60,label:'角質ケア',cat:'other'},
@@ -183,7 +184,6 @@ function getItemPrice(id) {
         return item.price * 0.5;
     } return item.price;
 }
-
 function getOriginalTotal(idList) { var t = 0; for (var i = 0; i < idList.length; i++) { t += getItemPrice(idList[i]); } return t; }
 
 function updateTotal() {
@@ -280,7 +280,6 @@ function proceedToCalendar() {
     xhr.send(JSON.stringify({type:'getBusySlots', excludeId: editEventId}));
 }
 
-// 💡 2026年 祝日データ (営業時間判定用)
 var holidays2026 = ["2026/1/1", "2026/1/2", "2026/1/12", "2026/2/11", "2026/2/23", "2026/3/21", "2026/4/29", "2026/5/3", "2026/5/4", "2026/5/5", "2026/5/6", "2026/7/20", "2026/8/11", "2026/9/21", "2026/9/22", "2026/9/23", "2026/10/12", "2026/11/3", "2026/11/23", "2026/12/23"];
 
 function renderCalendar() {
@@ -302,11 +301,8 @@ function renderCalendar() {
             var slotS = new Date(firstDay.getFullYear(), firstDay.getMonth(), firstDay.getDate()+d, timeStr.split(':')[0], timeStr.split(':')[1]);
             var s = slotS.getTime(); var e = s + reqMs; var wDay = slotS.getDay(); var totalM = slotS.getHours()*60 + slotS.getMinutes();
             var dateStrKey = slotS.getFullYear()+'/'+(slotS.getMonth()+1)+'/'+slotS.getDate();
-            
-            // 💡 祝日判定ロジックの修正
             var isHoliday = (holidays2026.indexOf(dateStrKey) !== -1);
             var isWeekendOrHoliday = (wDay===0 || wDay===6 || isHoliday);
-            
             var isInsideHours = isWeekendOrHoliday ? (totalM>=540 && totalM < 1260) : (totalM>=720 && totalM < 1320);
             var limitHr = isWeekendOrHoliday ? 21 : 22; var limitT = new Date(slotS.getFullYear(), slotS.getMonth(), slotS.getDate(), limitHr, 0).getTime();
             var canFit = (e <= limitT); var isBusy = false;
