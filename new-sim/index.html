@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.81.0</title>
+<title>NARX プレミアム予約システム Ver.82.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -60,7 +60,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 #suggestion-box { position:fixed; bottom:185px; left:50%; transform:translateX(-50%); width:85%; max-width:320px; background:#f7d05e; color:#111; padding:15px; border-radius:12px; display:none; z-index:2000; box-shadow:0 10px 40px rgba(0,0,0,0.8); border:1px solid #fff; }
 .sug-title { font-weight:bold; font-size:0.7rem; color:#555; text-align:center; margin-bottom:5px; }
 .sug-benefit-msg { text-align:center; font-size:0.75rem; color:#fff; background:#111; padding:6px; border-radius:4px; font-weight:bold; margin-bottom:10px; }
-.sug-menu-name { font-size:1rem; font-weight:bold; text-align:center; margin-bottom:10px; }
+.sug-menu-name { font-size:0.9rem; font-weight:bold; text-align:center; margin-bottom:10px; }
 .sug-compare-panel { background:rgba(255,255,255,0.9); padding:10px; border-radius:8px; margin-bottom:15px; display:flex; justify-content:space-around; align-items:center; }
 .sug-col { text-align:center; }
 .sug-col-label { font-size:0.55rem; color:#666; display:block; }
@@ -113,7 +113,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
         <button class="btn-reserve" style="font-size:1.0rem; padding:18px;" onclick="applyAndProceed()">お得なセットに変更してカレンダーへ進む</button>
         
         <div style="text-align:center; margin-top:20px;">
-            <a href="javascript:void(0)" onclick="cancelAndProceed()" style="color:#888; font-size:0.8rem; text-decoration:underline;">いいえ、このままバラバラのメニューで進む</a>
+            <a href="javascript:void(0)" onclick="cancelAndProceed()" style="color:#888; font-size:0.8rem; text-decoration:underline;">いいえ、このままのメニューで進む</a>
         </div>
         
         <div style="text-align:center; margin-top:20px;">
@@ -130,18 +130,28 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 <div id="calendar-modal"><div class="cal-header"><div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><button onclick="changeWeek(-1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">◀ 前週</button><span id="cal-title" style="color:var(--gold); font-size:0.95rem; font-weight:bold;"></span><button onclick="changeWeek(1)" style="color:var(--gold); background:none; border:1px solid var(--gold); padding:8px 15px; border-radius:4px;">次週 ▶</button></div>
 <div style="text-align:center; font-size:0.7rem; color:#888; margin-top:5px;">◎：予約可能 / ×：予約不可 / <span style="color:#d4af37;">☎</span>：お電話にてお問い合わせください</div>
 <button onclick="closeCalendarModal()" style="color:#888; background:none; border:none; width:100%; margin-top:10px;">メニューに戻る</button></div><div class="cal-outer-wrapper"><div id="calendar-container"></div></div></div>
-<div id="info-modal"><div class="modal-content" style="background:#111; max-width:90%;"><h3 style="color:var(--gold); text-align:center;">内容の確認</h3><div id="selected-summary" style="font-size:0.85rem; background:#222; padding:20px; border-radius:8px; margin-bottom:25px; border-left:4px solid var(--gold); line-height:1.7; text-align:left;"></div><div class="form-group"><label>お名前</label><input type="text" id="cust-name"></div><div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel"></div><div class="form-group"><label>メール</label><input type="email" id="cust-email"></div><div class="form-group"><label>備考 / その他 / 伝えたい事</label><textarea id="cust-memo" rows="3"></textarea></div><div style="text-align:center; font-size:0.7rem; color:#ccc; margin: 20px 0 10px; line-height: 1.4;">※ご予約の変更やキャンセルは、メールに記載の専用URLより【3日前まで】いつでも簡単に行えます。</div><button class="btn-reserve" onclick="submitReservation()">予約を確定する</button><button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#888; width:100%; margin-top:20px;">修正する</button></div></div>
+
+<div id="info-modal"><div class="modal-content" style="background:#111; max-width:90%;">
+    <div style="position:relative; margin-bottom:15px;">
+        <span onclick="document.getElementById('info-modal').style.display='none'" style="position:absolute; left:0; top:-5px; color:#888; font-size:1.5rem; cursor:pointer;">◀</span>
+        <h3 style="color:var(--gold); text-align:center; margin:0;">内容の確認</h3>
+    </div>
+    <div id="selected-summary" style="font-size:0.85rem; background:#222; padding:20px; border-radius:8px; margin-bottom:25px; border-left:4px solid var(--gold); line-height:1.7; text-align:left;"></div>
+    <div class="form-group"><label>お名前</label><input type="text" id="cust-name"></div><div class="form-group"><label>電話番号</label><input type="tel" id="cust-tel"></div><div class="form-group"><label>メール</label><input type="email" id="cust-email"></div><div class="form-group"><label>備考 / その他 / 伝えたい事</label><textarea id="cust-memo" rows="3"></textarea></div>
+    <div style="text-align:center; font-size:0.7rem; color:#ccc; margin: 20px 0 10px; line-height: 1.4;">※ご予約の変更やキャンセルは、メールに記載の専用URLより【3日前まで】いつでも簡単に行えます。</div>
+    <button class="btn-reserve" onclick="submitReservation()">予約を確定する</button>
+    <button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#888; width:100%; margin-top:20px; font-size:0.85rem; padding:10px;">◀ メニューを選びなおす（前の画面に戻る）</button>
+</div></div>
+
 <div id="repeat-guidance-modal"><div class="guidance-box"><div class="guidance-title">施術内容をコピーしました</div><div class="guidance-step"><b style="color:var(--gold);">❶. 予約メニューの選択</b><br>LINE予約画面より<br><span style="color:var(--white); font-weight:bold;">「複数メニュー【時間枠】」</span>をお選びください。</div><div class="guidance-step" style="border: 2px solid var(--gold); background: #1a1500; text-align:center; padding: 20px 15px; border-left: none;"><b style="color:#fff; font-size:0.9rem;">❷. 時間枠の選択 <span style="color:var(--gold);">[重要]</span></b><br><div id="guide-hours" style="color:var(--gold); font-size:1.4rem; font-weight:bold; margin:12px 0 5px;">【 ●.● 時間枠 】</div></div><button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button></div></div>
 
 <script>
-// 💡 ご指定の最新GAS URLを適用
 var GAS_URL = "https://script.google.com/macros/s/AKfycbxKw7vHKWRibtgOytoDJYZU3PmVbdi0VzsS4MsAoSRAkNCODbQjV3uql7TAfHTgB_sK3Q/exec";
 
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
-var suggestionId = null, suggestionReplaceItems = [], internalNumericSlot = 0, editEventId = null;
+var suggestionCart = null, internalNumericSlot = 0, editEventId = null;
 
-// 💡 修正：メニュー名を正式名称に復元（裏側のキーはそのまま）
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
     set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット',cat:'set',imgs:{body:'set_fullbody_noface_body'},cool:0},
@@ -178,6 +188,7 @@ var menuData = {
     part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nipple_around'},cool:0},
     part_abdomen_navel:{price:6600,time:15,label:'腹部(ヘソ下含む)',cat:'part',subCat:'upper',imgs:{body:'part_abdomen_navel'},cool:0},
     part_navel_under:{price:4400,time:10,label:'ヘソ下',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_navel_under'},cool:0},
+    
     part_back_upper:{price:6600,time:20,label:'背中上',cat:'part',subCat:'upper',imgs:{body:'part_back_upper'},cool:0},
     part_back_lower:{price:6600,time:20,label:'背中下',cat:'part',subCat:'upper',imgs:{body:'part_back_lower'},cool:0},
     part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'upper',imgs:{body:'part_elbow_upper'},cool:0},
@@ -192,7 +203,6 @@ var menuData = {
     part_i_line:{price:7700,time:20,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
     
-    // 💡 修正：その他のメニュー名復元
     other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
     other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
     other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other',cool:1},
@@ -238,19 +248,66 @@ function getItemPrice(id) {
 }
 function getOriginalTotal(idList) { var t = 0; for (var i = 0; i < idList.length; i++) { t += getItemPrice(idList[i]); } return t; }
 
-function calculateSavings() {
-    var savings = 0;
-    for(var i=0; i<selected.length; i++) {
-        var sid = selected[i];
-        if(setIncludes[sid]) {
-            var partsTotal = 0;
-            var leaves = itemLeaves[sid];
-            for(var j=0; j<leaves.length; j++) { partsTotal += getItemPrice(leaves[j]); }
-            var setPrice = getItemPrice(sid);
-            if (partsTotal > setPrice) { savings += (partsTotal - setPrice); }
+// 💡 修正：最適なカート（組み合わせ）を算出するパズルアルゴリズムを搭載！
+function getOptimalCart(selectedIds) {
+    var curL = [];
+    for (var s = 0; s < selectedIds.length; s++) {
+        var lNodes = itemLeaves[selectedIds[s]];
+        for (var ln = 0; ln < lNodes.length; ln++) {
+            if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]);
         }
     }
-    return savings;
+    var optimalCart = [];
+    var remainingLeaves = curL.slice();
+    var sets = Object.keys(menuData).filter(k => menuData[k].cat === 'set');
+    sets.sort((a, b) => getItemPrice(b) - getItemPrice(a));
+
+    while (true) {
+        var bestSet = null;
+        var bestSavings = -1;
+        var bestCoveredLeaves = [];
+        for (var i = 0; i < sets.length; i++) {
+            var sid = sets[i];
+            var sLeaves = itemLeaves[sid];
+            var covered = [];
+            var partsTotal = 0;
+            for (var j = 0; j < remainingLeaves.length; j++) {
+                if (sLeaves.indexOf(remainingLeaves[j]) !== -1) {
+                    covered.push(remainingLeaves[j]);
+                    partsTotal += getItemPrice(remainingLeaves[j]);
+                }
+            }
+            if (covered.length < 2) continue; // 2部位以上カバーできるセットのみ評価
+            var setPrice = getItemPrice(sid);
+            var savings = partsTotal - setPrice;
+            if (savings > bestSavings || (savings === bestSavings && savings >= 0 && covered.length > bestCoveredLeaves.length)) {
+                bestSavings = savings; bestSet = sid; bestCoveredLeaves = covered;
+            }
+        }
+        if (bestSet && bestSavings >= 0) {
+            optimalCart.push(bestSet);
+            remainingLeaves = remainingLeaves.filter(l => bestCoveredLeaves.indexOf(l) === -1);
+        } else { break; }
+    }
+    for(var i=0; i<remainingLeaves.length; i++){ optimalCart.push(remainingLeaves[i]); }
+    return optimalCart;
+}
+
+function calculateSavings() {
+    if (selected.length === 0) return 0;
+    var currentTotal = getOriginalTotal(selected);
+    var curL = [];
+    for (var s = 0; s < selected.length; s++) {
+        var lNodes = itemLeaves[selected[s]];
+        for (var ln = 0; ln < lNodes.length; ln++) {
+            if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]);
+        }
+    }
+    // バラバラで選んだ場合の理論上の最高額
+    var partsTotal = 0;
+    for (var i = 0; i < curL.length; i++) { partsTotal += getItemPrice(curL[i]); }
+    var savings = partsTotal - currentTotal;
+    return savings > 0 ? savings : 0;
 }
 
 function updateTotal() {
@@ -284,83 +341,109 @@ function updateTotal() {
 
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
-    var keys = Object.keys(menuData), curL = [];
-    for (var s = 0; s < selected.length; s++) { var lNodes = itemLeaves[selected[s]]; for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); } }
+    var optimalCart = getOptimalCart(selected);
     
-    var currentTotal = getOriginalTotal(selected);
-    for (var i = 0; i < keys.length; i++) {
-        var sid = keys[i]; if (menuData[sid].cat !== 'set' || selected.indexOf(sid) !== -1) continue;
-        var candL = itemLeaves[sid];
-        var intersect = [];
-        for(var j=0; j<selected.length; j++) {
-            var selId = selected[j], selL = itemLeaves[selId], isInc = true;
-            for(var k=0; k<selL.length; k++){ if(candL.indexOf(selL[k]) === -1) isInc=false; }
-            if(isInc) intersect.push(selId);
+    // カートが現在と同じかチェック
+    var isDifferent = false;
+    if (optimalCart.length !== selected.length) {
+        isDifferent = true;
+    } else {
+        var sortedSel = selected.slice().sort();
+        var sortedOpt = optimalCart.slice().sort();
+        for (var i = 0; i < sortedSel.length; i++) { if (sortedSel[i] !== sortedOpt[i]) { isDifferent = true; break; } }
+    }
+
+    var oldP = getOriginalTotal(selected);
+    if (isDifferent) {
+        var newP = getOriginalTotal(optimalCart);
+        var diff = newP - oldP;
+        if (diff <= 0) {
+            return { suggestedCart: optimalCart, diff: diff, oldPrice: oldP, newPrice: newP };
         }
-        if (intersect.length < 2) continue;
-        var oldP = getOriginalTotal(intersect), setP = getItemPrice(sid), diff = setP - oldP;
-        var newTotal = currentTotal - oldP + setP;
-        if (newTotal > 52800) continue;
-        if (diff <= 0) return {sid:sid, type: (diff < 0 ? 'cheaper' : 'equal'), diff:diff, oldPrice:oldP, intersectingItems:intersect};
-        else if (diff > 0 && diff <= 3000) return {sid:sid, type: 'upsell', diff:diff, oldPrice:oldP, intersectingItems:intersect};
-    } 
+    }
+
+    // アップセル（少しの追加で一つの大きなセットになる場合）
+    var currentOptPrice = isDifferent ? getOriginalTotal(optimalCart) : oldP;
+    var sets = Object.keys(menuData).filter(k => menuData[k].cat === 'set');
+    var curL = [];
+    for (var s = 0; s < selected.length; s++) {
+        var lNodes = itemLeaves[selected[s]];
+        for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); }
+    }
+    for (var i = 0; i < sets.length; i++) {
+        var sid = sets[i];
+        if (selected.length === 1 && selected[0] === sid) continue;
+        var sLeaves = itemLeaves[sid];
+        var coversAll = true;
+        for(var j=0; j<curL.length; j++) { if (sLeaves.indexOf(curL[j]) === -1) { coversAll = false; break; } }
+        if (!coversAll) continue;
+        
+        var setPrice = getItemPrice(sid);
+        var diff = setPrice - oldP;
+        if (diff > 0 && diff <= 3000) {
+            return { suggestedCart: [sid], diff: diff, oldPrice: oldP, newPrice: oldP + diff };
+        }
+    }
     return null;
 }
 
 function checkSuggestion(isManual) {
-    document.getElementById('suggestion-box').style.display = 'none'; var best = analyzeSuggestions(isManual); if (!best) { suggestionId = null; return; }
-    suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
-    var setItem = menuData[best.sid];
-    var currentTotal = getOriginalTotal(selected);
-    var newTotal = currentTotal - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
-    var diffVal = currentTotal - newTotal; 
+    document.getElementById('suggestion-box').style.display = 'none'; 
+    var best = analyzeSuggestions(isManual); 
+    if (!best) { suggestionCart = null; return; }
+    
+    suggestionCart = best.suggestedCart;
+    var diffVal = best.diff; 
     
     var diffMsg = "";
-    if (diffVal > 0) diffMsg = '¥' + diffVal.toLocaleString() + ' お得になります！';
+    if (diffVal < 0) diffMsg = '¥' + Math.abs(diffVal).toLocaleString() + ' お得になります！';
     else if (diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
-    else diffMsg = 'あと ¥' + Math.abs(diffVal).toLocaleString() + ' でお得なセットに！';
+    else diffMsg = 'あと ¥' + diffVal.toLocaleString() + ' でお得なセットに！';
 
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name">' + setItem.label + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + currentTotal.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + newTotal.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion(\''+suggestionId+'\')" class="btn-sug-skip">今はしない</button></div><div style="font-size:0.65rem; color:#aaa; margin-top:10px; text-align:left; line-height:1.4;">※セットに含まれる部位のうち、施術が不要な箇所は当日のご相談で省くことも可能です。お客様に合わせたオーダーメイドで対応いたします。</div>';
+    var labelNames = best.suggestedCart.map(id => menuData[id].label).join(' ＋ ');
+
+    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name" style="font-size:0.85rem; padding: 0 10px;">' + labelNames + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + best.oldPrice.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + best.newPrice.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion()" class="btn-sug-skip">今はしない</button></div><div style="font-size:0.65rem; color:#aaa; margin-top:10px; text-align:left; line-height:1.4;">※不要な箇所は当日のご相談で省くことも可能です。お客様に合わせたオーダーメイドで対応いたします。</div>';
     
     document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
 }
 
 function applyOptimalSet() {
-    if(!suggestionReplaceItems || !suggestionId) return;
-    for (var i = 0; i < suggestionReplaceItems.length; i++) { var idx = selected.indexOf(suggestionReplaceItems[i]); if (idx !== -1) selected.splice(idx, 1); }
-    selected.push(suggestionId); suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display = 'none'; render(); 
+    if(!suggestionCart) return;
+    selected = suggestionCart.slice();
+    suggestionCart = null;
+    document.getElementById('suggestion-box').style.display = 'none'; 
+    render(); 
 }
 
-// 💡 修正：最後の提案時の3パターン分岐メッセージ
 function handleReserveAction() {
-    if (selected.length === 0) return alert("メニューを選んでください"); var best = analyzeSuggestions(true);
-    if (best && (best.type === 'cheaper' || best.type === 'equal' || best.type === 'upsell')) {
-        suggestionId = best.sid; suggestionReplaceItems = best.intersectingItems;
-        var oldNames = []; for(var i=0; i<best.intersectingItems.length; i++) oldNames.push(menuData[best.intersectingItems[i]].label);
+    if (selected.length === 0) return alert("メニューを選んでください"); 
+    var best = analyzeSuggestions(true);
+    if (best) {
+        suggestionCart = best.suggestedCart;
+        var newNames = best.suggestedCart.map(id => menuData[id].label);
         document.getElementById('final-suggestion-modal').style.display = 'flex'; 
         
         var modalBox = document.querySelector('#final-suggestion-modal .final-sug-box');
         modalBox.classList.remove('modal-animate'); void modalBox.offsetWidth; modalBox.classList.add('modal-animate');
         
-        var curP = getOriginalTotal(selected);
-        var newP = curP - getOriginalTotal(suggestionReplaceItems) + getItemPrice(best.sid);
-        var diffVal = curP - newP;
-        
+        var diffVal = best.diff;
         var finalMsg = "";
-        if(diffVal > 0) {
-            finalMsg = "現在選択されている部位は、『" + menuData[best.sid].label + "』に変更した方が <b style='color:var(--gold);'>¥" + diffVal.toLocaleString() + " もお得に</b>ご案内できます！変更してよろしいでしょうか？";
+        
+        // 💡 修正：親切なメッセージの出し分け
+        if(diffVal < 0) {
+            finalMsg = "現在選択されているメニューは、<br>『" + newNames.join('』＋『') + "』<br>に変更した方が <b style='color:var(--gold);'>¥" + Math.abs(diffVal).toLocaleString() + " もお得に</b>ご案内できます！変更してよろしいでしょうか？";
         } else if(diffVal === 0) {
-            finalMsg = "現在選択されている部位は、同じ料金のまま『" + menuData[best.sid].label + "』としてまとめた方が、<b>当日のご案内や施術がよりスムーズになります。</b> セットに変更してよろしいでしょうか？";
+            finalMsg = "現在選択されているメニューは、同じ料金のまま<br>『" + newNames.join('』＋『') + "』<br>としてまとめた方が、<b>当日のご案内や施術がよりスムーズになります。</b> セットに変更してよろしいでしょうか？";
         } else {
-            finalMsg = "あと <b style='color:var(--gold);'>¥" + Math.abs(diffVal).toLocaleString() + " 追加するだけ</b>で、全ての部位が含まれたお得な『" + menuData[best.sid].label + "』に変更できます！大変お得ですが、変更してよろしいでしょうか？";
+            finalMsg = "あと <b style='color:var(--gold);'>¥" + diffVal.toLocaleString() + " 追加するだけ</b>で、全ての部位が含まれたお得な<br>『" + newNames.join('』＋『') + "』<br>に変更できます！大変お得ですが、変更してよろしいでしょうか？";
         }
         
         document.getElementById('final-sug-desc').innerHTML = finalMsg;
-        document.getElementById('final-old-price').innerText = "¥" + curP.toLocaleString();
-        document.getElementById('final-new-price').innerText = "¥" + newP.toLocaleString(); return;
-    } proceedToCalendar();
+        document.getElementById('final-old-price').innerText = "¥" + best.oldPrice.toLocaleString();
+        document.getElementById('final-new-price').innerText = "¥" + best.newPrice.toLocaleString(); return;
+    } 
+    proceedToCalendar();
 }
-
 function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedToCalendar, 100); }
 function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedToCalendar(); }
 
@@ -416,7 +499,6 @@ function renderCalendar() {
             var isBlockedByTime = (s < blockLimitTime);
             if(s < now.getTime()) isBusy = true;
             
-            // 💡 修正：直前ブロック枠には「☎」マークを表示
             if(!isInsideHours) {
                 html+='<td class="cal-status-off">-</td>';
             } else if(!canFit || isBusy) {
@@ -496,11 +578,11 @@ function toggleConcierge() {
     } else { 
         img.src = 'concierge_off.png'; 
         showConciergeBubble("AIコンシェルジュをオフにしました。"); 
-        document.getElementById('suggestion-box').style.display = 'none'; suggestionId = null; render(); 
+        document.getElementById('suggestion-box').style.display = 'none'; suggestionCart = null; render(); 
     }
 }
 function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (window.bubbleTimer) clearTimeout(window.bubbleTimer); window.bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
-function skipSuggestion(id) { document.getElementById('suggestion-box').style.display='none'; suggestionId=null; render(); }
+function skipSuggestion() { document.getElementById('suggestion-box').style.display='none'; suggestionCart=null; render(); }
 function forceStart(t) { 
     document.getElementById('gate-modal').style.display='none'; userType=t; 
     document.getElementById('mode-display').innerText = t==='new'?"【ご新規様】初回体験価格":"【会員様】通常価格"; 
@@ -539,7 +621,7 @@ function initApp() {
 }
 function createImg(parent, name) { var layerId = "img-" + name; if (document.getElementById(layerId)) return; var img = document.createElement('img'); img.src = name + ".png"; img.id = layerId; img.className = 'layer-part'; img.onerror = function() { this.style.display = 'none'; }; parent.appendChild(img); }
 function changeTab(t){ currentTab=t; render(); }
-function resetSelection(){ selected = []; suggestionId = null; suggestionReplaceItems = []; document.getElementById('suggestion-box').style.display='none'; render(); }
+function resetSelection(){ selected = []; suggestionCart = null; document.getElementById('suggestion-box').style.display='none'; render(); }
 function toggleItem(id){ document.getElementById('suggestion-box').style.display='none'; var idx=selected.indexOf(id); if(idx!==-1)selected.splice(idx,1); else selected.push(id); checkSuggestion(false); render(); }
 function render() {
     var area = document.getElementById('menu-area'); area.innerHTML=''; var tabs = document.querySelectorAll('.tab'); for (var t = 0; t < tabs.length; t++) { tabs[t].classList.remove('active'); } document.getElementById("tab-" + currentTab).classList.add('active');
@@ -547,8 +629,12 @@ function render() {
     var parts = document.querySelectorAll('.layer-part'); for (var p = 0; p < parts.length; p++) { parts[p].classList.remove('active', 'suggest-blink'); }
     var curL = []; for (var s = 0; s < selected.length; s++) { var sid = selected[s], item = menuData[sid]; if(!item)continue; if (item.imgs) { if (item.imgs.body) { var b = document.getElementById("img-" + item.imgs.body); if(b) b.classList.add('active'); } if (item.imgs.face) { var f = document.getElementById("img-" + item.imgs.face); if(f) f.classList.add('active'); } } var lNodes = itemLeaves[sid]; for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); } }
     for (var cl = 0; cl < curL.length; cl++) { var leaf = menuData[curL[cl]]; if(!leaf)continue; if (leaf.imgs) { if (leaf.imgs.body) { var lb = document.getElementById("img-" + leaf.imgs.body); if(lb) lb.classList.add('active'); } if (leaf.imgs.face) { var lf = document.getElementById("img-" + leaf.imgs.face); if(lf) lf.classList.add('active'); } } }
-    if (suggestionId) {
-        var sugLeaves = itemLeaves[suggestionId];
+    if (suggestionCart) {
+        var sugLeaves = [];
+        for(var s=0; s<suggestionCart.length; s++) {
+            var n = itemLeaves[suggestionCart[s]];
+            for(var ln=0; ln<n.length; ln++){ if(sugLeaves.indexOf(n[ln])===-1) sugLeaves.push(n[ln]); }
+        }
         for (var sl = 0; sl < sugLeaves.length; sl++) {
             var leafId = sugLeaves[sl]; if (curL.indexOf(leafId) === -1) { 
                 var sLeaf = menuData[leafId]; if (sLeaf && sLeaf.imgs) {
