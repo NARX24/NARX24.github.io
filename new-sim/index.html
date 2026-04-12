@@ -60,7 +60,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 #suggestion-box { position:fixed; bottom:185px; left:50%; transform:translateX(-50%); width:85%; max-width:320px; background:#f7d05e; color:#111; padding:15px; border-radius:12px; display:none; z-index:2000; box-shadow:0 10px 40px rgba(0,0,0,0.8); border:1px solid #fff; }
 .sug-title { font-weight:bold; font-size:0.7rem; color:#555; text-align:center; margin-bottom:5px; }
 .sug-benefit-msg { text-align:center; font-size:0.75rem; color:#fff; background:#111; padding:6px; border-radius:4px; font-weight:bold; margin-bottom:10px; }
-.sug-menu-name { font-size:0.9rem; font-weight:bold; text-align:center; margin-bottom:10px; }
+.sug-menu-name { font-size:0.85rem; font-weight:bold; text-align:center; margin-bottom:10px; }
 .sug-compare-panel { background:rgba(255,255,255,0.9); padding:10px; border-radius:8px; margin-bottom:15px; display:flex; justify-content:space-around; align-items:center; }
 .sug-col { text-align:center; }
 .sug-col-label { font-size:0.55rem; color:#666; display:block; }
@@ -109,13 +109,10 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
             <div style="text-align:center;"><span style="font-size:0.6rem; color:var(--gold);">変更後の合計</span><br><span id="final-new-price" style="font-size:1.1rem; color:#f44; font-weight:bold;"></span></div>
         </div>
         <div style="font-size:0.65rem; color:#aaa; margin-bottom:15px; text-align:left; line-height:1.4;">※セットに含まれる部位のうち、施術が不要な箇所は当日のご相談で省くことも可能です。お客様に合わせたオーダーメイドで対応いたします。</div>
-        
         <button class="btn-reserve" style="font-size:1.0rem; padding:18px;" onclick="applyAndProceed()">お得なセットに変更してカレンダーへ進む</button>
-        
         <div style="text-align:center; margin-top:20px;">
             <a href="javascript:void(0)" onclick="cancelAndProceed()" style="color:#888; font-size:0.8rem; text-decoration:underline;">いいえ、このままのメニューで進む</a>
         </div>
-        
         <div style="text-align:center; margin-top:20px;">
             <button onclick="document.getElementById('final-suggestion-modal').style.display='none'" style="background:none; border:none; color:#555; width:100%; font-size:0.8rem;">選択画面へ戻る</button>
         </div>
@@ -151,6 +148,7 @@ var GAS_URL = "https://script.google.com/macros/s/AKfycbxKw7vHKWRibtgOytoDJYZU3P
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {};
 var suggestionCart = null, internalNumericSlot = 0, editEventId = null;
+var aiThinkTimer = null; // 💡 思考アニメーション用タイマー
 
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
@@ -248,7 +246,6 @@ function getItemPrice(id) {
 }
 function getOriginalTotal(idList) { var t = 0; for (var i = 0; i < idList.length; i++) { t += getItemPrice(idList[i]); } return t; }
 
-// 💡 修正：最適なカート（組み合わせ）を算出するパズルアルゴリズムを搭載！
 function getOptimalCart(selectedIds) {
     var curL = [];
     for (var s = 0; s < selectedIds.length; s++) {
@@ -277,7 +274,7 @@ function getOptimalCart(selectedIds) {
                     partsTotal += getItemPrice(remainingLeaves[j]);
                 }
             }
-            if (covered.length < 2) continue; // 2部位以上カバーできるセットのみ評価
+            if (covered.length < 2) continue; 
             var setPrice = getItemPrice(sid);
             var savings = partsTotal - setPrice;
             if (savings > bestSavings || (savings === bestSavings && savings >= 0 && covered.length > bestCoveredLeaves.length)) {
@@ -303,7 +300,6 @@ function calculateSavings() {
             if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]);
         }
     }
-    // バラバラで選んだ場合の理論上の最高額
     var partsTotal = 0;
     for (var i = 0; i < curL.length; i++) { partsTotal += getItemPrice(curL[i]); }
     var savings = partsTotal - currentTotal;
@@ -343,7 +339,6 @@ function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var optimalCart = getOptimalCart(selected);
     
-    // カートが現在と同じかチェック
     var isDifferent = false;
     if (optimalCart.length !== selected.length) {
         isDifferent = true;
@@ -362,7 +357,6 @@ function analyzeSuggestions(isManual) {
         }
     }
 
-    // アップセル（少しの追加で一つの大きなセットになる場合）
     var currentOptPrice = isDifferent ? getOriginalTotal(optimalCart) : oldP;
     var sets = Object.keys(menuData).filter(k => menuData[k].cat === 'set');
     var curL = [];
@@ -387,24 +381,33 @@ function analyzeSuggestions(isManual) {
     return null;
 }
 
+// 💡 修正：AI思考中アニメーションを追加
 function checkSuggestion(isManual) {
+    if(aiThinkTimer) clearTimeout(aiThinkTimer);
     document.getElementById('suggestion-box').style.display = 'none'; 
     var best = analyzeSuggestions(isManual); 
     if (!best) { suggestionCart = null; return; }
     
-    suggestionCart = best.suggestedCart;
-    var diffVal = best.diff; 
-    
-    var diffMsg = "";
-    if (diffVal < 0) diffMsg = '¥' + Math.abs(diffVal).toLocaleString() + ' お得になります！';
-    else if (diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
-    else diffMsg = 'あと ¥' + diffVal.toLocaleString() + ' でお得なセットに！';
+    var box = document.getElementById('suggestion-box');
+    box.innerHTML = '<div style="text-align:center; color:#111; font-size:0.8rem; font-weight:bold; padding:15px;">🤖 AIが最適なプランを計算中<span style="animation: blink-gold 1s infinite;">...</span></div>';
+    box.style.display = 'block';
 
-    var labelNames = best.suggestedCart.map(id => menuData[id].label).join(' ＋ ');
+    aiThinkTimer = setTimeout(function() {
+        suggestionCart = best.suggestedCart;
+        var diffVal = best.diff; 
+        
+        var diffMsg = "";
+        if (diffVal < 0) diffMsg = '¥' + Math.abs(diffVal).toLocaleString() + ' お得になります！';
+        else if (diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
+        else diffMsg = 'あと ¥' + diffVal.toLocaleString() + ' でお得なセットに！';
 
-    var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name" style="font-size:0.85rem; padding: 0 10px;">' + labelNames + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + best.oldPrice.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + best.newPrice.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion()" class="btn-sug-skip">今はしない</button></div><div style="font-size:0.65rem; color:#aaa; margin-top:10px; text-align:left; line-height:1.4;">※不要な箇所は当日のご相談で省くことも可能です。お客様に合わせたオーダーメイドで対応いたします。</div>';
-    
-    document.getElementById('suggestion-box').innerHTML = html; document.getElementById('suggestion-box').style.display = 'block'; render(); 
+        var labelNames = best.suggestedCart.map(id => menuData[id].label).join(' ＋ ');
+
+        var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name" style="font-size:0.85rem; padding: 0 10px;">' + labelNames + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + best.oldPrice.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + best.newPrice.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion()" class="btn-sug-skip">今はしない</button></div><div style="font-size:0.65rem; color:#aaa; margin-top:10px; text-align:left; line-height:1.4;">※不要な箇所は当日のご相談で省くことも可能です。お客様に合わせたオーダーメイドで対応いたします。</div>';
+        
+        box.innerHTML = html;
+        render(); // 提案チップを光らせる
+    }, 800); // 0.8秒の「考えてる感」
 }
 
 function applyOptimalSet() {
@@ -429,7 +432,6 @@ function handleReserveAction() {
         var diffVal = best.diff;
         var finalMsg = "";
         
-        // 💡 修正：親切なメッセージの出し分け
         if(diffVal < 0) {
             finalMsg = "現在選択されているメニューは、<br>『" + newNames.join('』＋『') + "』<br>に変更した方が <b style='color:var(--gold);'>¥" + Math.abs(diffVal).toLocaleString() + " もお得に</b>ご案内できます！変更してよろしいでしょうか？";
         } else if(diffVal === 0) {
@@ -515,13 +517,22 @@ function renderCalendar() {
     wrapper.innerHTML = html+'</tbody></table>';
 }
 
+// 💡 修正：文字重複の完全解消
 function openInfoModal(d, t, et) { 
     tDate=d; tTime=t; tEndTime=et; var labels = []; 
-    for(var i=0; i<selected.length; i++){ var l = menuData[selected[i]].label; if(userType==='new' && l!=='無料カウンセリングのみ') l+='(無料カウンセリング込)'; labels.push(l); } 
+    for(var i=0; i<selected.length; i++){ 
+        labels.push(menuData[selected[i]].label); 
+    } 
+    var joinedLabels = labels.join(', ');
     
+    // ご新規様で、かつ「無料カウンセリングのみ」以外なら、最後に一回だけ上品に付ける
+    if (userType === 'new' && joinedLabels !== '無料カウンセリングのみ') {
+        joinedLabels += " <span style='font-size:0.75rem; color:var(--gold);'>（※初回無料カウンセリング含む）</span>";
+    }
+
     var counselText = (userType === 'new') ? " <span style='font-size:0.7rem;'>(無料カウンセリング込)</span>" : "";
     var summaryHtml = "<div style='margin-bottom:10px;'><span style='font-size:0.7rem; color:#888;'>ご予約確保時間</span><br><span style='color:var(--gold); font-size:1.2rem; font-weight:bold;'>" + internalNumericSlot.toFixed(1) + " 時間枠</span>" + counselText + "</div>";
-    summaryHtml += "【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+labels.join(', ')+"<br>【合計】 "+document.getElementById('total-price').innerText;
+    summaryHtml += "【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+joinedLabels+"<br>【合計】 "+document.getElementById('total-price').innerText;
     
     document.getElementById('selected-summary').innerHTML = summaryHtml; 
     
@@ -541,15 +552,24 @@ function submitReservation() {
     var confirmMsg = "入力されたメールアドレスは\n【 " + em + " 】\nでよろしいですか？\n\n※間違っていると予約の変更やキャンセルができなくなります。";
     if (!window.confirm(confirmMsg)) return;
     showLoading(true); 
+    
+    // GASへのデータ送信（GAS側で自動的に無料カウンセリングの文字が1回だけ付与されます）
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = { type:'reserve', oldEventId: editEventId, userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
+    
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.href="index.html"; }}; xhr.send(JSON.stringify(payload));
 }
 
+// 💡 修正：LINEクリップボード機能の文字重複の解消
 function handleRepeatBooking() { 
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
-    var txt = "【NARX 予約内容】\nメニュー: " + labels.join(', ') + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠";
+    var joinedLabels = labels.join(', ');
+    if (userType === 'new' && joinedLabels !== '無料カウンセリングのみ') {
+        joinedLabels += "（※初回無料カウンセリング含む）";
+    }
+
+    var txt = "【NARX 予約内容】\nメニュー: " + joinedLabels + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠";
     var fallbackCopy = function(text) {
         var textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-9999px";
         document.body.appendChild(textArea); textArea.focus(); textArea.select();
