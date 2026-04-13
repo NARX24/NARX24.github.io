@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.83.0</title>
+<title>NARX プレミアム予約システム Ver.84.0</title>
 <style>
 :root{--gold:#d4af37;--black:#000;--dark-gray:#151515;--light-gray:#333;--white:#fff;--panel-bg:#fdfdfd;}
 body{background-color:var(--black);color:var(--white);font-family:serif;margin:0;padding-bottom:240px;overflow-x:hidden;}
@@ -75,7 +75,12 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 .concierge-icon img { width: 100%; height: 100%; object-fit: cover; }
 .bottom-bar { position:fixed; bottom:0; left:0; width:100%; background:rgba(5,5,5,0.98); border-top:2px solid var(--gold); padding:15px 20px; box-sizing:border-box; z-index:100; }
 .btn-reserve { background:var(--gold); color:#000; width:100%; padding:16px; border-radius:6px; font-weight:bold; border:none; cursor:pointer; font-size:1rem; }
-#loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200000; display: none; justify-content: center; align-items: center; color: var(--gold); font-weight: bold; }
+
+/* 💡 修正：ローディング（グルグル）のデザイン */
+#loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200000; display: none; flex-direction: column; justify-content: center; align-items: center; color: var(--gold); }
+.spinner { width: 50px; height: 50px; border: 5px solid rgba(212,175,55,0.3); border-top: 5px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
 #calendar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100000; display: none; overflow: hidden; }
 .cal-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--gold); text-align: center; }
 .cal-outer-wrapper { height: calc(100% - 110px); overflow: auto; background: #333; }
@@ -97,7 +102,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
 </style>
 </head>
 <body>
-<div id="loading-overlay">同期中...</div>
+<div id="loading-overlay"><div class="spinner"></div><div id="loading-text">予約帳を確認しています...</div></div>
 
 <div id="final-suggestion-modal">
     <div class="final-sug-box modal-animate">
@@ -140,7 +145,17 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
     <button onclick="document.getElementById('info-modal').style.display='none'" style="background:none; border:none; color:#888; width:100%; margin-top:20px; font-size:0.85rem; padding:10px;">◀ メニューを選びなおす（前の画面に戻る）</button>
 </div></div>
 
-<div id="repeat-guidance-modal"><div class="guidance-box"><div class="guidance-title">施術内容をコピーしました</div><div class="guidance-step"><b style="color:var(--gold);">❶. 予約メニューの選択</b><br>LINE予約画面より<br><span style="color:var(--white); font-weight:bold;">「複数メニュー【時間枠】」</span>をお選びください。</div><div class="guidance-step" style="border: 2px solid var(--gold); background: #1a1500; text-align:center; padding: 20px 15px; border-left: none;"><b style="color:#fff; font-size:0.9rem;">❷. 時間枠の選択 <span style="color:var(--gold);">[重要]</span></b><br><div id="guide-hours" style="color:var(--gold); font-size:1.4rem; font-weight:bold; margin:12px 0 5px;">【 ●.● 時間枠 】</div></div><button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button></div></div>
+<div id="repeat-guidance-modal">
+    <div class="guidance-box">
+        <div class="guidance-title">施術内容をコピーしました</div>
+        <div class="guidance-step"><b style="color:var(--gold);">❶. 予約メニューの選択</b><br>LINE予約画面より<br><span style="color:var(--white); font-weight:bold;">「複数メニュー【時間枠】」</span>をお選びください。</div>
+        <div class="guidance-step" style="border: 2px solid var(--gold); background: #1a1500; text-align:center; padding: 20px 15px; border-left: none;"><b style="color:#fff; font-size:0.9rem;">❷. 時間枠の選択 <span style="color:var(--gold);">[重要]</span></b><br><div id="guide-hours" style="color:var(--gold); font-size:1.4rem; font-weight:bold; margin:12px 0 5px;">【 ●.● 時間枠 】</div></div>
+        <button class="btn-reserve" onclick="location.href='https://liff.line.me/1657088803-ODW7m7Nn?calendar_salon_id=100&ts=1774360408'">LINE予約へ進む</button>
+        <div style="text-align:center; margin-top:20px;">
+            <a href="javascript:void(0)" onclick="document.getElementById('repeat-guidance-modal').style.display='none'" style="color:#888; font-size:0.8rem; text-decoration:underline;">◀ 戻ってメニューを変更する</a>
+        </div>
+    </div>
+</div>
 
 <script>
 var GAS_URL = "https://script.google.com/macros/s/AKfycbxKw7vHKWRibtgOytoDJYZU3PmVbdi0VzsS4MsAoSRAkNCODbQjV3uql7TAfHTgB_sK3Q/exec";
@@ -165,7 +180,6 @@ var menuData = {
     set_arms_legs:{price:28600,time:110,label:'両腕+両足セット',cat:'set',imgs:{body:'set_arms_legs'},cool:0},
     set_arms:{price:15400,time:60,label:'両腕セット',cat:'set',imgs:{body:'set_arms'},cool:0},
     set_legs:{price:17600,time:60,label:'両足セット',cat:'set',imgs:{body:'set_legs'},cool:0},
-
     part_nose_under:{price:4400,time:7,label:'鼻下',cat:'part',subCat:'face',imgs:{face:'part_nose_under'},cool:1},
     part_mouth_under:{price:4400,time:7,label:'口下',cat:'part',subCat:'face',imgs:{face:'part_mouth_under'},cool:1},
     part_cheek:{price:4400,time:7,label:'頬',cat:'part',subCat:'face',imgs:{face:'part_cheek'},cool:1},
@@ -179,20 +193,17 @@ var menuData = {
     part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',imgs:{face:'part_earlobe'},cool:0},
     part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
-
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
     part_chest_nipple:{price:6600,time:18,label:'胸(乳輪周り含む)',cat:'part',subCat:'upper',imgs:{body:'part_chest_nipple'},cool:0, disables:['part_nipple_around']},
     part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nipple_around'},cool:0},
     part_abdomen_navel:{price:6600,time:15,label:'腹部(ヘソ下含む)',cat:'part',subCat:'upper',imgs:{body:'part_abdomen_navel'},cool:0, disables:['part_navel_under']},
     part_navel_under:{price:4400,time:10,label:'ヘソ下',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_navel_under'},cool:0},
-    
     part_back_upper:{price:6600,time:20,label:'背中上',cat:'part',subCat:'upper',imgs:{body:'part_back_upper'},cool:0},
     part_back_lower:{price:6600,time:20,label:'背中下',cat:'part',subCat:'upper',imgs:{body:'part_back_lower'},cool:0},
     part_elbow_upper:{price:6600,time:20,label:'肘上',cat:'part',subCat:'upper',imgs:{body:'part_elbow_upper'},cool:0},
     part_elbow_lower:{price:8800,time:25,label:'肘下',cat:'part',subCat:'upper',imgs:{body:'part_elbow_lower'},cool:0},
     part_hand_finger:{price:4400,time:15,label:'手の甲指',cat:'part',subCat:'upper',imgs:{body:'part_hand_finger'},cool:0},
-    
     part_buttocks:{price:6600,time:18,label:'臀部',cat:'part',subCat:'lower',imgs:{body:'part_buttocks'},cool:0},
     part_knee_upper:{price:8800,time:30,label:'膝上',cat:'part',subCat:'lower',imgs:{body:'part_knee_upper'},cool:0},
     part_knee_lower:{price:8800,time:35,label:'膝下',cat:'part',subCat:'lower',imgs:{body:'part_knee_lower'},cool:0},
@@ -200,7 +211,6 @@ var menuData = {
     part_v_line:{price:7700,time:15,label:'Vライン',cat:'part',subCat:'lower',imgs:{body:'part_v_line'},cool:0},
     part_i_line:{price:7700,time:20,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
-    
     other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
     other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
     other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other',cool:1, imgs:{face:'other_derma_injection_face'}},
@@ -213,7 +223,6 @@ var menuData = {
 var setOrderNew = ['set_fullface', 'set_fullface_eyebrow', 'set_fullbody_all', 'set_fullbody_noface', 'set_fullbody_novio', 'set_eyebrow', 'set_upperbody', 'set_lowerbody', 'set_vio', 'set_arms_legs', 'set_chest_abdomen', 'set_arms', 'set_legs', 'set_fullface_vio'];
 var setOrderRepeat = ['set_fullface', 'set_eyebrow', 'set_fullface_eyebrow', 'set_fullbody_all', 'set_vio', 'set_lowerbody', 'set_upperbody', 'set_fullbody_noface', 'set_fullbody_novio', 'set_arms_legs', 'set_chest_abdomen', 'set_arms', 'set_legs', 'set_fullface_vio'];
 
-// 💡 修正：全顔+VIOセットの構成定義を正確に追加しました
 var setIncludes = {
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
@@ -228,7 +237,7 @@ var setIncludes = {
     set_legs:['part_knee_upper','part_knee_lower','part_foot_toe'],
     set_arms_legs:['set_arms','set_legs'],
     set_fullface_eyebrow:['set_fullface','set_eyebrow'],
-    set_fullface_vio:['set_fullface','set_vio'] // 💡 これが抜けていたためグレーアウトしなかった
+    set_fullface_vio:['set_fullface','set_vio']
 };
 
 function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
@@ -250,41 +259,22 @@ function getOptimalCart(selectedIds) {
     var curL = [];
     for (var s = 0; s < selectedIds.length; s++) {
         var lNodes = itemLeaves[selectedIds[s]];
-        for (var ln = 0; ln < lNodes.length; ln++) {
-            if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]);
-        }
+        for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); }
     }
     var optimalCart = [];
     var remainingLeaves = curL.slice();
     var sets = Object.keys(menuData).filter(k => menuData[k].cat === 'set');
     sets.sort((a, b) => getItemPrice(b) - getItemPrice(a));
-
     while (true) {
-        var bestSet = null;
-        var bestSavings = -1;
-        var bestCoveredLeaves = [];
+        var bestSet = null, bestSavings = -1, bestCoveredLeaves = [];
         for (var i = 0; i < sets.length; i++) {
-            var sid = sets[i];
-            var sLeaves = itemLeaves[sid];
-            var covered = [];
-            var partsTotal = 0;
-            for (var j = 0; j < remainingLeaves.length; j++) {
-                if (sLeaves.indexOf(remainingLeaves[j]) !== -1) {
-                    covered.push(remainingLeaves[j]);
-                    partsTotal += getItemPrice(remainingLeaves[j]);
-                }
-            }
+            var sid = sets[i], sLeaves = itemLeaves[sid], covered = [], partsTotal = 0;
+            for (var j = 0; j < remainingLeaves.length; j++) { if (sLeaves.indexOf(remainingLeaves[j]) !== -1) { covered.push(remainingLeaves[j]); partsTotal += getItemPrice(remainingLeaves[j]); } }
             if (covered.length < 2) continue; 
-            var setPrice = getItemPrice(sid);
-            var savings = partsTotal - setPrice;
-            if (savings > bestSavings || (savings === bestSavings && savings >= 0 && covered.length > bestCoveredLeaves.length)) {
-                bestSavings = savings; bestSet = sid; bestCoveredLeaves = covered;
-            }
+            var setPrice = getItemPrice(sid), savings = partsTotal - setPrice;
+            if (savings > bestSavings || (savings === bestSavings && savings >= 0 && covered.length > bestCoveredLeaves.length)) { bestSavings = savings; bestSet = sid; bestCoveredLeaves = covered; }
         }
-        if (bestSet && bestSavings >= 0) {
-            optimalCart.push(bestSet);
-            remainingLeaves = remainingLeaves.filter(l => bestCoveredLeaves.indexOf(l) === -1);
-        } else { break; }
+        if (bestSet && bestSavings >= 0) { optimalCart.push(bestSet); remainingLeaves = remainingLeaves.filter(l => bestCoveredLeaves.indexOf(l) === -1); } else { break; }
     }
     for(var i=0; i<remainingLeaves.length; i++){ optimalCart.push(remainingLeaves[i]); }
     return optimalCart;
@@ -292,14 +282,8 @@ function getOptimalCart(selectedIds) {
 
 function calculateSavings() {
     if (selected.length === 0) return 0;
-    var currentTotal = getOriginalTotal(selected);
-    var curL = [];
-    for (var s = 0; s < selected.length; s++) {
-        var lNodes = itemLeaves[selected[s]];
-        for (var ln = 0; ln < lNodes.length; ln++) {
-            if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]);
-        }
-    }
+    var currentTotal = getOriginalTotal(selected), curL = [];
+    for (var s = 0; s < selected.length; s++) { var lNodes = itemLeaves[selected[s]]; for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); } }
     var partsTotal = 0;
     for (var i = 0; i < curL.length; i++) { partsTotal += getItemPrice(curL[i]); }
     var savings = partsTotal - currentTotal;
@@ -324,7 +308,6 @@ function updateTotal() {
     var rounded = Math.ceil(t / 30) * 30; internalNumericSlot = (rounded / 60); 
     document.getElementById('total-price').innerText = "¥" + p.toLocaleString();
     document.getElementById('total-time-display').innerText = "枠 " + internalNumericSlot.toFixed(1) + " 時間枠";
-
     var savings = calculateSavings();
     var discountBadge = document.getElementById('discount-badge');
     if(savings > 0 && selected.length > 0) {
@@ -338,44 +321,25 @@ function updateTotal() {
 function analyzeSuggestions(isManual) {
     if (!isConciergeON && !isManual) return null;
     var optimalCart = getOptimalCart(selected);
-    
     var isDifferent = false;
-    if (optimalCart.length !== selected.length) {
-        isDifferent = true;
-    } else {
-        var sortedSel = selected.slice().sort();
-        var sortedOpt = optimalCart.slice().sort();
+    if (optimalCart.length !== selected.length) { isDifferent = true; } else {
+        var sortedSel = selected.slice().sort(), sortedOpt = optimalCart.slice().sort();
         for (var i = 0; i < sortedSel.length; i++) { if (sortedSel[i] !== sortedOpt[i]) { isDifferent = true; break; } }
     }
-
     var oldP = getOriginalTotal(selected);
     if (isDifferent) {
-        var newP = getOriginalTotal(optimalCart);
-        var diff = newP - oldP;
-        if (diff <= 0) {
-            return { suggestedCart: optimalCart, diff: diff, oldPrice: oldP, newPrice: newP };
-        }
+        var newP = getOriginalTotal(optimalCart), diff = newP - oldP;
+        if (diff <= 0) { return { suggestedCart: optimalCart, diff: diff, oldPrice: oldP, newPrice: newP }; }
     }
-
-    var sets = Object.keys(menuData).filter(k => menuData[k].cat === 'set');
-    var curL = [];
-    for (var s = 0; s < selected.length; s++) {
-        var lNodes = itemLeaves[selected[s]];
-        for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); }
-    }
+    var sets = Object.keys(menuData).filter(k => menuData[k].cat === 'set'), curL = [];
+    for (var s = 0; s < selected.length; s++) { var lNodes = itemLeaves[selected[s]]; for (var ln = 0; ln < lNodes.length; ln++) { if (curL.indexOf(lNodes[ln]) === -1) curL.push(lNodes[ln]); } }
     for (var i = 0; i < sets.length; i++) {
-        var sid = sets[i];
-        if (selected.length === 1 && selected[0] === sid) continue;
-        var sLeaves = itemLeaves[sid];
-        var coversAll = true;
+        var sid = sets[i]; if (selected.length === 1 && selected[0] === sid) continue;
+        var sLeaves = itemLeaves[sid], coversAll = true;
         for(var j=0; j<curL.length; j++) { if (sLeaves.indexOf(curL[j]) === -1) { coversAll = false; break; } }
         if (!coversAll) continue;
-        
-        var setPrice = getItemPrice(sid);
-        var diff = setPrice - oldP;
-        if (diff > 0 && diff <= 3000) {
-            return { suggestedCart: [sid], diff: diff, oldPrice: oldP, newPrice: oldP + diff };
-        }
+        var setPrice = getItemPrice(sid), diff = setPrice - oldP;
+        if (diff > 0 && diff <= 3000) { return { suggestedCart: [sid], diff: diff, oldPrice: oldP, newPrice: oldP + diff }; }
     }
     return null;
 }
@@ -385,68 +349,40 @@ function checkSuggestion(isManual) {
     document.getElementById('suggestion-box').style.display = 'none'; 
     var best = analyzeSuggestions(isManual); 
     if (!best) { suggestionCart = null; return; }
-    
     var box = document.getElementById('suggestion-box');
-    box.innerHTML = '<div style="text-align:center; color:#111; font-size:0.8rem; font-weight:bold; padding:15px;">🤖 AIが最適なプランを計算中<span style="animation: blink-gold 1s infinite;">...</span></div>';
+    box.innerHTML = '<div style="text-align:center; color:#111; font-size:0.8rem; font-weight:bold; padding:15px;">🤖 AIが最適なプランを計算中...</div>';
     box.style.display = 'block';
-
     aiThinkTimer = setTimeout(function() {
         suggestionCart = best.suggestedCart;
-        var diffVal = best.diff; 
-        
-        var diffMsg = "";
+        var diffVal = best.diff, diffMsg = "";
         if (diffVal < 0) diffMsg = '¥' + Math.abs(diffVal).toLocaleString() + ' お得になります！';
         else if (diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
         else diffMsg = 'あと ¥' + diffVal.toLocaleString() + ' でお得なセットに！';
-
-        // 💡 修正：提案内容を【 】で囲い、境界線を明確にしました
         var labelNames = best.suggestedCart.map(id => '【' + menuData[id].label + '】').join(' ＋ ');
-
         var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name" style="font-size:0.85rem; padding: 0 10px;">' + labelNames + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + best.oldPrice.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + best.newPrice.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion()" class="btn-sug-skip">今はしない</button></div><div style="font-size:0.65rem; color:#aaa; margin-top:10px; text-align:left; line-height:1.4;">※不要な箇所は当日のご相談で省くことも可能です。お客様に合わせたオーダーメイドで対応いたします。</div>';
-        
-        box.innerHTML = html;
-        render(); 
+        box.innerHTML = html; render(); 
     }, 800); 
 }
 
-function applyOptimalSet() {
-    if(!suggestionCart) return;
-    selected = suggestionCart.slice();
-    suggestionCart = null;
-    document.getElementById('suggestion-box').style.display = 'none'; 
-    render(); 
-}
+function applyOptimalSet() { if(!suggestionCart) return; selected = suggestionCart.slice(); suggestionCart = null; document.getElementById('suggestion-box').style.display='none'; render(); }
 
 function handleReserveAction() {
     if (selected.length === 0) return alert("メニューを選んでください"); 
     var best = analyzeSuggestions(true);
     if (best) {
         suggestionCart = best.suggestedCart;
-        // 💡 修正：提案内容を【 】で囲い、境界線を明確にしました
         var newNames = best.suggestedCart.map(id => '『' + menuData[id].label + '』');
         document.getElementById('final-suggestion-modal').style.display = 'flex'; 
-        
         var modalBox = document.querySelector('#final-suggestion-modal .final-sug-box');
         modalBox.classList.remove('modal-animate'); void modalBox.offsetWidth; modalBox.classList.add('modal-animate');
-        
-        var diffVal = best.diff;
-        var finalMsg = "";
-        
-        if(diffVal < 0) {
-            finalMsg = "現在選択されているメニューは、<br>" + newNames.join(' ＋ ') + "<br>に変更した方が <b style='color:var(--gold);'>¥" + Math.abs(diffVal).toLocaleString() + " もお得に</b>ご案内できます！変更してよろしいでしょうか？";
-        } else if(diffVal === 0) {
-            finalMsg = "現在選択されているメニューは、同じ料金のまま<br>" + newNames.join(' ＋ ') + "<br>としてまとめた方が、<b>当日のご案内や施術がよりスムーズになります。</b> セットに変更してよろしいでしょうか？";
-        } else {
-            finalMsg = "あと <b style='color:var(--gold);'>¥" + diffVal.toLocaleString() + " 追加するだけ</b>で、全ての部位が含まれたお得な<br>" + newNames.join(' ＋ ') + "<br>に変更できます！大変お得ですが、変更してよろしいでしょうか？";
-        }
-        
+        var diffVal = best.diff, finalMsg = "";
+        if(diffVal < 0) { finalMsg = "現在選択されているメニューは、<br>" + newNames.join(' ＋ ') + "<br>に変更した方が <b style='color:var(--gold);'>¥" + Math.abs(diffVal).toLocaleString() + " もお得に</b>ご案内できます！変更してよろしいでしょうか？"; } else if(diffVal === 0) { finalMsg = "現在選択されているメニューは、同じ料金のまま<br>" + newNames.join(' ＋ ') + "<br>としてまとめた方が、<b>当日のご案内や施術がよりスムーズになります。</b> セットに変更してよろしいでしょうか？"; } else { finalMsg = "あと <b style='color:var(--gold);'>¥" + diffVal.toLocaleString() + " 追加するだけ</b>で、全ての部位が含まれたお得な<br>" + newNames.join(' ＋ ') + "<br>に変更できます！大変お得ですが、変更してよろしいでしょうか？"; }
         document.getElementById('final-sug-desc').innerHTML = finalMsg;
         document.getElementById('final-old-price').innerText = "¥" + best.oldPrice.toLocaleString();
         document.getElementById('final-new-price').innerText = "¥" + best.newPrice.toLocaleString(); return;
     } 
     proceedToCalendar();
 }
-
 function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedToCalendar, 100); }
 function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedToCalendar(); }
 
@@ -459,11 +395,11 @@ function proceedToCalendar() {
             if (xhr.status === 200) {
                 try {
                     var text = xhr.responseText.trim();
-                    var startIdx = text.indexOf('['); var endIdx = text.lastIndexOf(']');
+                    var startIdx = text.indexOf('['), endIdx = text.lastIndexOf(']');
                     if(startIdx !== -1 && endIdx !== -1) { text = text.substring(startIdx, endIdx + 1); }
                     busySlots = JSON.parse(text); renderCalendar(); document.getElementById('calendar-modal').style.display = 'block';
-                } catch(e) { alert("データ形式エラーが発生しました。再度お試しください。"); }
-            } else { alert("通信エラーが発生しました。電波状況をご確認ください。"); }
+                } catch(e) { alert("データ形式エラーが発生しました。"); }
+            } else { alert("通信エラーが発生しました。"); }
         }
     };
     xhr.send(JSON.stringify({type:'getBusySlots', excludeId: editEventId}));
@@ -474,15 +410,13 @@ var holidays2026 = ["2026/1/1", "2026/1/2", "2026/1/12", "2026/2/11", "2026/2/23
 function renderCalendar() {
     var wrapper=document.getElementById('calendar-container'), now=new Date();
     var blockLimitTime = now.getTime() + (3 * 60 * 60 * 1000); 
-    
     var reqMs = internalNumericSlot * 60 * 60 * 1000;
-    var firstDay = new Date(); var day = firstDay.getDay(); var diffToMon = (day === 0 ? -6 : 1) - day; firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
+    var firstDay = new Date(); var day = firstDay.getDay(), diffToMon = (day === 0 ? -6 : 1) - day; firstDay.setDate(firstDay.getDate() + diffToMon + (weekOffset * 7));
     document.getElementById('cal-title').innerText = (firstDay.getMonth()+1)+"/"+firstDay.getDate() + "の週";
     var html='<table class="cal-table"><thead><tr><th>時間</th>';
     var dayNames = ['日','月','火','水','木','金','土'];
     for(var j=0; j<7; j++){
-        var d = new Date(firstDay.getTime() + j*24*60*60*1000); 
-        var cls = d.getDay()===0?'sun':(d.getDay()===6?'sat':''); html+='<th class="'+cls+'">'+(d.getMonth()+1)+'/'+d.getDate()+'<br>('+dayNames[d.getDay()]+')</th>';
+        var d = new Date(firstDay.getTime() + j*24*60*60*1000), cls = d.getDay()===0?'sun':(d.getDay()===6?'sat':''); html+='<th class="'+cls+'">'+(d.getMonth()+1)+'/'+d.getDate()+'<br>('+dayNames[d.getDay()]+')</th>';
     }
     html+='</tr></thead><tbody>';
     var times=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00'];
@@ -490,28 +424,17 @@ function renderCalendar() {
         html+='<tr><td>'+timeStr+'</td>';
         for(var d=0; d<7; d++){
             var slotS = new Date(firstDay.getFullYear(), firstDay.getMonth(), firstDay.getDate()+d, timeStr.split(':')[0], timeStr.split(':')[1]);
-            var s = slotS.getTime(); var e = s + reqMs; var wDay = slotS.getDay(); var totalM = slotS.getHours()*60 + slotS.getMinutes();
+            var s = slotS.getTime(), e = s + reqMs, wDay = slotS.getDay(), totalM = slotS.getHours()*60 + slotS.getMinutes();
             var dateStrKey = slotS.getFullYear()+'/'+(slotS.getMonth()+1)+'/'+slotS.getDate();
             var isHoliday = (holidays2026.indexOf(dateStrKey) !== -1);
             var isWeekendOrHoliday = (wDay===0 || wDay===6 || isHoliday);
             var isInsideHours = isWeekendOrHoliday ? (totalM>=540 && totalM < 1260) : (totalM>=720 && totalM < 1320);
-            var limitHr = isWeekendOrHoliday ? 21 : 22; var limitT = new Date(slotS.getFullYear(), slotS.getMonth(), slotS.getDate(), limitHr, 0).getTime();
-            var canFit = (e <= limitT); var isBusy = false;
+            var limitHr = isWeekendOrHoliday ? 21 : 22, limitT = new Date(slotS.getFullYear(), slotS.getMonth(), slotS.getDate(), limitHr, 0).getTime();
+            var canFit = (e <= limitT), isBusy = false;
             for(var b=0; b<busySlots.length; b++){ if(s < (busySlots[b].end + 30*60*1000) && e > (busySlots[b].start - 30*60*1000)) { isBusy = true; break; } };
-            
             var isBlockedByTime = (s < blockLimitTime);
             if(s < now.getTime()) isBusy = true;
-            
-            if(!isInsideHours) {
-                html+='<td class="cal-status-off">-</td>';
-            } else if(!canFit || isBusy) {
-                html+='<td class="cal-status-x">×</td>';
-            } else if (isBlockedByTime) {
-                html+='<td class="cal-status-x" style="color:#d4af37; font-size:1.1rem;">☎</td>';
-            } else {
-                var endObj = new Date(e); var endStr = endObj.getHours() + ":" + (endObj.getMinutes() === 0 ? "00" : (endObj.getMinutes() < 10 ? "0" : "") + endObj.getMinutes());
-                html+='<td class="cal-status-o" onclick="openInfoModal(\''+dateStrKey+'\', \''+timeStr+'\', \''+endStr+'\')">◎</td>';
-            }
+            if(!isInsideHours) { html+='<td class="cal-status-off">-</td>'; } else if(!canFit || isBusy) { html+='<td class="cal-status-x">×</td>'; } else if (isBlockedByTime) { html+='<td class="cal-status-x" style="color:#d4af37; font-size:1.1rem;">☎</td>'; } else { var endObj = new Date(e), endStr = endObj.getHours() + ":" + (endObj.getMinutes() === 0 ? "00" : (endObj.getMinutes() < 10 ? "0" : "") + endObj.getMinutes()); html+='<td class="cal-status-o" onclick="openInfoModal(\''+dateStrKey+'\', \''+timeStr+'\', \''+endStr+'\')">◎</td>'; }
         }
         html+='</tr>';
     });
@@ -520,41 +443,26 @@ function renderCalendar() {
 
 function openInfoModal(d, t, et) { 
     tDate=d; tTime=t; tEndTime=et; var labels = []; 
-    for(var i=0; i<selected.length; i++){ 
-        labels.push(menuData[selected[i]].label); 
-    } 
+    for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); } 
     var joinedLabels = labels.join(', ');
-    
-    if (userType === 'new' && joinedLabels !== '無料カウンセリングのみ') {
-        joinedLabels += " <span style='font-size:0.75rem; color:var(--gold);'>（※初回無料カウンセリング含む）</span>";
-    }
-
+    if (userType === 'new' && joinedLabels !== '無料カウンセリングのみ') { joinedLabels += " <span style='font-size:0.75rem; color:var(--gold);'>（※初回無料カウンセリング含む）</span>"; }
     var counselText = (userType === 'new') ? " <span style='font-size:0.7rem;'>(無料カウンセリング込)</span>" : "";
     var summaryHtml = "<div style='margin-bottom:10px;'><span style='font-size:0.7rem; color:#888;'>ご予約確保時間</span><br><span style='color:var(--gold); font-size:1.2rem; font-weight:bold;'>" + internalNumericSlot.toFixed(1) + " 時間枠</span>" + counselText + "</div>";
     summaryHtml += "【日時】 "+d+" "+t+" 〜 "+et+"<br>【内容】 "+joinedLabels+"<br>【合計】 "+document.getElementById('total-price').innerText;
-    
     document.getElementById('selected-summary').innerHTML = summaryHtml; 
-    
-    var modal = document.getElementById('info-modal');
-    var content = modal.querySelector('.modal-content');
-    modal.style.display = 'block';
-    modal.classList.remove('modal-bg-animate');
-    content.classList.remove('modal-animate');
-    void modal.offsetWidth; 
-    modal.classList.add('modal-bg-animate');
-    content.classList.add('modal-animate');
+    var modal = document.getElementById('info-modal'), content = modal.querySelector('.modal-content');
+    modal.style.display = 'block'; modal.classList.remove('modal-bg-animate'); content.classList.remove('modal-animate');
+    void modal.offsetWidth; modal.classList.add('modal-bg-animate'); content.classList.add('modal-animate');
 }
 
 function submitReservation() {
     var n=document.getElementById('cust-name').value, tel=document.getElementById('cust-tel').value, em=document.getElementById('cust-email').value.trim(), memo=document.getElementById('cust-memo').value;
     if(!n||!tel||!em) return alert("必須項目を入力してください"); 
-    var confirmMsg = "入力されたメールアドレスは\n【 " + em + " 】\nでよろしいですか？\n\n※間違っていると予約の変更やキャンセルができなくなります。";
+    var confirmMsg = "入力されたメールアドレスは\n【 " + em + " 】\nでよろしいですか？";
     if (!window.confirm(confirmMsg)) return;
     showLoading(true); 
-    
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = { type:'reserve', oldEventId: editEventId, userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
-    
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
     xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); alert("ご予約ありがとうございます。確定メールを送信しました。"); location.href="index.html"; }}; xhr.send(JSON.stringify(payload));
 }
@@ -562,10 +470,7 @@ function submitReservation() {
 function handleRepeatBooking() { 
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var joinedLabels = labels.join(', ');
-    if (userType === 'new' && joinedLabels !== '無料カウンセリングのみ') {
-        joinedLabels += "（※初回無料カウンセリング含む）";
-    }
-
+    if (userType === 'new' && joinedLabels !== '無料カウンセリングのみ') { joinedLabels += "（※初回無料カウンセリング含む）"; }
     var txt = "【NARX 予約内容】\nメニュー: " + joinedLabels + "\n合計金額: " + document.getElementById('total-price').innerText + "\n予約時間枠: " + internalNumericSlot.toFixed(1) + " 時間枠";
     var fallbackCopy = function(text) {
         var textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-9999px";
@@ -577,26 +482,11 @@ function handleRepeatBooking() {
     if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(showModal).catch(function(){ fallbackCopy(txt); }); } else { fallbackCopy(txt); }
 }
 
-var aiMessages = [
-    "NARXへようこそ。お客様にとって最も効率的で、心まで満たされるプランをご提案いたします。",
-    "気になる部位を教えていただけますか？最高の結果が出る組み合わせを一緒に考えましょう。",
-    "部位選びに迷ったらお任せください。実はお得になる隠れたパターンがあるんです。",
-    "明日の自分への投資を、精一杯お手伝いさせていただきます。最適な時間枠をご用意いたします。",
-    "初めての方は不安も多いですよね。当日はまずお話を聞くことから始めますのでご安心ください。"
-];
+var aiMessages = ["NARXへようこそ。お客様にとって最も効率的で、心まで満たされるプランをご提案いたします。","気になる部位を教えていただけますか？最高の結果が出る組み合わせを一緒に考えましょう。","部位選びに迷ったらお任せください。実はお得になる隠れたパターンがあるんです。","明日の自分への投資を、精一杯お手伝いさせていただきます。最適な時間枠をご用意いたします。","初めての方は不安も多いですよね。当日はまずお話を聞くことから始めますのでご安心ください。"];
 
 function toggleConcierge() {
     isConciergeON = !isConciergeON; var img = document.getElementById('concierge-img');
-    if (isConciergeON) { 
-        img.src = 'concierge_on.png'; 
-        var msg = aiMessages[Math.floor(Math.random() * aiMessages.length)];
-        showConciergeBubble(msg);
-        checkSuggestion(true); 
-    } else { 
-        img.src = 'concierge_off.png'; 
-        showConciergeBubble("AIコンシェルジュをオフにしました。"); 
-        document.getElementById('suggestion-box').style.display = 'none'; suggestionCart = null; render(); 
-    }
+    if (isConciergeON) { img.src = 'concierge_on.png'; var msg = aiMessages[Math.floor(Math.random() * aiMessages.length)]; showConciergeBubble(msg); checkSuggestion(true); } else { img.src = 'concierge_off.png'; showConciergeBubble("AIコンシェルジュをオフにしました。"); document.getElementById('suggestion-box').style.display = 'none'; suggestionCart = null; render(); }
 }
 function showConciergeBubble(msg) { var b = document.getElementById('concierge-bubble'); document.getElementById('concierge-msg').innerText = msg; b.style.display = 'block'; b.style.opacity = '1'; if (window.bubbleTimer) clearTimeout(window.bubbleTimer); window.bubbleTimer = setTimeout(function() { b.style.opacity = '0'; setTimeout(function(){b.style.display='none';},300); }, 5000); }
 function skipSuggestion() { document.getElementById('suggestion-box').style.display='none'; suggestionCart=null; render(); }
@@ -607,14 +497,11 @@ function forceStart(t) {
     document.getElementById('action-btn-container').innerHTML = '<button class="btn-reserve" onclick="'+btnAction+'">予約を確認して次へ</button>'; 
     initApp(); render(); 
 }
-function startFreeConsult() {
-    document.getElementById('gate-modal').style.display='none'; userType = 'new'; selected = ['free_consult']; 
-    document.getElementById('mode-display').innerText = "無料カウンセリング予約";
-    updateTotal(); proceedToCalendar(); 
-}
+function startFreeConsult() { document.getElementById('gate-modal').style.display='none'; userType = 'new'; selected = ['free_consult']; document.getElementById('mode-display').innerText = "無料カウンセリング予約"; updateTotal(); proceedToCalendar(); }
+
 window.onload = function() {
     var urlParams = new URLSearchParams(window.location.search);
-    var mode = urlParams.get('mode'); var id = urlParams.get('id');
+    var mode = urlParams.get('mode'), id = urlParams.get('id');
     if (mode === 'edit' && id) {
         editEventId = id; showLoading(true);
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({type:'getBookingDetails', id: id}) }).then(res => res.json()).then(data => {
@@ -625,11 +512,11 @@ window.onload = function() {
                 selected = []; Object.keys(menuData).forEach(k => { if(cleanMenus.indexOf(menuData[k].label) !== -1) selected.push(k); });
                 forceStart(userType);
             }
-            document.getElementById('cust-name').value = data.name; document.getElementById('cust-tel').value = data.tel;
-            document.getElementById('cust-email').value = data.email; document.getElementById('cust-memo').value = data.memo;
+            document.getElementById('cust-name').value = data.name; document.getElementById('cust-tel').value = data.tel; document.getElementById('cust-email').value = data.email; document.getElementById('cust-memo').value = data.memo;
         });
     }
 };
+
 function initApp() {
     function getLeafNodes(id) { var leaves = []; function traverse(nodeId) { if (setIncludes[nodeId]) { for (var i = 0; i < setIncludes[nodeId].length; i++) { traverse(setIncludes[nodeId][i]); } } else { if (leaves.indexOf(nodeId) === -1) leaves.push(nodeId); } } traverse(id); return leaves; }
     var keys = Object.keys(menuData); for (var i = 0; i < keys.length; i++) { itemLeaves[keys[i]] = getLeafNodes(keys[i]); }
@@ -649,18 +536,8 @@ function render() {
     for (var cl = 0; cl < curL.length; cl++) { var leaf = menuData[curL[cl]]; if(!leaf)continue; if (leaf.imgs) { if (leaf.imgs.body) { var lb = document.getElementById("img-" + leaf.imgs.body); if(lb) lb.classList.add('active'); } if (leaf.imgs.face) { var lf = document.getElementById("img-" + leaf.imgs.face); if(lf) lf.classList.add('active'); } } }
     if (suggestionCart) {
         var sugLeaves = [];
-        for(var s=0; s<suggestionCart.length; s++) {
-            var n = itemLeaves[suggestionCart[s]];
-            for(var ln=0; ln<n.length; ln++){ if(sugLeaves.indexOf(n[ln])===-1) sugLeaves.push(n[ln]); }
-        }
-        for (var sl = 0; sl < sugLeaves.length; sl++) {
-            var leafId = sugLeaves[sl]; if (curL.indexOf(leafId) === -1) { 
-                var sLeaf = menuData[leafId]; if (sLeaf && sLeaf.imgs) {
-                    if (sLeaf.imgs.body) { var siBody = document.getElementById("img-" + sLeaf.imgs.body); if(siBody) siBody.classList.add('suggest-blink'); }
-                    if (sLeaf.imgs.face) { var siFace = document.getElementById("img-" + sLeaf.imgs.face); if(siFace) siFace.classList.add('suggest-blink'); }
-                }
-            }
-        }
+        for(var s=0; s<suggestionCart.length; s++) { var n = itemLeaves[suggestionCart[s]]; for(var ln=0; ln<n.length; ln++){ if(sugLeaves.indexOf(n[ln])===-1) sugLeaves.push(n[ln]); } }
+        for (var sl = 0; sl < sugLeaves.length; sl++) { var leafId = sugLeaves[sl]; if (curL.indexOf(leafId) === -1) { var sLeaf = menuData[leafId]; if (sLeaf && sLeaf.imgs) { if (sLeaf.imgs.body) { var siBody = document.getElementById("img-" + sLeaf.imgs.body); if(siBody) siBody.classList.add('suggest-blink'); } if (sLeaf.imgs.face) { var siFace = document.getElementById("img-" + sLeaf.imgs.face); if(siFace) siFace.classList.add('suggest-blink'); } } } }
     }
     var keys = Object.keys(menuData);
     if (currentTab === 'part') {
@@ -676,19 +553,14 @@ function render() {
             }
         }
     } else { 
-        var renderKeys = keys;
-        if (currentTab === 'set') { renderKeys = (userType === 'new') ? setOrderNew : setOrderRepeat; }
-        for (var m = 0; m < renderKeys.length; m++) { 
-            var id = renderKeys[m], item = menuData[id]; 
-            if (item && item.cat === currentTab) createMenuItem(area, id, item, curL); 
-        } 
+        var renderKeys = keys; if (currentTab === 'set') { renderKeys = (userType === 'new') ? setOrderNew : setOrderRepeat; }
+        for (var m = 0; m < renderKeys.length; m++) { var id = renderKeys[m], item = menuData[id]; if (item && item.cat === currentTab) createMenuItem(area, id, item, curL); } 
     }
     updateTotal();
 }
 
 function createMenuItem(area, id, item, curL) {
     var isSel = selected.indexOf(id) !== -1, isDis = false;
-    
     if (!isSel) {
         var itemL = itemLeaves[id];
         for (var l = 0; l < itemL.length; l++) { if (curL.indexOf(itemL[l]) !== -1) { isDis = true; break; } }
@@ -700,11 +572,9 @@ function createMenuItem(area, id, item, curL) {
             }
         }
     }
-    
     var div = document.createElement('div'); div.className = "item " + (isSel ? 'selected' : '') + " " + (isDis ? 'disabled' : '');
     (function(mid, disabled){ div.onclick = function(){ if(!disabled) toggleItem(mid); }; })(id, isDis);
     var specialTag = item.isSpecial ? '<i class="special-badge">特殊部位</i>' : '';
-    
     if (userType === 'new') {
         if (id === 'set_fullface') specialTag += '<span class="badge-crown">👑人気No.1</span>';
         if (id === 'set_fullface_eyebrow') specialTag += '<span class="badge-crown">✨他店にない希少メニュー</span>';
@@ -712,7 +582,6 @@ function createMenuItem(area, id, item, curL) {
         if (id === 'set_fullface') specialTag += '<span class="badge-crown">👑人気No.1</span>';
         if (id === 'set_eyebrow') specialTag += '<span class="badge-crown">✨他店にない希少メニュー</span>';
     }
-
     var noteTag = item.note ? '<span class="sub-label">' + item.note + '</span>' : '';
     div.innerHTML = '<input type="checkbox" ' + (isSel ? 'checked' : '') + ' ' + (isDis ? 'disabled' : '') + '><div class="item-info"><span class="item-name">' + item.label + noteTag + specialTag + '</span></div><div class="item-price">¥' + getItemPrice(id).toLocaleString() + '</div>'; area.appendChild(div);
 }
