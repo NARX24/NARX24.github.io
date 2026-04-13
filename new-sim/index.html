@@ -111,7 +111,7 @@ body{background-color:var(--black);color:var(--white);font-family:serif;margin:0
         <div style="font-size:0.65rem; color:#aaa; margin-bottom:15px; text-align:left; line-height:1.4;">※セットに含まれる部位のうち、施術が不要な箇所は当日のご相談で省くことも可能です。お客様に合わせたオーダーメイドで対応いたします。</div>
         <button class="btn-reserve" style="font-size:1.0rem; padding:18px;" onclick="applyAndProceed()">お得なセットに変更してカレンダーへ進む</button>
         <div style="text-align:center; margin-top:20px;">
-            <a href="javascript:void(0)" onclick="cancelAndProceed()" style="color:#888; font-size:0.8rem; text-decoration:underline;">いいえ、このままのメニューで進む</a>
+            <a href="javascript:void(0)" onclick="cancelAndProceed()" style="color:#888; font-size:0.8rem; text-decoration:underline;">いいえ、このままバラバラのメニューで進む</a>
         </div>
         <div style="text-align:center; margin-top:20px;">
             <button onclick="document.getElementById('final-suggestion-modal').style.display='none'" style="background:none; border:none; color:#555; width:100%; font-size:0.8rem;">選択画面へ戻る</button>
@@ -150,7 +150,6 @@ var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {}
 var suggestionCart = null, internalNumericSlot = 0, editEventId = null;
 var aiThinkTimer = null; 
 
-// 💡 修正：画像の完全紐付けと、胸・腹部のグレーアウト専用フラグ（disables）を追加
 var menuData = {
     set_fullbody_all:{price:52800,time:240,label:'全身オールセット',cat:'set',imgs:{body:'set_fullbody_all_body',face:'set_fullface'},cool:1},
     set_fullbody_noface:{price:41800,time:200,label:'顔なし全身セット',cat:'set',imgs:{body:'set_fullbody_noface_body'},cool:0},
@@ -176,15 +175,13 @@ var menuData = {
     part_eyebrow_upper:{price:8800,time:18,label:'眉上',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_upper'},cool:0},
     part_eyebrow_middle:{price:4400,time:10,label:'眉中',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_middle'},cool:0},
     part_eyebrow_lower:{price:6600,time:18,label:'眉下',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_eyebrow_lower'},cool:0},
-    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_tragus'},cool:0},
-    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_earlobe'},cool:0},
+    part_tragus:{price:4400,time:10,label:'耳珠',cat:'part',subCat:'face',imgs:{face:'part_tragus'},cool:0},
+    part_earlobe:{price:4400,time:10,label:'耳たぶ',cat:'part',subCat:'face',imgs:{face:'part_earlobe'},cool:0},
     part_nose_hair:{price:8800,time:20,label:'鼻毛',cat:'part',subCat:'face',isSpecial:true,imgs:{face:'part_nose_hair'},cool:0},
     part_nose_wing:{price:4400,time:10,label:'小鼻',cat:'part',subCat:'face',imgs:{face:'part_nose_wing'},cool:0},
 
     part_nape:{price:4400,time:15,label:'うなじ',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nape'},cool:0},
     part_armpit:{price:4400,time:10,label:'脇',cat:'part',subCat:'upper',imgs:{body:'part_armpit'},cool:0},
-    
-    // 💡 修正：グレーアウトさせるための専用フラグを追加し、胸・腹部自身がAI計算から消えるのを防ぎました
     part_chest_nipple:{price:6600,time:18,label:'胸(乳輪周り含む)',cat:'part',subCat:'upper',imgs:{body:'part_chest_nipple'},cool:0, disables:['part_nipple_around']},
     part_nipple_around:{price:4400,time:10,label:'乳輪周り',cat:'part',subCat:'upper',isSpecial:true,imgs:{body:'part_nipple_around'},cool:0},
     part_abdomen_navel:{price:6600,time:15,label:'腹部(ヘソ下含む)',cat:'part',subCat:'upper',imgs:{body:'part_abdomen_navel'},cool:0, disables:['part_navel_under']},
@@ -204,7 +201,6 @@ var menuData = {
     part_i_line:{price:7700,time:20,label:'Iライン',cat:'part',subCat:'lower',imgs:{body:'part_i_line'},cool:0},
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
     
-    // 💡 画像の紐付けを追加
     other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
     other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
     other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other',cool:1, imgs:{face:'other_derma_injection_face'}},
@@ -217,7 +213,7 @@ var menuData = {
 var setOrderNew = ['set_fullface', 'set_fullface_eyebrow', 'set_fullbody_all', 'set_fullbody_noface', 'set_fullbody_novio', 'set_eyebrow', 'set_upperbody', 'set_lowerbody', 'set_vio', 'set_arms_legs', 'set_chest_abdomen', 'set_arms', 'set_legs', 'set_fullface_vio'];
 var setOrderRepeat = ['set_fullface', 'set_eyebrow', 'set_fullface_eyebrow', 'set_fullbody_all', 'set_vio', 'set_lowerbody', 'set_upperbody', 'set_fullbody_noface', 'set_fullbody_novio', 'set_arms_legs', 'set_chest_abdomen', 'set_arms', 'set_legs', 'set_fullface_vio'];
 
-// 💡 修正：AIが「胸」や「腹部」を単体として正しく計算できるように整理しました
+// 💡 修正：全顔+VIOセットの構成定義を正確に追加しました
 var setIncludes = {
     set_fullface:['part_nose_under','part_mouth_under','part_cheek','part_face_line','part_neck'],
     set_eyebrow:['part_eyebrow_upper','part_eyebrow_middle','part_eyebrow_lower'],
@@ -231,7 +227,8 @@ var setIncludes = {
     set_arms:['part_elbow_upper','part_elbow_lower','part_hand_finger'],
     set_legs:['part_knee_upper','part_knee_lower','part_foot_toe'],
     set_arms_legs:['set_arms','set_legs'],
-    set_fullface_eyebrow:['set_fullface','set_eyebrow']
+    set_fullface_eyebrow:['set_fullface','set_eyebrow'],
+    set_fullface_vio:['set_fullface','set_vio'] // 💡 これが抜けていたためグレーアウトしなかった
 };
 
 function showLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
@@ -402,7 +399,8 @@ function checkSuggestion(isManual) {
         else if (diffVal === 0) diffMsg = '料金そのままで部位が増えます！';
         else diffMsg = 'あと ¥' + diffVal.toLocaleString() + ' でお得なセットに！';
 
-        var labelNames = best.suggestedCart.map(id => menuData[id].label).join(' ＋ ');
+        // 💡 修正：提案内容を【 】で囲い、境界線を明確にしました
+        var labelNames = best.suggestedCart.map(id => '【' + menuData[id].label + '】').join(' ＋ ');
 
         var html = '<div class="sug-title">🎉 AIコンシェルジュ</div><div class="sug-benefit-msg">'+diffMsg+'</div><div class="sug-menu-name" style="font-size:0.85rem; padding: 0 10px;">' + labelNames + '</div><div class="sug-compare-panel"><div class="sug-col"><span class="sug-col-label">現在合計</span><span class="sug-col-price">¥' + best.oldPrice.toLocaleString() + '</span></div><div class="sug-col"><span class="sug-col-label">変更後合計</span><span class="sug-col-price" style="color:#c00;">¥' + best.newPrice.toLocaleString() + '</span></div></div><div class="sug-btn-group"><button onclick="applyOptimalSet()" class="btn-sug-apply">変更する</button><button onclick="skipSuggestion()" class="btn-sug-skip">今はしない</button></div><div style="font-size:0.65rem; color:#aaa; margin-top:10px; text-align:left; line-height:1.4;">※不要な箇所は当日のご相談で省くことも可能です。お客様に合わせたオーダーメイドで対応いたします。</div>';
         
@@ -424,7 +422,8 @@ function handleReserveAction() {
     var best = analyzeSuggestions(true);
     if (best) {
         suggestionCart = best.suggestedCart;
-        var newNames = best.suggestedCart.map(id => menuData[id].label);
+        // 💡 修正：提案内容を【 】で囲い、境界線を明確にしました
+        var newNames = best.suggestedCart.map(id => '『' + menuData[id].label + '』');
         document.getElementById('final-suggestion-modal').style.display = 'flex'; 
         
         var modalBox = document.querySelector('#final-suggestion-modal .final-sug-box');
@@ -434,11 +433,11 @@ function handleReserveAction() {
         var finalMsg = "";
         
         if(diffVal < 0) {
-            finalMsg = "現在選択されているメニューは、<br>『" + newNames.join('』＋『') + "』<br>に変更した方が <b style='color:var(--gold);'>¥" + Math.abs(diffVal).toLocaleString() + " もお得に</b>ご案内できます！変更してよろしいでしょうか？";
+            finalMsg = "現在選択されているメニューは、<br>" + newNames.join(' ＋ ') + "<br>に変更した方が <b style='color:var(--gold);'>¥" + Math.abs(diffVal).toLocaleString() + " もお得に</b>ご案内できます！変更してよろしいでしょうか？";
         } else if(diffVal === 0) {
-            finalMsg = "現在選択されているメニューは、同じ料金のまま<br>『" + newNames.join('』＋『') + "』<br>としてまとめた方が、<b>当日のご案内や施術がよりスムーズになります。</b> セットに変更してよろしいでしょうか？";
+            finalMsg = "現在選択されているメニューは、同じ料金のまま<br>" + newNames.join(' ＋ ') + "<br>としてまとめた方が、<b>当日のご案内や施術がよりスムーズになります。</b> セットに変更してよろしいでしょうか？";
         } else {
-            finalMsg = "あと <b style='color:var(--gold);'>¥" + diffVal.toLocaleString() + " 追加するだけ</b>で、全ての部位が含まれたお得な<br>『" + newNames.join('』＋『') + "』<br>に変更できます！大変お得ですが、変更してよろしいでしょうか？";
+            finalMsg = "あと <b style='color:var(--gold);'>¥" + diffVal.toLocaleString() + " 追加するだけ</b>で、全ての部位が含まれたお得な<br>" + newNames.join(' ＋ ') + "<br>に変更できます！大変お得ですが、変更してよろしいでしょうか？";
         }
         
         document.getElementById('final-sug-desc').innerHTML = finalMsg;
@@ -447,6 +446,7 @@ function handleReserveAction() {
     } 
     proceedToCalendar();
 }
+
 function applyAndProceed() { applyOptimalSet(); document.getElementById('final-suggestion-modal').style.display = 'none'; setTimeout(proceedToCalendar, 100); }
 function cancelAndProceed() { document.getElementById('final-suggestion-modal').style.display = 'none'; proceedToCalendar(); }
 
@@ -641,7 +641,6 @@ function changeTab(t){ currentTab=t; render(); }
 function resetSelection(){ selected = []; suggestionCart = null; document.getElementById('suggestion-box').style.display='none'; render(); }
 function toggleItem(id){ document.getElementById('suggestion-box').style.display='none'; var idx=selected.indexOf(id); if(idx!==-1)selected.splice(idx,1); else selected.push(id); checkSuggestion(false); render(); }
 
-// 💡 修正：グレーアウト処理（disables）を確実に反映するようロジックを整理
 function render() {
     var area = document.getElementById('menu-area'); area.innerHTML=''; var tabs = document.querySelectorAll('.tab'); for (var t = 0; t < tabs.length; t++) { tabs[t].classList.remove('active'); } document.getElementById("tab-" + currentTab).classList.add('active');
     var container = document.getElementById('chips-container'); if (selected.length === 0) { container.innerHTML = '<span style="color:#444; font-size:0.65rem;">部位を選択してください</span>'; } else { container.innerHTML = ''; for (var i = 0; i < selected.length; i++) { if(!menuData[selected[i]]) continue; var chip = document.createElement('div'); chip.className = 'chip'; chip.innerHTML = '<span>' + menuData[selected[i]].label + '</span><span class="chip-close" onclick="event.stopPropagation(); toggleItem(\'' + selected[i] + '\')">×</span>'; container.appendChild(chip); } }
@@ -690,12 +689,9 @@ function render() {
 function createMenuItem(area, id, item, curL) {
     var isSel = selected.indexOf(id) !== -1, isDis = false;
     
-    // 💡 修正：グレーアウト処理の完全分離
     if (!isSel) {
         var itemL = itemLeaves[id];
-        // 1. 自分がすでに選ばれたパーツで構成されているか
         for (var l = 0; l < itemL.length; l++) { if (curL.indexOf(itemL[l]) !== -1) { isDis = true; break; } }
-        // 2. 専用のグレーアウトフラグ（胸が乳輪周りを消す等）で止められているか
         if(!isDis) {
             for(var s=0; s<selected.length; s++){
                 var sItem = menuData[selected[s]];
