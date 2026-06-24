@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.89.0</title>
+<title>NARX プレミアム予約システム Ver.90.0</title>
 <!-- ⚠️【消さないで】GA4 予約完了コンバージョン計測（測定ID G-1BNZL0126X）。広告→サイト→このフォーム→予約完了を計測。フォーム再生成・更新時も、この計測タグ（gtag）と下の submitReservation 内 reservation_complete 行を必ず残すこと。 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1BNZL0126X"></script>
 <script>
@@ -810,13 +810,17 @@ function submitReservation() {
         if(xhr.readyState!==4) return;
         showLoading(false);
         // 💡 修正：サーバーの応答を確認し、本当に成功したときだけ「予約完了」とする
-        var ok = false;
+        var ok = false, errType = '';
         if (xhr.status === 200) {
-            try { var rt = (xhr.responseText||'').trim(); var bi = rt.indexOf('{'); if(bi>0) rt = rt.substring(bi); ok = (JSON.parse(rt).status === 'success'); } catch(e) { ok = false; }
+            try { var rt = (xhr.responseText||'').trim(); var bi = rt.indexOf('{'); if(bi>0) rt = rt.substring(bi); var resp = JSON.parse(rt); ok = (resp.status === 'success'); errType = resp.error || ''; } catch(e) { ok = false; }
         }
         if (!ok) {
             reEnable();
-            alert("申し訳ございません。予約の確定に失敗しました。\n（通信エラー、またはこの時間枠が直前に埋まった可能性があります）\n\nお手数ですが、もう一度お試しいただくか、公式LINE・お電話（080-2129-9072）にてご連絡ください。\n\n※この時点ではご予約は確定しておりません。");
+            if (errType === 'slot_taken') {
+                alert("申し訳ございません。この時間枠は、ちょうど直前に他のご予約で埋まってしまいました。\n\nお手数ですが、下の「メニューを選びなおす」から別のお時間をお選びください。\n\n※この時点ではご予約は確定しておりません。");
+            } else {
+                alert("申し訳ございません。予約の確定に失敗しました。\n（通信エラー、またはこの時間枠が直前に埋まった可能性があります）\n\nお手数ですが、もう一度お試しいただくか、公式LINE・お電話（080-2129-9072）にてご連絡ください。\n\n※この時点ではご予約は確定しておりません。");
+            }
             return;
         }
         // ここから成功時のみ：おもてなし記憶 → GA4計測 → 完了表示
