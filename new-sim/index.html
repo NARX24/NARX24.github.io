@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NARX プレミアム予約システム Ver.88.0</title>
+<title>NARX プレミアム予約システム Ver.89.0</title>
 <!-- ⚠️【消さないで】GA4 予約完了コンバージョン計測（測定ID G-1BNZL0126X）。広告→サイト→このフォーム→予約完了を計測。フォーム再生成・更新時も、この計測タグ（gtag）と下の submitReservation 内 reservation_complete 行を必ず残すこと。 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1BNZL0126X"></script>
 <script>
@@ -192,7 +192,7 @@ var GAS_URL = "https://script.google.com/macros/s/AKfycbxKw7vHKWRibtgOytoDJYZU3P
 
 var userType = 'new', currentTab = 'set', selected = [], busySlots = [], weekOffset = 0;
 var tDate = "", tTime = "", tEndTime = "", isConciergeON = true, itemLeaves = {}, busySlotsLoaded = false, userSkippedSuggestion = false;
-var suggestionCart = null, internalNumericSlot = 0, editEventId = null;
+var suggestionCart = null, internalNumericSlot = 0, editEventId = null, isSubmitting = false;
 var aiThinkTimer = null; 
 var nextStepMode = 'calendar'; // 💡 AI提案後の飛び先判定用
 
@@ -203,9 +203,9 @@ var menuData = {
     set_upperbody:{price:30800,time:135,label:'上半身セット(顔含む)',cat:'set',imgs:{body:'set_upperbody_body',face:'set_fullface'},cool:1},
     set_lowerbody:{price:30800,time:135,label:'下半身セット(VIO含む)',cat:'set',imgs:{body:'set_lowerbody_body'},cool:0},
     set_fullface_vio:{price:27500,time:95,label:'全顔+VIOセット',cat:'set',imgs:{body:'set_vio',face:'set_fullface'},cool:1},
-    set_fullface_eyebrow:{price:24200,time:81,label:'全顔+眉毛セット',cat:'set',imgs:{face:'set_fullface_eyebrow_face'},cool:1},
+    set_fullface_eyebrow:{price:24200,time:81,label:'全顔+眉毛セット',cat:'set',imgs:{face:'set_fullface_eyebrow'},cool:1},
     set_fullface:{price:13200,time:52,label:'全顔セット',cat:'set',imgs:{face:'set_fullface'},cool:1},
-    set_eyebrow:{price:13200,time:40,label:'眉毛セット',cat:'set',imgs:{face:'set_eyebrow_face'},cool:0},
+    set_eyebrow:{price:13200,time:40,label:'眉毛セット',cat:'set',imgs:{face:'set_eyebrow'},cool:0},
     set_vio:{price:16500,time:50,label:'VIOセット',cat:'set',imgs:{body:'set_vio'},cool:0},
     set_vio_buttocks:{price:20900,time:68,label:'VIO+臀部セット',cat:'set',imgs:{body:'set_vio_buttocks'},cool:0},
     set_chest_abdomen:{price:11000,time:33,label:'胸＋腹部セット',cat:'set',imgs:{body:'set_chest_abdomen'},cool:0},
@@ -245,9 +245,9 @@ var menuData = {
     part_o_line:{price:5500,time:15,label:'Oライン',cat:'part',subCat:'lower',imgs:{body:'part_o_line'},cool:0},
     other_lala_peel:{price:12100,time:65,label:'ララピール',cat:'other',imgs:{face:'other_lala_peel'},cool:1},
     other_face_correction:{price:22000,time:65,label:'小顔矯正',cat:'other',imgs:{face:'other_face_correction'},cool:0},
-    other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other',cool:1, imgs:{face:'other_derma_injection_face'}},
-    other_scalp_care:{price:22000,time:25,label:'スカルプケア［育毛］',cat:'other', imgs:{face:'other_scalp_care_face'}},
-    other_s_planning:{price:11000,time:60,label:'エスプランニング［足裏角質ケア］',cat:'other', imgs:{body:'other_s_planning_foot'}},
+    other_derma_injection:{price:22000,time:30,label:'ダーマインジェクション［肌育］',cat:'other',cool:1, imgs:{face:'other_derma_injection'}},
+    other_scalp_care:{price:22000,time:25,label:'スカルプケア［育毛］',cat:'other', imgs:{face:'other_scalp_care'}},
+    other_s_planning:{price:11000,time:60,label:'エスプランニング［足裏角質ケア］',cat:'other', imgs:{body:'other_s_planning'}},
     opt_new_5:{price:1100,time:10,label:'ＳＶ',cat:'other'},
     free_consult:{price:0, time:90, label:'無料カウンセリングのみ', cat:'special'}
 };
@@ -795,18 +795,44 @@ function submitReservation() {
     if(miss.length) return alert(miss.join("・") + " を入力してください。");
     if(em.indexOf("@") === -1 || em.indexOf(".") === -1) return alert("メールアドレスの形式をご確認ください。\n（確定メールが届かないと予約内容をお送りできません）");
 
-    // 💡 修正：予約成功時に情報をスマホに記憶させる
-    localStorage.setItem('narx_name', n);
-    localStorage.setItem('narx_tel', tel);
-    localStorage.setItem('narx_email', em);
-    localStorage.setItem('narx_last_menu', JSON.stringify(selected));
-    localStorage.setItem('narx_last_date', tDate);
+    // 💡 二重送信ガード：送信中の連打で二重予約が入るのを防ぐ
+    if (isSubmitting) return;
+    isSubmitting = true;
+    var submitBtn = document.querySelector('#info-modal .btn-reserve');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; }
+    var reEnable = function(){ isSubmitting = false; if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; } };
 
-    showLoading(true); 
+    showLoading(true);
     var labels = []; for(var i=0; i<selected.length; i++){ labels.push(menuData[selected[i]].label); }
     var payload = { type:'reserve', oldEventId: editEventId, userType:userType, date:tDate, time:tTime, slot:internalNumericSlot.toFixed(1), price:document.getElementById('total-price').innerText, menus:labels.join(', '), name:n, tel:tel, email:em, memo:memo };
     var xhr=new XMLHttpRequest(); xhr.open("POST", GAS_URL, true); xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
-    xhr.onreadystatechange=function(){ if(xhr.readyState===4){ showLoading(false); try{ if(typeof gtag==='function') gtag('event','reservation_complete',{user_type:userType, value:Number(String(payload.price).replace(/[^\d]/g,''))||0, currency:'JPY'}); }catch(e){} /* ⚠️GA4 予約完了CV: フォーム更新時もこの行を残す */ alert("ご予約ありがとうございます。確定メールを送信しました。"); location.href="index.html"; }}; xhr.send(JSON.stringify(payload));
+    xhr.onreadystatechange=function(){
+        if(xhr.readyState!==4) return;
+        showLoading(false);
+        // 💡 修正：サーバーの応答を確認し、本当に成功したときだけ「予約完了」とする
+        var ok = false;
+        if (xhr.status === 200) {
+            try { var rt = (xhr.responseText||'').trim(); var bi = rt.indexOf('{'); if(bi>0) rt = rt.substring(bi); ok = (JSON.parse(rt).status === 'success'); } catch(e) { ok = false; }
+        }
+        if (!ok) {
+            reEnable();
+            alert("申し訳ございません。予約の確定に失敗しました。\n（通信エラー、またはこの時間枠が直前に埋まった可能性があります）\n\nお手数ですが、もう一度お試しいただくか、公式LINE・お電話（080-2129-9072）にてご連絡ください。\n\n※この時点ではご予約は確定しておりません。");
+            return;
+        }
+        // ここから成功時のみ：おもてなし記憶 → GA4計測 → 完了表示
+        try {
+            localStorage.setItem('narx_name', n);
+            localStorage.setItem('narx_tel', tel);
+            localStorage.setItem('narx_email', em);
+            localStorage.setItem('narx_last_menu', JSON.stringify(selected));
+            localStorage.setItem('narx_last_date', tDate);
+        } catch(e) {}
+        try{ if(typeof gtag==='function') gtag('event','reservation_complete',{user_type:userType, value:Number(String(payload.price).replace(/[^\d]/g,''))||0, currency:'JPY'}); }catch(e){} /* ⚠️GA4 予約完了CV: フォーム更新時もこの行を残す */
+        alert("ご予約ありがとうございます。確定メールを送信しました。");
+        location.href="index.html";
+    };
+    xhr.onerror = function(){ showLoading(false); reEnable(); alert("通信エラーが発生しました。電波の良い場所で、もう一度お試しください。\n\n※この時点ではご予約は確定しておりません。"); };
+    xhr.send(JSON.stringify(payload));
 }
 
 // 💡 修正：既存客向け案内画面の表示（エルメの枠名に完全一致＋枠を間違えない案内）
